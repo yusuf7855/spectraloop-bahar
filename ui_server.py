@@ -24,7 +24,7 @@ from hardware         import send_vehicle_command, PI_HOST, PI_PORT
 from vehicle_commands import detect_vehicle_command
 
 # ── Flask + SocketIO ─────────────────────────────────────────────────────────
-app      = Flask(__name__, static_folder=".")
+app      = Flask(__name__, static_folder=".", static_url_path="")
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading",
                     logger=False, engineio_logger=False)
 
