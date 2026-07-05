@@ -5,317 +5,235 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spectra · Spectraloop</title>
   <style>
-    /* ═══ RESET & TEMEL ════════════════════════════════════════════ */
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     :root {
       --col:  #1e6eff;
-      --glow: rgba(30,110,255,.35);
+      --glow: rgba(30,110,255,.4);
       --bg:   #050515;
-      --dim:  #0a0f20;
-      --txt:  #2a3a55;
     }
 
     html, body {
       width:100%; height:100%;
       background: var(--bg);
       font-family: 'Courier New', Courier, monospace;
-      color: #fff;
-      overflow: hidden;
+      color:#fff;
+      overflow:hidden;
     }
 
-    /* ═══ HOLOGRAFİK EFEKTLER ══════════════════════════════════════ */
-
-    /* Grid arka plan */
+    /* ── Holografik grid ──────────────────────────────────────── */
     body::before {
-      content:'';
-      position:fixed; inset:0; z-index:0;
+      content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
       background-image:
-        linear-gradient(rgba(0,212,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,255,.025) 1px, transparent 1px);
-      background-size: 44px 44px;
-      pointer-events:none;
+        linear-gradient(rgba(0,212,255,.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,.02) 1px, transparent 1px);
+      background-size:48px 48px;
     }
-
-    /* Tarama çizgileri */
     body::after {
-      content:'';
-      position:fixed; inset:0; z-index:999;
+      content:''; position:fixed; inset:0; z-index:999; pointer-events:none;
       background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,.13) 2px,
-        rgba(0,0,0,.13) 4px
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,.1) 2px, rgba(0,0,0,.1) 4px
       );
-      pointer-events:none;
     }
-
-    /* Hareketli tarama ışığı */
     .scan-beam {
-      position:fixed; left:0; right:0; height:4px; z-index:998;
-      background: linear-gradient(transparent, rgba(0,212,255,.06), transparent);
-      animation: scan 8s linear infinite;
-      pointer-events:none;
+      position:fixed; left:0; right:0; height:5px; z-index:998; pointer-events:none;
+      background:linear-gradient(transparent, rgba(0,212,255,.05), transparent);
+      animation:scan 9s linear infinite;
     }
-    @keyframes scan { 0%{top:-4px} 100%{top:100vh} }
+    @keyframes scan { 0%{top:-5px} 100%{top:100vh} }
 
-    /* CRT titreme */
-    @keyframes crt-flicker {
-      0%,100%{opacity:1} 92%{opacity:1} 93%{opacity:.97} 94%{opacity:1} 96%{opacity:.98}
-    }
-    #app { animation: crt-flicker 8s infinite; }
+    @keyframes crt { 0%,100%{opacity:1} 91%{opacity:1} 92%{opacity:.96} 94%{opacity:1} }
+    #app { animation: crt 9s infinite; }
 
-    /* Glitch efekti */
     @keyframes glitch {
-      0%  { transform:translate(0);    clip-path:none; }
-      15% { transform:translate(-3px,1px); clip-path:inset(8% 0 84% 0); }
-      30% { transform:translate(3px,-1px); clip-path:inset(44% 0 40% 0); }
-      45% { transform:translate(-2px,2px); clip-path:inset(78% 0 8% 0); }
-      60% { transform:translate(1px,0); clip-path:none; }
-      100%{ transform:translate(0);    clip-path:none; }
+      0%  { transform:translate(0);         clip-path:none; }
+      18% { transform:translate(-3px, 1px); clip-path:inset(8% 0 84% 0); }
+      36% { transform:translate( 3px,-1px); clip-path:inset(43% 0 41% 0); }
+      54% { transform:translate(-2px, 2px); clip-path:inset(78% 0 7% 0); }
+      72% { transform:translate( 1px, 0);   clip-path:none; }
+      100%{ transform:translate(0);         clip-path:none; }
     }
-    .glitch { animation: glitch .28s steps(1) forwards; }
+    .glitch { animation:glitch .26s steps(1) forwards; }
 
-    /* ═══ LAYOUT ════════════════════════════════════════════════════ */
+    /* ── Layout ───────────────────────────────────────────────── */
     #app {
       position:relative; z-index:1;
       display:flex; flex-direction:column;
       width:100vw; height:100vh;
     }
 
-    /* ── Header ─────────────────────────────────────────────────── */
+    /* ── Header ───────────────────────────────────────────────── */
     header {
       flex-shrink:0;
       display:flex; align-items:center; justify-content:space-between;
-      padding:12px 28px 10px;
-      border-bottom:1px solid rgba(30,110,255,.18);
-      background: linear-gradient(180deg, rgba(5,5,20,.9) 0%, transparent 100%);
+      padding:11px 32px 9px;
+      border-bottom:1px solid rgba(30,110,255,.16);
+      background:linear-gradient(180deg,rgba(5,5,20,.92) 0%,transparent 100%);
     }
-
-    .brand {
-      display:flex; flex-direction:column; gap:2px;
-    }
+    .brand { display:flex; flex-direction:column; gap:2px; }
     .brand-name {
       font-size:15px; font-weight:bold; letter-spacing:5px;
-      color: var(--col);
-      text-shadow:0 0 16px var(--glow);
-      transition: color .5s, text-shadow .5s;
+      color:var(--col); text-shadow:0 0 16px var(--glow);
+      transition:color .5s,text-shadow .5s;
     }
-    .brand-sub {
-      font-size:9px; letter-spacing:3px; color:var(--txt);
-    }
-
-    .center-title {
-      text-align:center;
-    }
+    .brand-sub { font-size:9px; letter-spacing:3px; color:#253040; }
+    .center-title { text-align:center; }
     .center-title h1 {
-      font-size:28px; font-weight:bold; letter-spacing:12px;
-      color:var(--col);
-      text-shadow:0 0 30px var(--glow);
-      transition: color .5s, text-shadow .5s;
+      font-size:30px; font-weight:bold; letter-spacing:14px;
+      color:var(--col); text-shadow:0 0 32px var(--glow);
+      transition:color .5s,text-shadow .5s;
     }
-    .center-title p {
-      font-size:10px; letter-spacing:4px; color:var(--txt); margin-top:2px;
-    }
-
-    .teknofest-badge {
-      display:flex; flex-direction:column; align-items:flex-end; gap:2px;
-    }
+    .center-title p { font-size:10px; letter-spacing:4px; color:#253040; margin-top:3px; }
+    .badge { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
     .badge-main {
       font-size:14px; font-weight:bold; letter-spacing:4px;
-      color:#ff4444; text-shadow:0 0 14px rgba(255,68,68,.4);
+      color:#e03030; text-shadow:0 0 14px rgba(224,48,48,.4);
     }
-    .badge-year {
-      font-size:10px; letter-spacing:3px; color:var(--txt);
-    }
+    .badge-sub { font-size:9px; letter-spacing:3px; color:#253040; }
 
-    /* ── Ana içerik ─────────────────────────────────────────────── */
+    /* ── İçerik ───────────────────────────────────────────────── */
     .content {
-      flex:1; display:flex; align-items:center;
-      justify-content:center; gap:32px;
-      padding:16px 28px;
-      min-height:0;
+      flex:1; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:18px; min-height:0;
     }
 
-    /* ── Sol: Yüz bölümü ────────────────────────────────────────── */
-    .face-section {
-      display:flex; flex-direction:column; align-items:center; gap:14px;
-    }
-
+    /* ── Yüz sarmalayıcı ─────────────────────────────────────── */
     .face-wrap {
-      position:relative;
-      width:320px; height:320px;
-      flex-shrink:0;
+      position:relative; flex-shrink:0;
+      width:380px; height:380px;
     }
 
-    /* Köşe dekorasyonları */
-    .face-wrap::before, .face-wrap::after,
-    .face-inner::before, .face-inner::after {
+    /* Köşe bracket */
+    .face-wrap::before,.face-wrap::after,
+    .face-inner::before,.face-inner::after {
       content:''; position:absolute;
-      width:18px; height:18px;
+      width:22px; height:22px;
       border-color:var(--col); border-style:solid;
-      transition: border-color .5s;
+      transition:border-color .5s; z-index:2;
     }
-    .face-wrap::before  { top:-4px;  left:-4px;  border-width:2px 0 0 2px; }
-    .face-wrap::after   { top:-4px;  right:-4px; border-width:2px 2px 0 0; }
-    .face-inner::before { bottom:-4px; left:-4px;  border-width:0 0 2px 2px; }
-    .face-inner::after  { bottom:-4px; right:-4px; border-width:0 2px 2px 0; }
+    .face-wrap::before  { top:-6px;    left:-6px;    border-width:2px 0 0 2px; }
+    .face-wrap::after   { top:-6px;    right:-6px;   border-width:2px 2px 0 0; }
+    .face-inner::before { bottom:-6px; left:-6px;    border-width:0 0 2px 2px; }
+    .face-inner::after  { bottom:-6px; right:-6px;   border-width:0 2px 2px 0; }
 
     .face-inner { position:relative; width:100%; height:100%; }
 
     /* Glow halkaları */
     .ring {
       position:absolute; border-radius:50%;
-      border:1px solid var(--col); transition: border-color .5s;
-      pointer-events:none;
+      border:1px solid var(--col); transition:border-color .5s; pointer-events:none;
     }
-    .ring-1{ inset:-10px; opacity:.22; animation:rp 2.2s ease-in-out infinite; }
-    .ring-2{ inset:-22px; opacity:.13; animation:rp 2.2s ease-in-out infinite .35s; }
-    .ring-3{ inset:-38px; opacity:.07; animation:rp 2.2s ease-in-out infinite .7s; }
-    @keyframes rp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.025)} }
+    .ring-1{ inset:-14px; opacity:.22; animation:rp 2.3s ease-in-out infinite; }
+    .ring-2{ inset:-28px; opacity:.12; animation:rp 2.3s ease-in-out infinite .4s; }
+    .ring-3{ inset:-46px; opacity:.06; animation:rp 2.3s ease-in-out infinite .8s; }
+    @keyframes rp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
 
-    canvas {
-      display:block;
-      filter: drop-shadow(0 0 18px var(--glow));
+    /* ── SVG yüz görseli ─────────────────────────────────────── */
+    #faceImg {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:contain;
+      /* Varsayılan: mavi glow */
+      filter: sepia(1) hue-rotate(185deg) saturate(4)
+              drop-shadow(0 0 22px rgba(30,110,255,.8));
       transition: filter .5s;
     }
 
-    /* Durum etiketi */
-    .state-lbl {
-      font-size:14px; font-weight:bold; letter-spacing:3px;
-      color:var(--col); transition: color .5s;
-      text-shadow:0 0 12px var(--glow);
+    /* State'e göre CSS sınıfları (JS ile eklenir) */
+    #faceImg.idle {
+      filter: sepia(1) hue-rotate(185deg) saturate(4)
+              drop-shadow(0 0 22px rgba(30,110,255,.8));
+    }
+    #faceImg.listening {
+      filter: sepia(1) hue-rotate(138deg) saturate(5)
+              drop-shadow(0 0 28px rgba(0,255,200,.9));
+      animation: listen-pulse 1.1s ease-in-out infinite;
+    }
+    #faceImg.thinking {
+      filter: sepia(1) hue-rotate(22deg) saturate(4)
+              drop-shadow(0 0 22px rgba(255,170,0,.8));
+    }
+    #faceImg.speaking {
+      filter: sepia(0) brightness(1.25)
+              drop-shadow(0 0 30px rgba(200,225,255,.95));
+      animation: speak-pulse .38s ease-in-out infinite;
     }
 
-    /* Duyulan / yanıt */
-    .texts {
-      text-align:center; max-width:360px;
-      min-height:40px;
+    @keyframes listen-pulse {
+      0%,100% { filter: sepia(1) hue-rotate(138deg) saturate(5)
+                        drop-shadow(0 0 24px rgba(0,255,200,.8)); }
+      50%     { filter: sepia(1) hue-rotate(138deg) saturate(5)
+                        drop-shadow(0 0 38px rgba(0,255,200,1)); }
     }
+    @keyframes speak-pulse {
+      0%,100% { filter: sepia(0) brightness(1.2)
+                        drop-shadow(0 0 26px rgba(200,225,255,.85)); }
+      50%     { filter: sepia(0) brightness(1.5)
+                        drop-shadow(0 0 42px rgba(200,225,255,1)); }
+    }
+
+    /* ── Efekt canvas (üstte, saydam, surat kapatmaz) ─────────── */
+    #fxCanvas {
+      position:absolute; inset:0;
+      pointer-events:none; z-index:1;
+    }
+
+    /* ── Durum etiketi ───────────────────────────────────────── */
+    .state-lbl {
+      font-size:15px; font-weight:bold; letter-spacing:4px;
+      color:var(--col); transition:color .5s;
+      text-shadow:0 0 14px var(--glow);
+    }
+
+    /* ── Metinler ─────────────────────────────────────────────── */
+    .texts { text-align:center; max-width:460px; }
     .heard-txt {
-      font-size:13px; color:#6688aa; font-style:italic;
-      margin-bottom:6px; min-height:18px;
-      text-shadow: 0 0 8px rgba(100,140,200,.3);
+      font-size:13px; color:#5577aa; font-style:italic;
+      margin-bottom:8px; min-height:18px;
+      text-shadow:0 0 8px rgba(80,120,180,.35);
     }
     .resp-txt {
-      font-size:14px; font-weight:bold; letter-spacing:.5px;
-      color:var(--col); transition: color .5s; min-height:18px;
-      text-shadow: 0 0 12px var(--glow);
+      font-size:15px; font-weight:bold; letter-spacing:.5px;
+      color:var(--col); transition:color .5s; min-height:20px;
+      text-shadow:0 0 14px var(--glow);
     }
 
-    /* ── Sağ: Log paneli ────────────────────────────────────────── */
-    .log-panel {
-      width:300px; height:100%;
-      max-height:440px;
-      display:flex; flex-direction:column;
-      border:1px solid rgba(30,110,255,.2);
-      background: rgba(5,5,20,.7);
-      position:relative;
-    }
-    /* Köşe dekorasyonları */
-    .log-panel::before {
-      content:''; position:absolute;
-      top:-1px; left:-1px; width:12px; height:12px;
-      border-top:2px solid var(--col); border-left:2px solid var(--col);
-      transition: border-color .5s;
-    }
-    .log-panel::after {
-      content:''; position:absolute;
-      bottom:-1px; right:-1px; width:12px; height:12px;
-      border-bottom:2px solid var(--col); border-right:2px solid var(--col);
-      transition: border-color .5s;
-    }
-
-    .log-header {
-      padding:8px 12px;
-      font-size:10px; letter-spacing:3px; color:var(--txt);
-      border-bottom:1px solid rgba(30,110,255,.15);
-      flex-shrink:0;
-    }
-
-    .log-entries {
-      flex:1; overflow-y:auto;
-      padding:8px 0;
-      display:flex; flex-direction:column;
-      gap:0;
-    }
-    /* Scrollbar */
-    .log-entries::-webkit-scrollbar { width:3px; }
-    .log-entries::-webkit-scrollbar-track { background:transparent; }
-    .log-entries::-webkit-scrollbar-thumb { background:rgba(30,110,255,.3); }
-
-    .log-entry {
-      display:flex; gap:8px; padding:3px 12px;
-      font-size:10.5px; line-height:1.5;
-      border-left:2px solid transparent;
-      transition: background .2s;
-    }
-    .log-entry:hover { background: rgba(30,110,255,.05); }
-
-    .log-time  { color:var(--txt); flex-shrink:0; font-size:10px; }
-    .log-type  { flex-shrink:0; width:38px; font-weight:bold; font-size:10px; }
-    .log-msg   { color:#8899bb; word-break:break-word; }
-
-    .log-entry.cmd  { border-left-color:#00d4ff44; }
-    .log-entry.cmd  .log-type { color:#00d4ff; }
-    .log-entry.resp { border-left-color:#00ff8844; }
-    .log-entry.resp .log-type { color:#00ff88; }
-    .log-entry.info .log-type { color:var(--txt); }
-    .log-entry.err  { border-left-color:#ff444444; }
-    .log-entry.err  .log-type { color:#ff4444; }
-    .log-entry.speak .log-type { color:#ffffff; }
-    .log-entry.speak .log-msg  { color:#ccddee; }
-
-    /* ── Footer ─────────────────────────────────────────────────── */
+    /* ── Footer ───────────────────────────────────────────────── */
     footer {
       flex-shrink:0;
       display:flex; align-items:center; justify-content:space-between;
-      padding:9px 28px;
-      border-top:1px solid rgba(30,110,255,.18);
-      background: linear-gradient(0deg, rgba(5,5,20,.9) 0%, transparent 100%);
+      padding:9px 32px;
+      border-top:1px solid rgba(30,110,255,.16);
+      background:linear-gradient(0deg,rgba(5,5,20,.92) 0%,transparent 100%);
     }
-
-    .pi-info {
-      display:flex; align-items:center; gap:18px;
-      font-size:11px;
-    }
-    .pi-block {
-      display:flex; align-items:center; gap:7px;
-    }
+    .pi-info { display:flex; align-items:center; gap:20px; font-size:11px; }
+    .pi-block { display:flex; align-items:center; gap:7px; }
     .pi-dot {
       width:8px; height:8px; border-radius:50%;
-      background:#ff4444; flex-shrink:0;
-      transition: background .4s, box-shadow .4s;
+      background:#ff4444;
+      transition:background .4s,box-shadow .4s;
     }
-    .pi-dot.on { background:#00ff88; box-shadow:0 0 7px #00ff88; }
-
-    .pi-label { color:var(--txt); }
-    .pi-val   { color: var(--col); transition: color .5s; }
-    .pi-ping  { color:var(--txt); }
+    .pi-dot.on { background:#00ff88; box-shadow:0 0 8px #00ff88; }
+    .pi-label { color:#253040; }
+    .pi-val   { color:var(--col); transition:color .5s; }
+    .pi-ping  { color:#253040; }
     .pi-ping.fast { color:#00ff88; }
     .pi-ping.slow { color:#ffaa00; }
     .pi-ping.dead { color:#ff4444; }
-
-    .keys {
-      display:flex; gap:10px; align-items:center;
-    }
+    .keys { display:flex; gap:10px; align-items:center; }
     .key {
       display:inline-flex; align-items:center; justify-content:center;
-      width:26px; height:22px;
-      border:1px solid rgba(30,110,255,.35);
+      min-width:26px; height:22px; padding:0 5px;
+      border:1px solid rgba(30,110,255,.32);
       color:var(--col); font-size:11px; font-weight:bold;
-      letter-spacing:1px;
-      transition: color .5s, border-color .5s;
+      transition:color .5s,border-color .5s;
     }
-    .key-desc {
-      font-size:10px; color:var(--txt); letter-spacing:1px;
-      margin-right:6px;
-    }
+    .key-desc { font-size:10px; color:#253040; margin-right:6px; }
 
-    /* Bağlantı uyarısı */
     .conn-warn {
-      position:fixed; top:12px; left:50%; transform:translateX(-50%);
+      position:fixed; top:13px; left:50%; transform:translateX(-50%);
       font-size:11px; letter-spacing:2px; color:#ff6644;
       opacity:0; transition:opacity .4s; pointer-events:none; z-index:1000;
     }
@@ -326,56 +244,42 @@
 <div class="scan-beam"></div>
 
 <div id="app">
-
-  <!-- ── Header ──────────────────────────────────────────────── -->
   <header>
     <div class="brand">
       <div class="brand-name">SPECTRALOOP</div>
       <div class="brand-sub">SAMSUN ÜNİVERSİTESİ</div>
     </div>
-
     <div class="center-title">
       <h1>SPECTRA</h1>
-      <p>SESLİ ARAÇ ASISTANI</p>
+      <p>SESLİ ARAÇ ASİSTANI</p>
     </div>
-
-    <div class="teknofest-badge">
+    <div class="badge">
       <div class="badge-main">TEKNOFEST</div>
-      <div class="badge-year">HYPERLOOP · 2025</div>
+      <div class="badge-sub">HYPERLOOP · 2025</div>
     </div>
   </header>
 
-  <!-- ── İçerik ───────────────────────────────────────────────── -->
   <div class="content">
-
-    <!-- Yüz bölümü -->
-    <div class="face-section">
-      <div class="face-wrap">
-        <div class="face-inner" id="faceInner">
-          <div class="ring ring-1"></div>
-          <div class="ring ring-2"></div>
-          <div class="ring ring-3"></div>
-          <canvas id="face" width="320" height="320"></canvas>
-        </div>
-      </div>
-
-      <div class="state-lbl" id="stateLbl">● BEKLİYOR</div>
-
-      <div class="texts">
-        <div class="heard-txt" id="heardTxt"></div>
-        <div class="resp-txt"  id="respTxt"></div>
+    <div class="face-wrap">
+      <div class="face-inner" id="faceInner">
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
+        <!-- Spectra SVG yüzü -->
+        <img id="faceImg" src="spectra.svg" alt="Spectra" class="idle">
+        <!-- Peripheral efektler (dalga, düşünme noktaları) -->
+        <canvas id="fxCanvas" width="380" height="380"></canvas>
       </div>
     </div>
 
-    <!-- Log paneli -->
-    <div class="log-panel">
-      <div class="log-header">SİSTEM LOGU</div>
-      <div class="log-entries" id="logEntries"></div>
-    </div>
+    <div class="state-lbl" id="stateLbl">● BEKLİYOR</div>
 
+    <div class="texts">
+      <div class="heard-txt" id="heardTxt"></div>
+      <div class="resp-txt"  id="respTxt"></div>
+    </div>
   </div>
 
-  <!-- ── Footer ──────────────────────────────────────────────── -->
   <footer>
     <div class="pi-info">
       <div class="pi-block">
@@ -386,7 +290,6 @@
       <span class="pi-ping" id="piPing">ping —</span>
       <span class="pi-label">Son: <span class="pi-val" id="piLast">—</span></span>
     </div>
-
     <div class="keys">
       <span class="key">S</span><span class="key-desc">Konuş</span>
       <span class="key">R</span><span class="key-desc">Sıfırla</span>
@@ -394,26 +297,24 @@
       <span class="key">ESC</span>
     </div>
   </footer>
-
 </div>
 
 <div class="conn-warn" id="connWarn">● SUNUCUYA BAĞLANIYOR...</div>
 
-<!-- Socket.IO client (CDN — programlama kütüphanesi) -->
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  CANVAS YÜZ ANİMASYONU
+//  CANVAS — ÇEVRE EFEKTLERİ (dalga, düşünme, nabız)
 // ═══════════════════════════════════════════════════════════════
-const canvas = document.getElementById('face');
+const canvas = document.getElementById('fxCanvas');
 const ctx    = canvas.getContext('2d');
-const CX = 160, CY = 160, FR = 122;
+const CX = 190, CY = 188, FR = 155; // canvas içinde yüz merkezi & yarıçapı
 
 const STATE_RGB = {
   idle:      [30,  110, 255],
   listening: [0,   255, 200],
   thinking:  [255, 170,   0],
-  speaking:  [220, 230, 255],
+  speaking:  [220, 235, 255],
 };
 const STATE_LABEL = {
   idle:      '● BEKLİYOR',
@@ -422,146 +323,80 @@ const STATE_LABEL = {
   speaking:  '◎ KONUŞUYOR',
 };
 
-let state     = 'idle';
-let curRGB    = [...STATE_RGB.idle];
-let frame     = 0;
-let mouthOpen = 0.0;
-let blinkF    = 0;
-let blinkNext = 120;
-let pulse     = 0.0;
-let thinkDot  = 0;
+let state   = 'idle';
+let curRGB  = [...STATE_RGB.idle];
+let frame   = 0;
+let pulse   = 0;
+let thinkDot = 0;
 
-const lerp    = (a,b,t)    => a+(b-a)*t;
-const lerpRGB = (a,b,t)    => a.map((v,i)=>v+(b[i]-v)*t);
-const rgb     = c          => `rgb(${c.map(Math.round).join(',')})`;
-const rgba    = (c,a)      => `rgba(${c.map(Math.round).join(',')},${a})`;
+const lerpRGB = (a,b,t) => a.map((v,i) => v+(b[i]-v)*t);
+const rgb  = c => `rgb(${c.map(Math.round).join(',')})`;
+const rgba = (c,a) => `rgba(${c.map(Math.round).join(',')},${a})`;
 
-// ── Update ───────────────────────────────────────────────────
 function update() {
   frame++;
-  pulse    = Math.sin(frame*0.05)*0.5+0.5;
-  curRGB   = lerpRGB(curRGB, STATE_RGB[state], 0.08);
-  thinkDot = Math.floor(frame/10)%3;
-
-  if (state==='idle'||state==='speaking') {
-    if (--blinkNext<=0) { blinkF=8; blinkNext=180+Math.floor(pulse*60); }
-    if (blinkF>0) blinkF--;
-  } else { blinkF=0; }
-
-  if   (state==='speaking') mouthOpen = Math.sin(frame*0.25)*0.5+0.5;
-  else                      mouthOpen = Math.max(0, mouthOpen-0.06);
+  pulse    = Math.sin(frame * 0.048) * 0.5 + 0.5;
+  curRGB   = lerpRGB(curRGB, STATE_RGB[state], 0.07);
+  thinkDot = Math.floor(frame / 10) % 3;
 }
 
-// ── Draw ─────────────────────────────────────────────────────
 function draw() {
-  ctx.clearRect(0,0,320,320);
+  ctx.clearRect(0, 0, 380, 380);
   const c = curRGB;
 
-  // Dış glow
-  for (let i=6;i>0;i--) {
-    ctx.beginPath(); ctx.arc(CX,CY,FR+i*17,0,Math.PI*2);
-    ctx.strokeStyle=rgba(c,0.022*i); ctx.lineWidth=2; ctx.stroke();
-  }
-
   // Nabız halkası
-  const pr = FR+10+pulse*10;
-  ctx.beginPath(); ctx.arc(CX,CY,pr,0,Math.PI*2);
-  ctx.strokeStyle=rgba(c,0.22); ctx.lineWidth=1.2; ctx.stroke();
+  const pr = FR + 14 + pulse * 12;
+  ctx.beginPath(); ctx.arc(CX, CY, pr, 0, Math.PI * 2);
+  ctx.strokeStyle = rgba(c, 0.18);
+  ctx.lineWidth = 1.5; ctx.stroke();
 
-  // Yüz dairesi
-  ctx.beginPath(); ctx.arc(CX,CY,FR,0,Math.PI*2);
-  ctx.fillStyle='#050515'; ctx.fill();
-  ctx.strokeStyle=rgb(c); ctx.lineWidth=2.5; ctx.stroke();
-
-  drawEyes(c);
-  drawMouth(c);
-  if (state==='thinking')  drawThinking(c);
-  if (state==='listening') drawWave(c);
-}
-
-function drawEyes(c) {
-  const eyeY=CY-36, blink=blinkF/8;
-  for (const ex of [CX-45, CX+45]) {
-    const oh = Math.max(3, 25*(1-blink));
-
-    ctx.beginPath(); ctx.ellipse(ex,eyeY,13,oh/2,0,0,Math.PI*2);
-    ctx.fillStyle='#050515'; ctx.fill();
-    ctx.strokeStyle=rgb(c); ctx.lineWidth=2; ctx.stroke();
-
-    if (blink<0.7) {
-      const pr=Math.max(2,8*(1-blink));
-      const ox=state==='thinking'?-5:0, oy=state==='thinking'?-4:0;
-      ctx.beginPath(); ctx.arc(ex+ox,eyeY+oy,pr,0,Math.PI*2);
-      ctx.fillStyle=rgb(c); ctx.fill();
-      // Parlaklık noktası
-      ctx.beginPath(); ctx.arc(ex+ox+3,eyeY+oy-3,pr*0.35,0,Math.PI*2);
-      ctx.fillStyle=rgba([255,255,255],0.7); ctx.fill();
-    }
-
-    // Kaş
-    const browY=eyeY-oh/2-10, lift=state==='listening'?-8:0;
+  // Tick işaretleri
+  for (let i = 0; i < 8; i++) {
+    const a   = i * Math.PI / 4;
+    const len = i % 2 === 0 ? 10 : 5;
     ctx.beginPath();
-    ctx.moveTo(ex-14, browY+lift+2); ctx.lineTo(ex+14, browY+lift-2);
-    ctx.strokeStyle=rgb(c); ctx.lineWidth=2; ctx.lineCap='round'; ctx.stroke();
+    ctx.moveTo(CX + Math.cos(a) * (FR + 1), CY + Math.sin(a) * (FR + 1));
+    ctx.lineTo(CX + Math.cos(a) * (FR + len + 1), CY + Math.sin(a) * (FR + len + 1));
+    ctx.strokeStyle = rgba(c, 0.5);
+    ctx.lineWidth = 1.5; ctx.stroke();
   }
-}
 
-function drawMouth(c) {
-  const mx=CX, my=CY+57;
-
-  if (state==='thinking') {
-    ctx.beginPath(); ctx.moveTo(mx-26,my); ctx.lineTo(mx+26,my);
-    ctx.strokeStyle=rgb(c); ctx.lineWidth=2; ctx.lineCap='round'; ctx.stroke();
-    return;
-  }
-  if (mouthOpen<0.05) {
-    // Gülümseme
-    ctx.beginPath(); ctx.arc(mx,my-13,44,0.43,Math.PI-0.43);
-    ctx.strokeStyle=rgb(c); ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.stroke();
-    return;
-  }
-  const oh = 8+mouthOpen*26;
-  const ow = 26+mouthOpen*20;
-  ctx.beginPath(); ctx.ellipse(mx,my,ow,Math.max(2,oh),0,0,Math.PI*2);
-  ctx.fillStyle='#050515'; ctx.fill();
-  ctx.strokeStyle=rgb(c); ctx.lineWidth=2; ctx.stroke();
-  if (state==='speaking'&&mouthOpen>0.3) {
-    ctx.beginPath(); ctx.moveTo(mx-ow+5,my); ctx.lineTo(mx+ow-5,my);
-    ctx.strokeStyle=rgba(c,.45); ctx.lineWidth=1; ctx.stroke();
-  }
+  if (state === 'thinking')  drawThinking(c);
+  if (state === 'listening') drawWave(c);
 }
 
 function drawThinking(c) {
-  for (let i=0;i<3;i++) {
-    const a=-Math.PI/2+i*2*Math.PI/3+frame*0.05;
-    const x=CX+Math.cos(a)*(FR+26), y=CY+Math.sin(a)*(FR+26);
-    ctx.beginPath(); ctx.arc(x,y,i===thinkDot?6:3,0,Math.PI*2);
-    ctx.fillStyle=i===thinkDot?rgb(c):'#2a3a55'; ctx.fill();
+  for (let i = 0; i < 3; i++) {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / 3 + frame * 0.048;
+    const x = CX + Math.cos(a) * (FR + 30);
+    const y = CY + Math.sin(a) * (FR + 30);
+    const r = i === thinkDot ? 7 : 3.5;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = i === thinkDot ? rgb(c) : rgba(c, 0.25);
+    ctx.fill();
   }
 }
 
 function drawWave(c) {
-  const wY=CY+FR+20, wW=210;
+  const wY = CY + FR + 18, wW = 250;
   ctx.beginPath();
-  for (let i=0;i<56;i++) {
-    const x=CX-wW/2+i*(wW/55);
-    const amp=8*Math.sin(i*0.4+frame*0.3);
-    i===0?ctx.moveTo(x,wY+amp):ctx.lineTo(x,wY+amp);
+  for (let i = 0; i < 64; i++) {
+    const x   = CX - wW / 2 + i * (wW / 63);
+    const amp = 9 * Math.sin(i * 0.36 + frame * 0.28)
+              + 4 * Math.sin(i * 0.82 + frame * 0.5);
+    i === 0 ? ctx.moveTo(x, wY + amp) : ctx.lineTo(x, wY + amp);
   }
-  ctx.strokeStyle=rgb(c); ctx.lineWidth=2; ctx.stroke();
+  ctx.strokeStyle = rgb(c); ctx.lineWidth = 2; ctx.stroke();
 }
 
-// ── CSS değişkenlerini güncelle ──────────────────────────────
 function syncCSS() {
-  const h=`rgb(${curRGB.map(Math.round).join(',')})`;
-  const g=`rgba(${curRGB.map(Math.round).join(',')},0.35)`;
+  const h = `rgb(${curRGB.map(Math.round).join(',')})`;
+  const g = `rgba(${curRGB.map(Math.round).join(',')},0.4)`;
   document.documentElement.style.setProperty('--col',  h);
   document.documentElement.style.setProperty('--glow', g);
 }
 
-// ── Ana döngü ────────────────────────────────────────────────
-function loop() { update(); draw(); syncCSS(); requestAnimationFrame(loop); }
-loop();
+(function loop() { update(); draw(); syncCSS(); requestAnimationFrame(loop); })();
 
 // ═══════════════════════════════════════════════════════════════
 //  GLITCH
@@ -574,70 +409,46 @@ function triggerGlitch() {
   setTimeout(() => {
     document.getElementById('faceInner').classList.remove('glitch');
     glitching = false;
-  }, 300);
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  LOG PANELİ
-// ═══════════════════════════════════════════════════════════════
-const LOG_MAX = 80;
-const logEl   = document.getElementById('logEntries');
-
-function addLog(type, msg) {
-  const now = new Date();
-  const ts  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-  const typeLabels = { cmd:'[KMT]', resp:'[OK]', info:'[INF]', err:'[ERR]', speak:'[TTS]' };
-
-  const row = document.createElement('div');
-  row.className = `log-entry ${type}`;
-  row.innerHTML = `<span class="log-time">${ts}</span>`
-                + `<span class="log-type">${typeLabels[type]||'[---]'}</span>`
-                + `<span class="log-msg">${escHtml(msg)}</span>`;
-  logEl.appendChild(row);
-
-  // Max satır
-  while (logEl.children.length > LOG_MAX) logEl.removeChild(logEl.firstChild);
-  logEl.scrollTop = logEl.scrollHeight;
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }, 260);
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  UI GÜNCELLEME
 // ═══════════════════════════════════════════════════════════════
-let prevState = 'idle';
+const faceImg  = document.getElementById('faceImg');
+let   prevState = 'idle';
 
 function setUIState(s) {
   if (s !== prevState) { triggerGlitch(); prevState = s; }
   state = s;
+
+  // CSS class ile filter değişimi
+  faceImg.className = s;
   document.getElementById('stateLbl').textContent = STATE_LABEL[s] || '● BEKLİYOR';
 }
 
 function setPiInfo(data) {
-  if (data.pi_connected !== undefined) {
+  if (data.pi_connected !== undefined)
     document.getElementById('piDot').classList.toggle('on', data.pi_connected);
-  }
   if (data.pi_ip)   document.getElementById('piIp').textContent   = data.pi_ip;
   if (data.pi_last) document.getElementById('piLast').textContent = data.pi_last;
   if (data.pi_ping !== undefined) {
-    const el  = document.getElementById('piPing');
-    const ms  = data.pi_ping;
+    const el = document.getElementById('piPing');
+    const ms = data.pi_ping;
     el.textContent = ms >= 0 ? `ping ${ms}ms` : 'ping —';
-    el.className = 'pi-ping ' + (ms<0?'dead': ms<80?'fast': ms<250?'slow':'dead');
+    el.className = 'pi-ping ' + (ms < 0 ? 'dead' : ms < 80 ? 'fast' : ms < 250 ? 'slow' : 'dead');
   }
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  TAM EKRAN
+//  TAM EKRAN (F)
 // ═══════════════════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
-  if (e.key==='f' || e.key==='F') {
+  if (e.key === 'f' || e.key === 'F') {
     if (!document.fullscreenElement)
-      document.documentElement.requestFullscreen().catch(()=>{});
+      document.documentElement.requestFullscreen().catch(() => {});
     else
-      document.exitFullscreen().catch(()=>{});
+      document.exitFullscreen().catch(() => {});
   }
 });
 
@@ -647,54 +458,35 @@ document.addEventListener('keydown', e => {
 const warn = document.getElementById('connWarn');
 
 try {
-  const socket = io('http://localhost:5001', { reconnectionDelay:2000, timeout:5000 });
+  const socket = io('http://localhost:5001', { reconnectionDelay: 2000, timeout: 5000 });
 
-  socket.on('connect', ()=>{
-    warn.classList.remove('show');
-    addLog('info','Sunucuya bağlandı');
-  });
+  socket.on('connect',       () => warn.classList.remove('show'));
+  socket.on('disconnect',    () => { warn.classList.add('show'); setUIState('idle'); });
+  socket.on('connect_error', () => warn.classList.add('show'));
 
-  socket.on('disconnect', ()=>{
-    warn.classList.add('show');
-    setUIState('idle');
-    addLog('err','Sunucu bağlantısı kesildi');
-  });
-
-  socket.on('connect_error', ()=>{
-    warn.classList.add('show');
-  });
-
-  socket.on('state', data=>{
-    if (data.mode)              setUIState(data.mode);
-    if (data.text)              document.getElementById('respTxt').textContent = data.text;
-    if (data.text && data.mode==='speaking') addLog('speak', data.text);
+  socket.on('state', data => {
+    if (data.mode) setUIState(data.mode);
+    if (data.text) document.getElementById('respTxt').textContent = data.text;
     setPiInfo(data);
   });
 
-  socket.on('heard', data=>{
-    const t = data.text||'';
+  socket.on('heard', data => {
+    const t = data.text || '';
     document.getElementById('heardTxt').textContent = t ? `"${t}"` : '';
-    if (t) addLog('info', `Duyuldu: ${t}`);
   });
 
-  socket.on('cmd_log', data=>{
-    addLog('cmd',  data.cmd);
-    if (data.result) addLog('resp', data.result);
+  socket.on('cmd_log', data => {
     if (data.cmd) document.getElementById('piLast').textContent = data.cmd;
   });
 
-  socket.on('clear', ()=>{
-    document.getElementById('heardTxt').textContent='';
-    document.getElementById('respTxt').textContent='';
+  socket.on('clear', () => {
+    document.getElementById('heardTxt').textContent = '';
+    document.getElementById('respTxt').textContent  = '';
   });
 
-  socket.on('sys_log', data=>{
-    addLog(data.type||'info', data.text||'');
-  });
-
-} catch(e) {
+} catch (e) {
   warn.classList.add('show');
-  warn.textContent='● socket.io yüklenemedi';
+  warn.textContent = '● socket.io yüklenemedi';
 }
 </script>
 </body>
