@@ -159,6 +159,11 @@ _RESPONSES = {
         "Ben Spectra, Samsun Üniversitesi Spectraloop hyperloop yarış takımının sesli asistanıyım.",
         "Spectra'yım. Samsun Üniversitesi'nin TEKNOFEST'e katılan Spectraloop takımının bir parçasıyım.",
     ],
+    "kendini tanıt": [
+        "Merhaba! Ben Spectra. Samsun Üniversitesi'nin TEKNOFEST hyperloop yarışmasına katılan Spectraloop takımı için özel olarak geliştirilmiş bir sesli asistanım. Araç sistemlerini sesli komutlarla kontrol edebilir, fren ve motor komutları verebilir, sensör verilerini okuyabilir ve ekiple sohbet edebilirim. Kısacası, kapsülün yanında her zaman hazır olan dijital ekip arkadaşınızım!",
+        "Tabii! Adım Spectra. Samsun Üniversitesi Spectraloop takımının sesli yapay zeka asistanıyım. Hyperloop kapsülünün fren, motor ve sensör sistemlerini sesli komutlarla yönetebilirim. TEKNOFEST yarışmasında takıma destek olmak için tasarlandım. Hem teknik kontrolü hem de günlük sohbeti hallederim!",
+        "Ben Spectra, Spectraloop'un dijital sesi ve zekasıyım. Samsun Üniversitesi'nden mühendis bir ekip tarafından geliştirildim. TEKNOFEST hyperloop yarışmasında araç kontrolü, sistem izleme ve ekip iletişimi için buradayım. Sesli komutla çalışıyorum, her an hazırım!",
+    ],
     "ne yapabilirsin": [
         "Araç sistemlerini kontrol edebilirim, sorularını yanıtlayabilirim ve sizinle sohbet edebilirim.",
         "Fren sistemini yönetebilirim, her türlü soruyu yanıtlayabilirim, genel sohbet edebilirim.",
@@ -591,6 +596,7 @@ def detect_pattern(text: str) -> Optional[str]:
         ("gunaydin",    "günaydın"),
         ("iyimi",       "iyi misin"),           # "iyimisin" bitişik yazım
         ("kimsin",      "sen kimsin"),
+        ("tanit",       "kendini tanıt"),    # kendini tanıt, tanıtır mısın
         ("berbat",      "berbat"),
         ("harika",      "harika"),
         # ── Yeni tetikleyiciler ──────────────────────────────────────────────

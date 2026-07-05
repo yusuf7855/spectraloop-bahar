@@ -74,23 +74,21 @@
     .brand { display:flex; flex-direction:column; gap:2px; }
     .brand-name {
       font-size:15px; font-weight:bold; letter-spacing:5px;
-      color:var(--col); text-shadow:0 0 16px var(--glow);
-      transition:color .5s,text-shadow .5s;
+      color:#ffffff; text-shadow:0 0 16px rgba(255,255,255,.3);
     }
-    .brand-sub { font-size:9px; letter-spacing:3px; color:#253040; }
+    .brand-sub { font-size:9px; letter-spacing:3px; color:#4a5a70; }
     .center-title { text-align:center; }
     .center-title h1 {
       font-size:30px; font-weight:bold; letter-spacing:14px;
-      color:var(--col); text-shadow:0 0 32px var(--glow);
-      transition:color .5s,text-shadow .5s;
+      color:#ffffff; text-shadow:0 0 32px rgba(255,255,255,.25);
     }
-    .center-title p { font-size:10px; letter-spacing:4px; color:#253040; margin-top:3px; }
+    .center-title p { font-size:10px; letter-spacing:4px; color:#4a5a70; margin-top:3px; }
     .badge { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
     .badge-main {
       font-size:14px; font-weight:bold; letter-spacing:4px;
-      color:#e03030; text-shadow:0 0 14px rgba(224,48,48,.4);
+      color:#ffffff; text-shadow:0 0 14px rgba(255,255,255,.2);
     }
-    .badge-sub { font-size:9px; letter-spacing:3px; color:#253040; }
+    .badge-sub { font-size:9px; letter-spacing:3px; color:#4a5a70; }
 
     /* ── İçerik ───────────────────────────────────────────────── */
     .content {
@@ -265,8 +263,8 @@
         <div class="ring ring-1"></div>
         <div class="ring ring-2"></div>
         <div class="ring ring-3"></div>
-        <!-- Spectra SVG yüzü -->
-        <img id="faceImg" src="spectra.svg" alt="Spectra" class="idle">
+        <!-- Spectra yüzü -->
+        <img id="faceImg" src="spectra.png" alt="Spectra" class="idle">
         <!-- Peripheral efektler (dalga, düşünme noktaları) -->
         <canvas id="fxCanvas" width="380" height="380"></canvas>
       </div>
