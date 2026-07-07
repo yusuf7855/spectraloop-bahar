@@ -36,6 +36,14 @@ def _tcp_send(command: str) -> str:
         with socket.create_connection((PI_HOST, PI_PORT), timeout=3) as s:
             s.sendall((command + "\n").encode())
             return s.recv(1024).decode(errors="ignore").strip()
+    except socket.timeout:
+        return "ERR:TIMEOUT"
+    except ConnectionRefusedError:
+        return "ERR:REFUSED"
+    except OSError as e:
+        if "Network is unreachable" in str(e) or "No route to host" in str(e):
+            return "ERR:NETWORK"
+        return f"ERR:{e}"
     except Exception as e:
         return f"ERR:{e}"
 
@@ -72,8 +80,16 @@ def send_vehicle_command(command: str) -> str:
     raw = _tcp_send(command)
     print(f"[HW] {command} → {raw}")
 
-    if raw.startswith("ERR") or not raw:
-        return "Pi'ye bağlanılamadı."
+    if not raw:
+        return "Pi'den yanıt gelmedi."
+    if raw == "ERR:TIMEOUT":
+        return f"Pi'ye bağlanılamadı. {PI_HOST} adresine 3 saniyede ulaşılamadı. Pi açık mı ve aynı ağda mı?"
+    if raw == "ERR:REFUSED":
+        return f"Pi'ye bağlanılamadı. {PI_HOST} bağlantıyı reddetti. Pi'de bridge çalışıyor mu?"
+    if raw == "ERR:NETWORK":
+        return f"Pi'ye bağlanılamadı. {PI_HOST} ağ üzerinde bulunamadı. Aynı Wi-Fi'de misiniz?"
+    if raw.startswith("ERR"):
+        return f"Pi bağlantı hatası: {raw[4:]}"
 
     # Sabit etiketli komut
     label = COMMAND_LABELS.get(command)
