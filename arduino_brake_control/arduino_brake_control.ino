@@ -12,6 +12,11 @@
  *   A0  -> NTC sicaklik sensoru (10k NTC + 10k pull-up, 5V)
  *   A1  -> Batarya voltaj bolucusu (R1=30k, R2=10k, max 20V -> max 5V)
  *
+ * Haberlesme:
+ *   Pi GPIO 14 (TXD) --> Arduino D0 (RX)
+ *   Pi GPIO 15 (RXD) --> Arduino D1 (TX)
+ *   NOT: Kodu yuklerken Pi RX/TX baglantisini cikart, yukleme sonrasi tekrar tak.
+ *
  * Komut protokolu (\n ile sonlanan dizeler):
  *   Tek-karakter geri-uyumlu fren komutlari:
  *     'A'  -> Tum frenler ON

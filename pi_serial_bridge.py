@@ -2,7 +2,17 @@
 """
 Spectraloop - Raspberry Pi Seri Kopru
 --------------------------------------
-MacBook'tan TCP ile komut alir, Arduino'ya USB seri ile iletir.
+MacBook'tan TCP ile komut alir, Arduino'ya UART (RX/TX) ile iletir.
+
+Baglanti:
+    Pi GPIO 14 (TXD) --> Arduino RX (D0)
+    Pi GPIO 15 (RXD) --> Arduino TX (D1)
+    GND              --> GND  (ortak toprak zorunlu)
+
+Pi UART etkinlestirme (/boot/config.txt veya raspi-config):
+    enable_uart=1
+    dtoverlay=disable-bt   # Pi 3/4/5: Bluetooth'u devre disi birak,
+                           # boylece /dev/ttyAMA0 Arduino'ya baglanir
 
 Kurulum:   pip3 install pyserial
 Calistir:  python3 pi_serial_bridge.py
@@ -20,13 +30,15 @@ Komut eslemesi (TCP metin -> Arduino dizesi):
     GET_TEMP     -> 'GT'   (sicaklik)
     GET_VOLTAGE  -> 'GV'   (voltaj)
     GET_ALL      -> 'GA'   (tum sensor verileri)
+    LED_ON       -> 'LN'   (LED ac)
+    LED_OFF      -> 'LF'   (LED kapat)
 """
 import socket
 import time
 import serial
 
 # --- Ayarlar ---
-SERIAL_PORT = "/dev/ttyUSB1"   # Arduino Uno genelde ttyACM0. USB-seri cevirici ise ttyUSB0
+SERIAL_PORT = "/dev/ttyAMA0"   # Pi hardware UART (GPIO14/15). Bluetooth kapali olmali.
 BAUD = 115200
 TCP_HOST = "0.0.0.0"           # Tum arayuzlerde dinle
 TCP_PORT = 5005
