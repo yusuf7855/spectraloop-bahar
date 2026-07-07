@@ -1,7 +1,7 @@
 """
 Spectraloop - Araç Komut Algılayıcı
 Türkçe sesli girişten araç komutunu tespit eder.
-Kapsam: fren, motor, sensör, alarm, flaşör, stop lambası.
+Kapsam: fren, motor, sensör, alarm, flaşör, stop lambası, LED.
 """
 import difflib
 from typing import Optional
@@ -52,6 +52,42 @@ def _norm(s: str) -> str:
 
 
 _NORM_PHRASES = {cmd: [_norm(p) for p in phrases] for cmd, phrases in BRAKE_PHRASES.items()}
+
+# ── LED difflib cümleleri ─────────────────────────────────────────────────────
+LED_PHRASES = {
+    "LED_ON": [
+        "led ac","ledi ac","ledleri ac","led yak","ledleri yak",
+        "isik ac","isigi ac","isiklari ac","isik ver","isiklari yak",
+        "lamba ac","lambay ac","lambayi ac","lambalari ac","lambay yak","lambayi yak",
+        "aydinlat","aydinlatici ac","parlat","isiklandi","isiklandir",
+        "led devreye al","ledleri devreye al","ledleri aktif et",
+        "isigi ac","isiklar acsin","lambalar acsin",
+        "led on","isik on","lamba on",
+        # Whisper yanlış okuyabilir
+        "let ac","yet ac","led ack","led hack",
+    ],
+    "LED_OFF": [
+        "led kapat","ledi kapat","ledleri kapat","led sondur","ledleri sondur",
+        "isik kapat","isigi kapat","isiklari kapat","isiklari sondur",
+        "lamba kapat","lambay kapat","lamabayi kapat","lambalari kapat","lambay sondur",
+        "isigi sondur","isiklar kapansin","karart","karanlik yap",
+        "led devre disi","ledleri kapat","ledleri durdur",
+        "isik yok","lamba yok","isiki kes","isigi kes",
+        "led off","isik off","lamba off","isiklari birak",
+        # Whisper yanlış okuyabilir
+        "let kapat","yet kapat","led capot",
+    ],
+}
+
+_LED_NORM_PHRASES = {cmd: [_norm(p) for p in phrases] for cmd, phrases in LED_PHRASES.items()}
+
+# LED için anahtar kelime setleri (normalize)
+_LED_WORDS    = {"led","ledi","ledleri","ledler","isik","isigi","isiklari","isiklar",
+                 "lamba","lambay","lambayi","lambalari","lambalar","aydinlat","parlat"}
+_LED_ON_ACTS  = {"ac","yak","ver","devreye","aktif","aydinlat","parlat","isiklandir",
+                 "baslat","calistir","on"}
+_LED_OFF_ACTS = {"kapat","sondur","birak","kes","off","durdur","karanlik","karart",
+                 "pasif","dur"}
 
 # Konuşmada anlam taşımayan dolgu sözcükleri — tw'den çıkarılır
 _FILLERS = {
@@ -104,15 +140,27 @@ def detect_vehicle_command(text: str) -> Optional[str]:
         return "FLASHER_ON"
 
     # ─────────────────────────────────────────────────────────────────────────
-    # 4. STOP LAMBASI — "lamba/ışık/led" + "stop/fren" birlikte olmalı
+    # 4. STOP LAMBASI / LED
     # ─────────────────────────────────────────────────────────────────────────
-    if has(["lamba","isik","isig","led"]):
+    if has(["lamba","isik","isig","led","aydinlat","parlat"]):
+        # Stop lambası: "ışık/led" + "stop/brake/fren" birlikte
         if has(["stop","brake"]) or \
            (has(["fren"]) and has(["lamba","isik","isig","led"])):
-            is_off = has(["kapat","sondur","off","birak","sondur"])
+            is_off = has(["kapat","sondur","off","birak"])
             return "STOP_LIGHT_OFF" if is_off else "STOP_LIGHT_ON"
-        # Genel LED kontrolü — "led aç/kapat", "ışıkları aç/kapat", "lambayı yak/söndür"
-        is_off = has(["kapat","sondur","off","birak","gec","koy","yok"])
+
+        # Genel LED — kelime seti ile karar ver
+        has_led_word = bool(tw & _LED_WORDS)
+        has_off_act  = bool(tw & _LED_OFF_ACTS)
+        has_on_act   = bool(tw & _LED_ON_ACTS)
+
+        if has_led_word:
+            if has_off_act and not has_on_act:
+                return "LED_OFF"
+            return "LED_ON"
+
+        # Kelime seti yoksa substring kontrol
+        is_off = has(["kapat","sondur","off","birak","kes","karart"])
         return "LED_OFF" if is_off else "LED_ON"
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -177,10 +225,11 @@ def detect_vehicle_command(text: str) -> Optional[str]:
             return "ALL"
 
     # ─────────────────────────────────────────────────────────────────────────
-    # 8. DİFFLİB FALLBACK — Whisper'ın yanlış duyduğu fren cümlelerini yakalar
+    # 8. DİFFLİB FALLBACK — Whisper yanlış okumalarını yakalar (fren + LED)
     # ─────────────────────────────────────────────────────────────────────────
     best_cmd, best_score = None, 0.0
-    for cmd, phrases in _NORM_PHRASES.items():
+    all_phrases = {**_NORM_PHRASES, **_LED_NORM_PHRASES}
+    for cmd, phrases in all_phrases.items():
         for phrase in phrases:
             s = difflib.SequenceMatcher(None, tn, phrase).ratio()
             if s > best_score:
