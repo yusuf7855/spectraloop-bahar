@@ -52,6 +52,8 @@ CMD_MAP = {
     "FLASHER_OFF":    "FLF",
     "STOP_LIGHT_ON":  "SLN",
     "STOP_LIGHT_OFF": "SLF",
+    "LED_ON":         "LN",
+    "LED_OFF":        "LF",
 }
 
 

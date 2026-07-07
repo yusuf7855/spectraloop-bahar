@@ -8,6 +8,7 @@
  *   D9  -> Buzzer / Alarm rolesi IN
  *   D10 -> Flasor rolesi IN
  *   D11 -> Stop lambasi rolesi IN
+ *   D12 -> LED surucusu (MOSFET gate veya rele IN)
  *   A0  -> NTC sicaklik sensoru (10k NTC + 10k pull-up, 5V)
  *   A1  -> Batarya voltaj bolucusu (R1=30k, R2=10k, max 20V -> max 5V)
  *
@@ -41,6 +42,8 @@
  *     "FLF" -> Flasor OFF        -> "OK:FLF\n"
  *     "SLN" -> Stop lambasi ON   -> "OK:SLN\n"
  *     "SLF" -> Stop lambasi OFF  -> "OK:SLF\n"
+ *     "LN"  -> LED ON            -> "OK:LN\n"
+ *     "LF"  -> LED OFF           -> "OK:LF\n"
  *
  *   Bilinmeyen komut            -> "ERR:cmd\n"
  *
@@ -65,6 +68,7 @@ const int PIN_RELAY_REAR  = 8;
 const int PIN_BUZZER      = 9;
 const int PIN_FLASHER     = 10;
 const int PIN_STOP_LIGHT  = 11;
+const int PIN_LED         = 12;
 const int PIN_TEMP        = A0;
 const int PIN_VOLT        = A1;
 
@@ -85,6 +89,7 @@ bool brakeRear   = false;
 bool buzzerOn    = false;
 bool flasherOn   = false;
 bool stopLightOn = false;
+bool ledOn       = false;
 
 // ── Zamanlayici degiskenleri ──────────────────────────────────────────────────
 unsigned long lastFlashTime = 0;
@@ -190,7 +195,8 @@ void handleCommand(String line) {
         Serial.print(",VOLT:");     Serial.print(v, 1);
         Serial.print(",MOTOR:");    Serial.print(motorOn    ? "ON" : "OFF");
         Serial.print(",BRAKE_F:");  Serial.print(brakeFront ? "ON" : "OFF");
-        Serial.print(",BRAKE_R:");  Serial.println(brakeRear ? "ON" : "OFF");
+        Serial.print(",BRAKE_R:");  Serial.print(brakeRear ? "ON" : "OFF");
+        Serial.print(",LED:");      Serial.println(ledOn ? "ON" : "OFF");
         return;
     }
 
@@ -257,6 +263,20 @@ void handleCommand(String line) {
         return;
     }
 
+    // ── LED ──────────────────────────────────────────────────────────────────
+    if (line == "LN") {
+        digitalWrite(PIN_LED, HIGH);   // MOSFET gate / aktif-HIGH surucu
+        ledOn = true;
+        Serial.println("OK:LN");
+        return;
+    }
+    if (line == "LF") {
+        digitalWrite(PIN_LED, LOW);
+        ledOn = false;
+        Serial.println("OK:LF");
+        return;
+    }
+
     // ── Bilinmeyen komut ─────────────────────────────────────────────────────
     Serial.print("ERR:"); Serial.println(line);
 }
@@ -266,14 +286,15 @@ void setup() {
     Serial.begin(115200);
 
     int outputs[] = {PIN_MOTOR, PIN_RELAY_FRONT, PIN_RELAY_REAR,
-                     PIN_BUZZER, PIN_FLASHER, PIN_STOP_LIGHT};
-    for (int i = 0; i < 6; i++) {
+                     PIN_BUZZER, PIN_FLASHER, PIN_STOP_LIGHT, PIN_LED};
+    for (int i = 0; i < 7; i++) {
         pinMode(outputs[i], OUTPUT);
         digitalWrite(outputs[i], RELAY_OFF);
     }
 
     motorOn = false; brakeFront = false; brakeRear   = false;
     buzzerOn = false; flasherOn = false; stopLightOn = false;
+    ledOn   = false;
 
     Serial.println("READY");
 }
