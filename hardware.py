@@ -4,7 +4,7 @@ Tüm araç komutları buradan gönderilir.
 """
 import socket
 
-PI_HOST = "10.220.189.177"
+PI_HOST = "192.168.1.8"
 PI_PORT = 5005
 
 # Sabit etiketli komutlar (OK yanıtı gelince bu metin söylenir)
