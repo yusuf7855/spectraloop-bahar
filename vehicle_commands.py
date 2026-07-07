@@ -109,8 +109,11 @@ def detect_vehicle_command(text: str) -> Optional[str]:
     if has(["lamba","isik","isig","led"]):
         if has(["stop","brake"]) or \
            (has(["fren"]) and has(["lamba","isik","isig","led"])):
-            is_off = has(["kapat","sondur","off","birak"])
+            is_off = has(["kapat","sondur","off","birak","sondur"])
             return "STOP_LIGHT_OFF" if is_off else "STOP_LIGHT_ON"
+        # Genel LED kontrolü — "led aç/kapat", "ışıkları aç/kapat", "lambayı yak/söndür"
+        is_off = has(["kapat","sondur","off","birak","gec","koy","yok"])
+        return "LED_OFF" if is_off else "LED_ON"
 
     # ─────────────────────────────────────────────────────────────────────────
     # 5. MOTOR

@@ -59,7 +59,8 @@ TOOLS = [
                             "EMERGENCY_STOP",
                             "BUZZER_ON", "BUZZER_OFF", "BUZZER_BEEP",
                             "FLASHER_ON", "FLASHER_OFF",
-                            "STOP_LIGHT_ON", "STOP_LIGHT_OFF"
+                            "STOP_LIGHT_ON", "STOP_LIGHT_OFF",
+                            "LED_ON", "LED_OFF"
                         ],
                         "description": "The vehicle command to execute"
                     }

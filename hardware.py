@@ -25,6 +25,8 @@ COMMAND_LABELS = {
     "FLASHER_OFF":     "Flaşör kapatıldı.",
     "STOP_LIGHT_ON":   "Stop lambası yandı.",
     "STOP_LIGHT_OFF":  "Stop lambası söndürüldü.",
+    "LED_ON":          "LED'ler açıldı.",
+    "LED_OFF":         "LED'ler kapatıldı.",
 }
 
 
