@@ -88,8 +88,12 @@ def send_vehicle_command(command: str) -> str:
         return f"Pi'ye bağlanılamadı. {PI_HOST} bağlantıyı reddetti. Pi'de bridge çalışıyor mu?"
     if raw == "ERR:NETWORK":
         return f"Pi'ye bağlanılamadı. {PI_HOST} ağ üzerinde bulunamadı. Aynı Wi-Fi'de misiniz?"
+    if raw == "ERR":
+        return "Pi komutu tanımadı. Pi'deki bridge eski sürümde olabilir, güncelleyin."
+    if raw.startswith("ERR:"):
+        return f"Pi hata döndürdü: {raw[4:]}"
     if raw.startswith("ERR"):
-        return f"Pi bağlantı hatası: {raw[4:]}"
+        return f"Pi hata döndürdü: {raw}"
 
     # Sabit etiketli komut
     label = COMMAND_LABELS.get(command)
