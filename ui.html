@@ -21,6 +21,7 @@
       overflow:hidden;
     }
 
+    /* ── Holografik grid ──────────────────────────────────────── */
     body::before {
       content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
       background-image:
@@ -41,7 +42,8 @@
       animation:scan 9s linear infinite;
     }
     @keyframes scan { 0%{top:-5px} 100%{top:100vh} }
-    @keyframes crt  { 0%,100%{opacity:1} 91%{opacity:1} 92%{opacity:.96} 94%{opacity:1} }
+
+    @keyframes crt { 0%,100%{opacity:1} 91%{opacity:1} 92%{opacity:.96} 94%{opacity:1} }
     #app { animation: crt 9s infinite; }
 
     @keyframes glitch {
@@ -54,12 +56,14 @@
     }
     .glitch { animation:glitch .26s steps(1) forwards; }
 
+    /* ── Layout ───────────────────────────────────────────────── */
     #app {
       position:relative; z-index:1;
       display:flex; flex-direction:column;
       width:100vw; height:100vh;
     }
 
+    /* ── Header ───────────────────────────────────────────────── */
     header {
       flex-shrink:0;
       display:flex; align-items:center; justify-content:space-between;
@@ -68,25 +72,38 @@
       background:linear-gradient(180deg,rgba(5,5,20,.92) 0%,transparent 100%);
     }
     .brand { display:flex; flex-direction:column; gap:2px; }
-    .brand-name { font-size:15px; font-weight:bold; letter-spacing:5px; color:#fff; text-shadow:0 0 16px rgba(255,255,255,.25); }
-    .brand-sub  { font-size:9px; letter-spacing:3px; color:#4a5a70; }
+    .brand-name {
+      font-size:15px; font-weight:bold; letter-spacing:5px;
+      color:#ffffff; text-shadow:0 0 16px rgba(255,255,255,.3);
+    }
+    .brand-sub { font-size:9px; letter-spacing:3px; color:#4a5a70; }
     .center-title { text-align:center; }
-    .center-title h1 { font-size:30px; font-weight:bold; letter-spacing:14px; color:#fff; text-shadow:0 0 32px rgba(255,255,255,.2); }
-    .center-title p  { font-size:10px; letter-spacing:4px; color:#4a5a70; margin-top:3px; }
+    .center-title h1 {
+      font-size:30px; font-weight:bold; letter-spacing:14px;
+      color:#ffffff; text-shadow:0 0 32px rgba(255,255,255,.25);
+    }
+    .center-title p { font-size:10px; letter-spacing:4px; color:#4a5a70; margin-top:3px; }
     .badge { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
-    .badge-main { font-size:14px; font-weight:bold; letter-spacing:4px; color:#fff; text-shadow:0 0 14px rgba(255,255,255,.2); }
-    .badge-sub  { font-size:9px; letter-spacing:3px; color:#4a5a70; }
+    .badge-main {
+      font-size:14px; font-weight:bold; letter-spacing:4px;
+      color:#ffffff; text-shadow:0 0 14px rgba(255,255,255,.2);
+    }
+    .badge-sub { font-size:9px; letter-spacing:3px; color:#4a5a70; }
 
+    /* ── İçerik ───────────────────────────────────────────────── */
     .content {
       flex:1; display:flex; flex-direction:column;
       align-items:center; justify-content:center;
       gap:18px; min-height:0;
     }
 
+    /* ── Yüz sarmalayıcı ─────────────────────────────────────── */
     .face-wrap {
       position:relative; flex-shrink:0;
       width:380px; height:380px;
     }
+
+    /* Köşe bracket */
     .face-wrap::before,.face-wrap::after,
     .face-inner::before,.face-inner::after {
       content:''; position:absolute;
@@ -101,6 +118,7 @@
 
     .face-inner { position:relative; width:100%; height:100%; }
 
+    /* Glow halkaları */
     .ring {
       position:absolute; border-radius:50%;
       border:1px solid var(--col); transition:border-color .5s; pointer-events:none;
@@ -110,23 +128,64 @@
     .ring-3{ inset:-46px; opacity:.06; animation:rp 2.3s ease-in-out infinite .8s; }
     @keyframes rp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
 
-    #faceSvg {
+    /* ── SVG yüz görseli ─────────────────────────────────────── */
+    #faceImg {
       position:absolute; inset:0;
       width:100%; height:100%;
-      z-index:0;
+      object-fit:contain;
+      /* Varsayılan: mavi glow */
+      filter: sepia(1) hue-rotate(185deg) saturate(4)
+              drop-shadow(0 0 22px rgba(30,110,255,.8));
+      transition: filter .5s;
     }
 
+    /* State'e göre CSS sınıfları (JS ile eklenir) */
+    #faceImg.idle {
+      filter: sepia(1) hue-rotate(185deg) saturate(4)
+              drop-shadow(0 0 22px rgba(30,110,255,.8));
+    }
+    #faceImg.listening {
+      filter: sepia(1) hue-rotate(138deg) saturate(5)
+              drop-shadow(0 0 28px rgba(0,255,200,.9));
+      animation: listen-pulse 1.1s ease-in-out infinite;
+    }
+    #faceImg.thinking {
+      filter: sepia(1) hue-rotate(22deg) saturate(4)
+              drop-shadow(0 0 22px rgba(255,170,0,.8));
+    }
+    #faceImg.speaking {
+      filter: sepia(0) brightness(1.25)
+              drop-shadow(0 0 30px rgba(200,225,255,.95));
+      animation: speak-pulse .38s ease-in-out infinite;
+    }
+
+    @keyframes listen-pulse {
+      0%,100% { filter: sepia(1) hue-rotate(138deg) saturate(5)
+                        drop-shadow(0 0 24px rgba(0,255,200,.8)); }
+      50%     { filter: sepia(1) hue-rotate(138deg) saturate(5)
+                        drop-shadow(0 0 38px rgba(0,255,200,1)); }
+    }
+    @keyframes speak-pulse {
+      0%,100% { filter: sepia(0) brightness(1.2)
+                        drop-shadow(0 0 26px rgba(200,225,255,.85)); }
+      50%     { filter: sepia(0) brightness(1.5)
+                        drop-shadow(0 0 42px rgba(200,225,255,1)); }
+    }
+
+    /* ── Efekt canvas (üstte, saydam, surat kapatmaz) ─────────── */
     #fxCanvas {
       position:absolute; inset:0;
       pointer-events:none; z-index:1;
     }
 
+    /* ── Durum etiketi ───────────────────────────────────────── */
     .state-lbl {
       font-size:15px; font-weight:bold; letter-spacing:4px;
       color:var(--col); transition:color .5s;
       text-shadow:0 0 14px var(--glow);
     }
 
+    /* ── Metinler ─────────────────────────────────────────────── */
     .texts { text-align:center; max-width:460px; }
     .heard-txt {
       font-size:13px; color:#5577aa; font-style:italic;
@@ -139,6 +198,7 @@
       text-shadow:0 0 14px var(--glow);
     }
 
+    /* ── Footer ───────────────────────────────────────────────── */
     footer {
       flex-shrink:0;
       display:flex; align-items:center; justify-content:space-between;
@@ -148,7 +208,11 @@
     }
     .pi-info { display:flex; align-items:center; gap:20px; font-size:11px; }
     .pi-block { display:flex; align-items:center; gap:7px; }
-    .pi-dot { width:8px; height:8px; border-radius:50%; background:#ff4444; transition:background .4s,box-shadow .4s; }
+    .pi-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:#ff4444;
+      transition:background .4s,box-shadow .4s;
+    }
     .pi-dot.on { background:#00ff88; box-shadow:0 0 8px #00ff88; }
     .pi-label { color:#253040; }
     .pi-val   { color:var(--col); transition:color .5s; }
@@ -165,6 +229,7 @@
       transition:color .5s,border-color .5s;
     }
     .key-desc { font-size:10px; color:#253040; margin-right:6px; }
+
     .conn-warn {
       position:fixed; top:13px; left:50%; transform:translateX(-50%);
       font-size:11px; letter-spacing:2px; color:#ff6644;
@@ -198,232 +263,9 @@
         <div class="ring ring-1"></div>
         <div class="ring ring-2"></div>
         <div class="ring ring-3"></div>
-
-        <!-- ══════════════ SPECTRA YÜZÜ ══════════════ -->
-        <svg id="faceSvg" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <!-- Yüz kırpma -->
-            <clipPath id="faceClip">
-              <ellipse cx="190" cy="188" rx="122" ry="140"/>
-            </clipPath>
-            <!-- Ten rengi gradyan -->
-            <radialGradient id="skinGrad" cx="40%" cy="28%" r="72%">
-              <stop offset="0%"   stop-color="#f5dfc0"/>
-              <stop offset="55%"  stop-color="#d9a87c"/>
-              <stop offset="100%" stop-color="#bb7a50"/>
-            </radialGradient>
-            <!-- Iris gradyan -->
-            <radialGradient id="irisGrad" cx="32%" cy="28%" r="72%">
-              <stop offset="0%"   stop-color="#80d8ff"/>
-              <stop offset="42%"  stop-color="#1878e0"/>
-              <stop offset="100%" stop-color="#001850"/>
-            </radialGradient>
-            <!-- Üst dudak gradyanı -->
-            <linearGradient id="lipTopGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stop-color="#c86878"/>
-              <stop offset="100%" stop-color="#a04858"/>
-            </linearGradient>
-            <!-- Alt dudak gradyanı -->
-            <linearGradient id="lipBotGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stop-color="#d87888"/>
-              <stop offset="100%" stop-color="#b05868"/>
-            </linearGradient>
-            <!-- Glow filtresi -->
-            <filter id="eyeGlow" x="-80%" y="-80%" width="260%" height="260%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="softBlur">
-              <feGaussianBlur stdDeviation="2.5"/>
-            </filter>
-          </defs>
-
-          <!-- ── SAÇ (arka) ── -->
-          <ellipse cx="190" cy="158" rx="128" ry="128" fill="#0c0720"/>
-          <path d="M 62 172 C 58 95 88 38 190 26 C 292 38 322 95 318 172" fill="#0c0720"/>
-          <!-- Saç yan yığınları -->
-          <path d="M 62 172 C 54 240 56 300 64 336 C 80 300 68 242 62 172" fill="#0c0720"/>
-          <path d="M 318 172 C 326 240 324 300 316 336 C 300 300 312 242 318 172" fill="#0c0720"/>
-          <!-- Saç parlaması -->
-          <path d="M 118 36 C 140 24 165 20 188 24" stroke="#1e1040" stroke-width="9"
-                fill="none" stroke-linecap="round" opacity="0.7"/>
-
-          <!-- ── BOYUN ── -->
-          <rect x="160" y="320" width="60" height="60" rx="10" fill="url(#skinGrad)"/>
-          <rect x="160" y="320" width="60" height="16" rx="8" fill="rgba(0,0,0,0.13)"/>
-
-          <!-- ── BAŞ ── -->
-          <ellipse cx="190" cy="188" rx="122" ry="140" fill="url(#skinGrad)"/>
-
-          <!-- ── YÜZÜN İÇİ (kırpılmış) ── -->
-          <g clip-path="url(#faceClip)">
-            <!-- Alın parlaması -->
-            <ellipse cx="174" cy="112" rx="55" ry="36" fill="white" opacity="0.09"/>
-            <!-- Yanak kızarıklığı sol -->
-            <ellipse cx="104" cy="230" rx="32" ry="18" fill="#e07060" opacity="0.14"/>
-            <!-- Yanak kızarıklığı sağ -->
-            <ellipse cx="276" cy="230" rx="32" ry="18" fill="#e07060" opacity="0.14"/>
-            <!-- Çene parlaması -->
-            <ellipse cx="190" cy="318" rx="28" ry="12" fill="white" opacity="0.06"/>
-            <!-- Holografik renk tonu (state'e göre değişir) -->
-            <ellipse id="holoTint" cx="190" cy="188" rx="122" ry="140"
-                     fill="#1e6eff" opacity="0.09"/>
-            <!-- Tarama çizgileri dokusu -->
-            <ellipse cx="190" cy="188" rx="122" ry="140"
-                     fill="none" stroke="rgba(0,0,0,0.035)" stroke-width="3"
-                     stroke-dasharray="1 5" opacity="0.6"/>
-          </g>
-
-          <!-- ── KAŞLAR ── -->
-          <path d="M 96 158 Q 124 146 150 151"
-                stroke="#281008" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-          <path d="M 230 151 Q 256 146 284 158"
-                stroke="#281008" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-          <!-- Kaş parlama çizgisi -->
-          <path d="M 98 160 Q 123 149 148 153"
-                stroke="#5a3020" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.45"/>
-          <path d="M 232 153 Q 257 149 282 160"
-                stroke="#5a3020" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.45"/>
-
-          <!-- ══ SOL GÖZ ══ -->
-          <!-- Göz beyazı -->
-          <ellipse cx="136" cy="182" rx="30" ry="19" fill="white"/>
-          <ellipse cx="136" cy="182" rx="28" ry="17" fill="white" opacity="0.6"/>
-          <!-- İris -->
-          <circle id="irisL" cx="136" cy="182" r="15" fill="url(#irisGrad)"/>
-          <!-- Göz bebeği -->
-          <circle id="pupilL" cx="136" cy="182" r="7.5" fill="#000818"/>
-          <!-- Limbal halka -->
-          <circle id="limbalL" cx="136" cy="182" r="15" fill="none" stroke="#08142a" stroke-width="1.2"/>
-          <!-- Parlamalar -->
-          <circle id="hlL1" cx="143" cy="176" r="4.2" fill="white" opacity="0.92"/>
-          <circle id="hlL2" cx="129" cy="187" r="2"   fill="white" opacity="0.42"/>
-          <!-- Göz kapağı üst -->
-          <path d="M 106 182 Q 136 163 166 182" stroke="#281008" stroke-width="2.5" fill="none"/>
-          <!-- Göz kapağı alt -->
-          <path d="M 106 182 Q 136 196 166 182" stroke="#c09078" stroke-width="1.4" fill="none"/>
-          <!-- Kirpikler üst -->
-          <line x1="110" y1="178" x2="106" y2="167" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="122" y1="168" x2="119" y2="158" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="136" y1="164" x2="136" y2="154" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="150" y1="168" x2="153" y2="158" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="162" y1="178" x2="166" y2="167" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <!-- Göz kırışık çizgisi -->
-          <path d="M 109 175 Q 136 169 163 175"
-                stroke="#c09078" stroke-width="0.8" fill="none" opacity="0.45"/>
-          <!-- Kırpma kapağı (skin rengi, ry=0'dan 19'a) -->
-          <ellipse id="blinkL" cx="136" cy="182" rx="30" ry="0" fill="#d9a87c"/>
-
-          <!-- ══ SAĞ GÖZ ══ -->
-          <ellipse cx="244" cy="182" rx="30" ry="19" fill="white"/>
-          <ellipse cx="244" cy="182" rx="28" ry="17" fill="white" opacity="0.6"/>
-          <circle id="irisR" cx="244" cy="182" r="15" fill="url(#irisGrad)"/>
-          <circle id="pupilR" cx="244" cy="182" r="7.5" fill="#000818"/>
-          <circle id="limbalR" cx="244" cy="182" r="15" fill="none" stroke="#08142a" stroke-width="1.2"/>
-          <circle id="hlR1" cx="251" cy="176" r="4.2" fill="white" opacity="0.92"/>
-          <circle id="hlR2" cx="237" cy="187" r="2"   fill="white" opacity="0.42"/>
-          <path d="M 214 182 Q 244 163 274 182" stroke="#281008" stroke-width="2.5" fill="none"/>
-          <path d="M 214 182 Q 244 196 274 182" stroke="#c09078" stroke-width="1.4" fill="none"/>
-          <line x1="218" y1="178" x2="214" y2="167" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="230" y1="168" x2="227" y2="158" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="244" y1="164" x2="244" y2="154" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="258" y1="168" x2="261" y2="158" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="270" y1="178" x2="274" y2="167" stroke="#180808" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M 217 175 Q 244 169 271 175"
-                stroke="#c09078" stroke-width="0.8" fill="none" opacity="0.45"/>
-          <ellipse id="blinkR" cx="244" cy="182" rx="30" ry="0" fill="#d9a87c"/>
-
-          <!-- Göz ışıltı halkaları (state glow) -->
-          <circle id="glowL" cx="136" cy="182" r="18" fill="none"
-                  stroke="#1e6eff" stroke-width="2" opacity="0" filter="url(#eyeGlow)"/>
-          <circle id="glowR" cx="244" cy="182" r="18" fill="none"
-                  stroke="#1e6eff" stroke-width="2" opacity="0" filter="url(#eyeGlow)"/>
-
-          <!-- ── BURUN ── -->
-          <path d="M 190 202 C 182 224 176 238 178 246 Q 190 253 202 246 C 204 238 198 224 190 202"
-                fill="none" stroke="#b07858" stroke-width="1.9"
-                stroke-linecap="round" opacity="0.6"/>
-          <ellipse cx="180" cy="247" rx="7" ry="3.5" fill="rgba(0,0,0,0.09)"
-                   transform="rotate(-12,180,247)"/>
-          <ellipse cx="200" cy="247" rx="7" ry="3.5" fill="rgba(0,0,0,0.09)"
-                   transform="rotate(12,200,247)"/>
-
-          <!-- ══ AĞIZ ══ -->
-          <!-- Cupid yayı çizgisi (dudak birleşim hattı) -->
-          <path d="M 157 275 Q 172 267 190 270 Q 208 267 223 275"
-                stroke="#803040" stroke-width="0.8" fill="none" opacity="0.55"/>
-
-          <!-- ÜST DUDAK -->
-          <path id="upperLip"
-                d="M 157 275
-                   Q 172 266 190 269
-                   Q 208 266 223 275
-                   Q 208 282 190 279
-                   Q 172 282 157 275 Z"
-                fill="url(#lipTopGrad)"/>
-          <!-- Üst dudak parlaması -->
-          <path d="M 169 272 Q 184 265 196 267 Q 184 272 169 272 Z"
-                fill="white" opacity="0.18"/>
-          <!-- Üst dudak gölgesi alt kenarı -->
-          <path d="M 157 275 Q 172 266 190 269 Q 208 266 223 275"
-                stroke="#803040" stroke-width="0.7" fill="none"/>
-
-          <!-- ALT DUDAK -->
-          <path id="lowerLip"
-                d="M 157 275
-                   Q 172 282 190 286
-                   Q 208 282 223 275
-                   Q 208 296 190 301
-                   Q 172 296 157 275 Z"
-                fill="url(#lipBotGrad)"/>
-          <!-- Alt dudak parlaması -->
-          <ellipse cx="190" cy="291" rx="20" ry="6.5" fill="white" opacity="0.14"/>
-
-          <!-- AĞIZ İÇİ (speaking'de açılır) -->
-          <ellipse id="mouthInner"  cx="190" cy="279" rx="32" ry="0" fill="#0e0008"/>
-          <!-- Üst dişler -->
-          <ellipse id="teethTop"    cx="190" cy="275" rx="26" ry="0" fill="#f2eeea"/>
-          <!-- Alt dişler -->
-          <ellipse id="teethBot"    cx="190" cy="286" rx="22" ry="0" fill="#e8e4e0" opacity="0.75"/>
-          <!-- Dil (hafif) -->
-          <ellipse id="tongueEl"    cx="190" cy="290" rx="13" ry="0" fill="#c05060" opacity="0.6"/>
-
-          <!-- Dudak köşe gölgeleri -->
-          <path d="M 157 275 Q 150 283 153 290" stroke="#803040" stroke-width="1"
-                fill="none" opacity="0.38"/>
-          <path d="M 223 275 Q 230 283 227 290" stroke="#803040" stroke-width="1"
-                fill="none" opacity="0.38"/>
-
-          <!-- ── YÜZ KONTURLARI (holografik çizgi) ── -->
-          <ellipse id="faceOutline" cx="190" cy="188" rx="122" ry="140"
-                   fill="none" stroke="#1e6eff" stroke-width="1.5" opacity="0.4"/>
-
-          <!-- ── TEKNİK DEKORASYONLAR ── -->
-          <!-- Sol şakak devresi -->
-          <g id="techL" stroke="#1e6eff" stroke-width="0.9" fill="none" opacity="0.32">
-            <line x1="68" y1="202" x2="84" y2="202"/>
-            <line x1="84" y1="202" x2="84" y2="220"/>
-            <line x1="84" y1="220" x2="72" y2="220"/>
-            <circle cx="72" cy="220" r="2.5" fill="#1e6eff" stroke="none"/>
-            <line x1="68" y1="228" x2="78" y2="228"/>
-            <line x1="68" y1="238" x2="86" y2="238" stroke-dasharray="3 2"/>
-          </g>
-          <!-- Sağ şakak devresi -->
-          <g id="techR" stroke="#1e6eff" stroke-width="0.9" fill="none" opacity="0.32">
-            <line x1="312" y1="202" x2="296" y2="202"/>
-            <line x1="296" y1="202" x2="296" y2="220"/>
-            <line x1="296" y1="220" x2="308" y2="220"/>
-            <circle cx="308" cy="220" r="2.5" fill="#1e6eff" stroke="none"/>
-            <line x1="312" y1="228" x2="302" y2="228"/>
-            <line x1="312" y1="238" x2="294" y2="238" stroke-dasharray="3 2"/>
-          </g>
-          <!-- Alın tarama noktası -->
-          <circle id="scanDot" cx="190" cy="102" r="3.5" fill="#1e6eff" opacity="0.5"/>
-          <circle cx="190" cy="102" r="7"   fill="none" stroke="#1e6eff"
-                  stroke-width="0.8" opacity="0.28" id="scanRing"/>
-        </svg>
-        <!-- ══════════════ SPECTRA YÜZÜ SON ══════════════ -->
-
+        <!-- Spectra yüzü -->
+        <img id="faceImg" src="spectra.png" alt="Spectra" class="idle">
+        <!-- Peripheral efektler (dalga, düşünme noktaları) -->
         <canvas id="fxCanvas" width="380" height="380"></canvas>
       </div>
     </div>
@@ -460,23 +302,17 @@
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  CANVAS — ÇEVRE EFEKTLERİ
+//  CANVAS — ÇEVRE EFEKTLERİ (dalga, düşünme, nabız)
 // ═══════════════════════════════════════════════════════════════
 const canvas = document.getElementById('fxCanvas');
 const ctx    = canvas.getContext('2d');
-const CX = 190, CY = 188, FR = 150;
+const CX = 190, CY = 188, FR = 155; // canvas içinde yüz merkezi & yarıçapı
 
 const STATE_RGB = {
   idle:      [30,  110, 255],
   listening: [0,   255, 200],
   thinking:  [255, 170,   0],
   speaking:  [220, 235, 255],
-};
-const STATE_HEX = {
-  idle:      '#1e6eff',
-  listening: '#00ffc8',
-  thinking:  '#ffaa00',
-  speaking:  '#c8e0ff',
 };
 const STATE_LABEL = {
   idle:      '● BEKLİYOR',
@@ -485,10 +321,10 @@ const STATE_LABEL = {
   speaking:  '◎ KONUŞUYOR',
 };
 
-let state    = 'idle';
-let curRGB   = [...STATE_RGB.idle];
-let frame    = 0;
-let pulse    = 0;
+let state   = 'idle';
+let curRGB  = [...STATE_RGB.idle];
+let frame   = 0;
+let pulse   = 0;
 let thinkDot = 0;
 
 const lerpRGB = (a,b,t) => a.map((v,i) => v+(b[i]-v)*t);
@@ -505,39 +341,48 @@ function update() {
 function draw() {
   ctx.clearRect(0, 0, 380, 380);
   const c = curRGB;
+
+  // Nabız halkası
   const pr = FR + 14 + pulse * 12;
   ctx.beginPath(); ctx.arc(CX, CY, pr, 0, Math.PI * 2);
-  ctx.strokeStyle = rgba(c, 0.18); ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.strokeStyle = rgba(c, 0.18);
+  ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Tick işaretleri
   for (let i = 0; i < 8; i++) {
     const a   = i * Math.PI / 4;
     const len = i % 2 === 0 ? 10 : 5;
     ctx.beginPath();
-    ctx.moveTo(CX + Math.cos(a)*(FR+1), CY + Math.sin(a)*(FR+1));
-    ctx.lineTo(CX + Math.cos(a)*(FR+len+1), CY + Math.sin(a)*(FR+len+1));
-    ctx.strokeStyle = rgba(c, 0.5); ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.moveTo(CX + Math.cos(a) * (FR + 1), CY + Math.sin(a) * (FR + 1));
+    ctx.lineTo(CX + Math.cos(a) * (FR + len + 1), CY + Math.sin(a) * (FR + len + 1));
+    ctx.strokeStyle = rgba(c, 0.5);
+    ctx.lineWidth = 1.5; ctx.stroke();
   }
+
   if (state === 'thinking')  drawThinking(c);
   if (state === 'listening') drawWave(c);
 }
 
 function drawThinking(c) {
   for (let i = 0; i < 3; i++) {
-    const a = -Math.PI/2 + i*2*Math.PI/3 + frame*0.048;
-    const x = CX + Math.cos(a)*(FR+30);
-    const y = CY + Math.sin(a)*(FR+30);
+    const a = -Math.PI / 2 + i * 2 * Math.PI / 3 + frame * 0.048;
+    const x = CX + Math.cos(a) * (FR + 30);
+    const y = CY + Math.sin(a) * (FR + 30);
     const r = i === thinkDot ? 7 : 3.5;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
-    ctx.fillStyle = i===thinkDot ? rgb(c) : rgba(c,0.25); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = i === thinkDot ? rgb(c) : rgba(c, 0.25);
+    ctx.fill();
   }
 }
 
 function drawWave(c) {
-  const wY = CY + FR + 20, wW = 260;
+  const wY = CY + FR + 18, wW = 250;
   ctx.beginPath();
   for (let i = 0; i < 64; i++) {
-    const x   = CX - wW/2 + i*(wW/63);
-    const amp = 9*Math.sin(i*0.36+frame*0.28) + 4*Math.sin(i*0.82+frame*0.5);
-    i===0 ? ctx.moveTo(x, wY+amp) : ctx.lineTo(x, wY+amp);
+    const x   = CX - wW / 2 + i * (wW / 63);
+    const amp = 9 * Math.sin(i * 0.36 + frame * 0.28)
+              + 4 * Math.sin(i * 0.82 + frame * 0.5);
+    i === 0 ? ctx.moveTo(x, wY + amp) : ctx.lineTo(x, wY + amp);
   }
   ctx.strokeStyle = rgb(c); ctx.lineWidth = 2; ctx.stroke();
 }
@@ -549,175 +394,47 @@ function syncCSS() {
   document.documentElement.style.setProperty('--glow', g);
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  YÜZ ANİMASYONU
-// ═══════════════════════════════════════════════════════════════
-const $ = id => document.getElementById(id);
-
-// SVG elemanları
-const holoTint   = $('holoTint');
-const faceOutEl  = $('faceOutline');
-const blinkLEl   = $('blinkL');
-const blinkREl   = $('blinkR');
-const irisLEl    = $('irisL');
-const irisREl    = $('irisR');
-const pupilLEl   = $('pupilL');
-const pupilREl   = $('pupilR');
-const limbalLEl  = $('limbalL');
-const limbalREl  = $('limbalR');
-const glowLEl    = $('glowL');
-const glowREl    = $('glowR');
-const mouthInner = $('mouthInner');
-const teethTop   = $('teethTop');
-const teethBot   = $('teethBot');
-const tongueEl   = $('tongueEl');
-const scanDotEl  = $('scanDot');
-const scanRingEl = $('scanRing');
-const techLEl    = $('techL');
-const techREl    = $('techR');
-
-// Animasyon durumu
-let mouthAmt   = 0, mouthTgt = 0;
-let blinkAmt   = 0, blinkDir = 0, blinkTimer = 150 + Math.random()*150;
-let lookX = 0, lookY = 0, lookXS = 0, lookYS = 0, lookTimer = 0;
-
-function animateFace() {
-  const fc = STATE_HEX[state] || STATE_HEX.idle;
-
-  // ── AĞIZ ──
-  if (state === 'speaking') {
-    mouthTgt = Math.max(0,
-      0.18
-      + Math.sin(frame * 0.30) * 0.45
-      + Math.sin(frame * 0.19) * 0.25
-      + Math.sin(frame * 0.11) * 0.12
-    );
-  } else {
-    mouthTgt = 0;
-  }
-  mouthAmt += (mouthTgt - mouthAmt) * 0.20;
-
-  const mRy = mouthAmt * 13;
-  mouthInner.setAttribute('ry', mRy.toFixed(2));
-  mouthInner.setAttribute('cy', (279 + mouthAmt*5).toFixed(2));
-  teethTop.setAttribute('ry',   (mouthAmt * 7.5).toFixed(2));
-  teethBot.setAttribute('ry',   (mouthAmt * 5.5).toFixed(2));
-  tongueEl.setAttribute('ry',   (mouthAmt * 4.5).toFixed(2));
-
-  // ── GÖZ KIRPMA ──
-  blinkTimer--;
-  if (blinkTimer <= 0) {
-    blinkTimer = 145 + Math.random()*185;
-    blinkDir   = 1;
-    blinkAmt   = 0;
-  }
-  if (blinkDir === 1) {
-    blinkAmt = Math.min(1, blinkAmt + 0.28);
-    if (blinkAmt >= 1) blinkDir = -1;
-  } else if (blinkDir === -1) {
-    blinkAmt = Math.max(0, blinkAmt - 0.28);
-    if (blinkAmt <= 0) blinkDir = 0;
-  }
-  const bRy = (blinkAmt * 19).toFixed(2);
-  blinkLEl.setAttribute('ry', bRy);
-  blinkREl.setAttribute('ry', bRy);
-
-  // ── GÖZ BAKIŞI ──
-  lookTimer--;
-  if (lookTimer <= 0) {
-    lookTimer = 80 + Math.floor(Math.random()*130);
-    const spread = state==='thinking' ? 7 : state==='speaking' ? 2.5 : 1.8;
-    lookX = (Math.random()-0.5) * spread * 2;
-    lookY = (Math.random()-0.5) * spread;
-  }
-  lookXS += (lookX - lookXS) * 0.05;
-  lookYS += (lookY - lookYS) * 0.05;
-
-  const setEyePos = (baseX, baseY, iris, pupil) => {
-    const nx = (baseX + lookXS).toFixed(2);
-    const ny = (baseY + lookYS).toFixed(2);
-    iris.setAttribute('cx',  nx); iris.setAttribute('cy',  ny);
-    pupil.setAttribute('cx', nx); pupil.setAttribute('cy', ny);
-  };
-  setEyePos(136, 182, irisLEl, pupilLEl);
-  setEyePos(244, 182, irisREl, pupilREl);
-
-  // ── GÖZ IŞILTISI ──
-  const ge = state==='speaking' ? (0.5 + Math.sin(frame*0.20)*0.38) :
-             state==='listening'? (0.28+ Math.sin(frame*0.09)*0.15) :
-             state==='thinking' ? (0.18+ Math.sin(frame*0.14)*0.12) : 0;
-  glowLEl.setAttribute('opacity', ge.toFixed(3));
-  glowREl.setAttribute('opacity', ge.toFixed(3));
-  glowLEl.setAttribute('stroke', fc);
-  glowREl.setAttribute('stroke', fc);
-
-  // ── HOLOGRAFİK RENK TONU ──
-  holoTint.setAttribute('fill', fc);
-  const ta = state==='speaking'  ? (0.13 + Math.sin(frame*0.13)*0.05) :
-             state==='listening' ? 0.12 :
-             state==='thinking'  ? (0.10 + Math.sin(frame*0.07)*0.04) : 0.07;
-  holoTint.setAttribute('opacity', ta.toFixed(3));
-
-  // ── YÜZ KONTURU ──
-  faceOutEl.setAttribute('stroke', fc);
-  faceOutEl.setAttribute('opacity', (0.32 + Math.sin(frame*0.046)*0.12).toFixed(3));
-
-  // ── TEKNİK DEKORASYONLAR ──
-  const techOp = (0.26 + Math.sin(frame*0.032)*0.10).toFixed(3);
-  techLEl.setAttribute('stroke', fc); techLEl.setAttribute('opacity', techOp);
-  techREl.setAttribute('stroke', fc); techREl.setAttribute('opacity', techOp);
-
-  // ── TARAMA NOKTASI ──
-  const da = state==='thinking'  ? (0.55 + Math.sin(frame*0.28)*0.42) :
-             state==='idle'      ? (0.28 + Math.sin(frame*0.058)*0.18) : 0.18;
-  scanDotEl.setAttribute('fill',    fc);
-  scanDotEl.setAttribute('opacity', da.toFixed(3));
-  scanRingEl.setAttribute('stroke', fc);
-}
+(function loop() { update(); draw(); syncCSS(); requestAnimationFrame(loop); })();
 
 // ═══════════════════════════════════════════════════════════════
-//  ANA DÖNGÜ
-// ═══════════════════════════════════════════════════════════════
-(function loop() {
-  update();
-  draw();
-  syncCSS();
-  animateFace();
-  requestAnimationFrame(loop);
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  GLİTCH
+//  GLITCH
 // ═══════════════════════════════════════════════════════════════
 let glitching = false;
 function triggerGlitch() {
   if (glitching) return;
   glitching = true;
-  $('faceInner').classList.add('glitch');
-  setTimeout(() => { $('faceInner').classList.remove('glitch'); glitching=false; }, 260);
+  document.getElementById('faceInner').classList.add('glitch');
+  setTimeout(() => {
+    document.getElementById('faceInner').classList.remove('glitch');
+    glitching = false;
+  }, 260);
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  UI GÜNCELLEME
 // ═══════════════════════════════════════════════════════════════
-let prevState = 'idle';
+const faceImg  = document.getElementById('faceImg');
+let   prevState = 'idle';
 
 function setUIState(s) {
   if (s !== prevState) { triggerGlitch(); prevState = s; }
   state = s;
-  $('stateLbl').textContent = STATE_LABEL[s] || '● BEKLİYOR';
+
+  // CSS class ile filter değişimi
+  faceImg.className = s;
+  document.getElementById('stateLbl').textContent = STATE_LABEL[s] || '● BEKLİYOR';
 }
 
 function setPiInfo(data) {
   if (data.pi_connected !== undefined)
-    $('piDot').classList.toggle('on', data.pi_connected);
-  if (data.pi_ip)   $('piIp').textContent  = data.pi_ip;
-  if (data.pi_last) $('piLast').textContent = data.pi_last;
+    document.getElementById('piDot').classList.toggle('on', data.pi_connected);
+  if (data.pi_ip)   document.getElementById('piIp').textContent   = data.pi_ip;
+  if (data.pi_last) document.getElementById('piLast').textContent = data.pi_last;
   if (data.pi_ping !== undefined) {
-    const el = $('piPing');
+    const el = document.getElementById('piPing');
     const ms = data.pi_ping;
     el.textContent = ms >= 0 ? `ping ${ms}ms` : 'ping —';
-    el.className   = 'pi-ping ' + (ms<0?'dead':ms<80?'fast':ms<250?'slow':'dead');
+    el.className = 'pi-ping ' + (ms < 0 ? 'dead' : ms < 80 ? 'fast' : ms < 250 ? 'slow' : 'dead');
   }
 }
 
@@ -725,39 +442,47 @@ function setPiInfo(data) {
 //  TAM EKRAN (F)
 // ═══════════════════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
-  if (e.key==='f'||e.key==='F') {
+  if (e.key === 'f' || e.key === 'F') {
     if (!document.fullscreenElement)
-      document.documentElement.requestFullscreen().catch(()=>{});
-    else document.exitFullscreen().catch(()=>{});
+      document.documentElement.requestFullscreen().catch(() => {});
+    else
+      document.exitFullscreen().catch(() => {});
   }
 });
 
 // ═══════════════════════════════════════════════════════════════
 //  SOCKET.IO
 // ═══════════════════════════════════════════════════════════════
-const warn = $('connWarn');
+const warn = document.getElementById('connWarn');
+
 try {
-  const socket = io('http://localhost:5001', { reconnectionDelay:2000, timeout:5000 });
+  const socket = io('http://localhost:5001', { reconnectionDelay: 2000, timeout: 5000 });
+
   socket.on('connect',       () => warn.classList.remove('show'));
   socket.on('disconnect',    () => { warn.classList.add('show'); setUIState('idle'); });
   socket.on('connect_error', () => warn.classList.add('show'));
+
   socket.on('state', data => {
     if (data.mode) setUIState(data.mode);
-    if (data.text) $('respTxt').textContent = data.text;
+    if (data.text) document.getElementById('respTxt').textContent = data.text;
     setPiInfo(data);
   });
+
   socket.on('heard', data => {
-    const t = data.text||'';
-    $('heardTxt').textContent = t ? `"${t}"` : '';
+    const t = data.text || '';
+    document.getElementById('heardTxt').textContent = t ? `"${t}"` : '';
   });
+
   socket.on('cmd_log', data => {
-    if (data.cmd) $('piLast').textContent = data.cmd;
+    if (data.cmd) document.getElementById('piLast').textContent = data.cmd;
   });
+
   socket.on('clear', () => {
-    $('heardTxt').textContent = '';
-    $('respTxt').textContent  = '';
+    document.getElementById('heardTxt').textContent = '';
+    document.getElementById('respTxt').textContent  = '';
   });
-} catch(e) {
+
+} catch (e) {
   warn.classList.add('show');
   warn.textContent = '● socket.io yüklenemedi';
 }
