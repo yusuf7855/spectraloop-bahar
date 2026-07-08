@@ -8,9 +8,14 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     :root {
-      --col:  #1e6eff;
-      --glow: rgba(30,110,255,.4);
-      --bg:   #050515;
+      --col:     #1e6eff;
+      --glow:    rgba(30,110,255,.4);
+      --bg:      #050515;
+      /* Spectra maskot renk paleti */
+      --cyan:    #22e0d6;
+      --blue:    #4c7cff;
+      --violet:  #8b5cf6;
+      --magenta: #ff57d8;
     }
 
     html, body {
@@ -100,7 +105,7 @@
     /* ── Yüz sarmalayıcı ─────────────────────────────────────── */
     .face-wrap {
       position:relative; flex-shrink:0;
-      width:380px; height:380px;
+      width:380px; height:420px;
     }
 
     /* Köşe bracket */
@@ -119,19 +124,20 @@
     .face-inner { position:relative; width:100%; height:100%; }
 
     /* Glow halkaları */
-    .ring {
+    .glow-ring {
       position:absolute; border-radius:50%;
       border:1px solid var(--col); transition:border-color .5s; pointer-events:none;
     }
-    .ring-1{ inset:-14px; opacity:.22; animation:rp 2.3s ease-in-out infinite; }
-    .ring-2{ inset:-28px; opacity:.12; animation:rp 2.3s ease-in-out infinite .4s; }
-    .ring-3{ inset:-46px; opacity:.06; animation:rp 2.3s ease-in-out infinite .8s; }
+    .glow-ring-1{ inset:-14px; opacity:.22; animation:rp 2.3s ease-in-out infinite; }
+    .glow-ring-2{ inset:-28px; opacity:.12; animation:rp 2.3s ease-in-out infinite .4s; }
+    .glow-ring-3{ inset:-46px; opacity:.06; animation:rp 2.3s ease-in-out infinite .8s; }
     @keyframes rp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
 
-    /* ── SVG Maskot ──────────────────────────────────────────── */
-    #mascotSVG {
+    /* ── Spectra SVG maskot ──────────────────────────────────── */
+    #spectra {
       position:absolute; inset:0;
       width:100%; height:100%;
+      display:block;
     }
 
     /* ── Efekt canvas (üstte, saydam) ───────────────────────── */
@@ -188,8 +194,9 @@
       min-width:26px; height:22px; padding:0 5px;
       border:1px solid rgba(30,110,255,.32);
       color:var(--col); font-size:11px; font-weight:bold;
-      transition:color .5s,border-color .5s;
+      transition:color .3s,border-color .3s,background .3s;
     }
+    .key.active { background:var(--col); color:#000; }
     .key-desc { font-size:10px; color:#253040; margin-right:6px; }
 
     .conn-warn {
@@ -198,6 +205,69 @@
       opacity:0; transition:opacity .4s; pointer-events:none; z-index:1000;
     }
     .conn-warn.show { opacity:1; }
+
+    /* ══════════════════════════════════════════════════════════
+       SPECTRA MASKOT CSS ANİMASYONLARI
+       ══════════════════════════════════════════════════════════ */
+
+    /* Ağız crossfade: normalde gülümseme, konuşunca çubuklar */
+    #mouth-bars { opacity:0; transition:opacity .18s }
+    #smile      { opacity:1; transition:opacity .18s }
+    .mouth-open #mouth-bars { opacity:1  }
+    .mouth-open #smile      { opacity:0  }
+    #mouth-bars, #smile { filter:drop-shadow(0 0 7px rgba(90,150,255,.65)) }
+
+    /* Gözler */
+    #eyes {
+      transform-box:fill-box; transform-origin:center;
+      transition:transform .09s;
+      transform:scaleY(var(--eyeScale,1));
+      filter:drop-shadow(0 0 9px rgba(34,224,214,.8))
+             drop-shadow(0 0 20px rgba(34,224,214,.4));
+    }
+    #eyes.blink   { transform:scaleY(0.08) }
+    #eyes-scan    { transform-box:fill-box; transform-origin:center }
+
+    /* Crown LED */
+    #sensor {
+      filter:drop-shadow(0 0 6px rgba(34,224,214,.9));
+      animation:led 3s ease-in-out infinite;
+    }
+    @keyframes led { 0%,100%{opacity:.6} 50%{opacity:1} }
+
+    /* Yüzen pod animasyonu */
+    #pod { transform-box:fill-box; transform-origin:center; animation:float 4.4s ease-in-out infinite }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-11px)} }
+
+    /* Maglev pad */
+    #maglev { transform-box:fill-box; transform-origin:center; animation:mag 2.4s ease-in-out infinite }
+    @keyframes mag { 0%,100%{opacity:.78;transform:scaleX(1)} 50%{opacity:1;transform:scaleX(1.06)} }
+
+    /* Ambient glow */
+    #ambient { animation:amb 6s ease-in-out infinite }
+    @keyframes amb { 0%,100%{opacity:.6} 50%{opacity:.85} }
+
+    /* Dinleme sonar halkaları — SADECE spectra SVG içindekiler */
+    #spectra .ring { opacity:0; transform-box:fill-box; transform-origin:center }
+    [data-state="listening"] #spectra .ring1 { animation:sonar 2.3s ease-out infinite }
+    [data-state="listening"] #spectra .ring2 { animation:sonar 2.3s ease-out 1.05s infinite }
+    @keyframes sonar {
+      0%  { opacity:.5; transform:scale(.62) }
+      70% { opacity:.12 }
+      100%{ opacity:0;  transform:scale(1.22) }
+    }
+    [data-state="listening"] #eyes { --eyeScale:1.06 }
+
+    /* Düşünme shimmer + göz tarama */
+    .shimmer { opacity:0; transform-box:fill-box; transform-origin:center }
+    [data-state="thinking"] .shimmer { opacity:1; animation:sweep 1.9s linear infinite }
+    @keyframes sweep { 0%{transform:translateX(-150px)} 100%{transform:translateX(150px)} }
+    [data-state="thinking"] #eyes-scan { animation:eyescan 2.5s ease-in-out infinite }
+    @keyframes eyescan {
+      0%,100%{ transform:translate(0,-3px) }
+      25%    { transform:translate(-11px,-4px) }
+      60%    { transform:translate(10px,-4px) }
+    }
   </style>
 </head>
 <body>
@@ -222,181 +292,129 @@
   <div class="content">
     <div class="face-wrap">
       <div class="face-inner" id="faceInner">
-        <div class="ring ring-1"></div>
-        <div class="ring ring-2"></div>
-        <div class="ring ring-3"></div>
+        <div class="glow-ring glow-ring-1"></div>
+        <div class="glow-ring glow-ring-2"></div>
+        <div class="glow-ring glow-ring-3"></div>
 
         <!-- ══════════════════════════════════════════════════════
-             SPECTRA MASKOT — inline SVG robot kafası
-             Renk: var(--col) ile state'e göre otomatik değişir
+             SPECTRA MASKOT SVG
              ══════════════════════════════════════════════════════ -->
-        <svg id="mascotSVG" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg">
+        <svg id="spectra" data-state="idle" viewBox="0 0 540 600"
+             role="img" aria-label="Spectra maskotu">
           <defs>
-            <!-- Kafa gövde gradyanı -->
-            <radialGradient id="headGrad" cx="42%" cy="38%" r="62%">
-              <stop offset="0%"   stop-color="#0b1630"/>
-              <stop offset="100%" stop-color="#020810"/>
+            <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0"    stop-color="#ffffff"/>
+              <stop offset="0.48" stop-color="#d7def2"/>
+              <stop offset="1"    stop-color="#9aa6c6"/>
+            </linearGradient>
+            <linearGradient id="gVisor" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#111834"/>
+              <stop offset="1" stop-color="#070b1c"/>
+            </linearGradient>
+            <linearGradient id="gEye" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0"   stop-color="#b9fff7"/>
+              <stop offset="0.5" stop-color="#2ce0d4"/>
+              <stop offset="1"   stop-color="#12a6c4"/>
+            </linearGradient>
+            <linearGradient id="gSpectrum" x1="196" y1="0" x2="344" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0"    stop-color="#22e0d6"/>
+              <stop offset="0.34" stop-color="#4c7cff"/>
+              <stop offset="0.64" stop-color="#8b5cf6"/>
+              <stop offset="1"    stop-color="#ff57d8"/>
+            </linearGradient>
+            <radialGradient id="gAmbient" cx="270" cy="250" r="270" gradientUnits="userSpaceOnUse">
+              <stop offset="0"    stop-color="#22e0d6" stop-opacity="0.22"/>
+              <stop offset="0.55" stop-color="#4c7cff" stop-opacity="0.08"/>
+              <stop offset="1"    stop-color="#4c7cff" stop-opacity="0"/>
             </radialGradient>
-            <!-- Göz parlaklık filtresi -->
-            <filter id="eyeGlow" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="3.5" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <!-- Yumuşak glow (ağız vb.) -->
-            <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="5" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <!-- Kafa dışına taşmayı kırp -->
-            <clipPath id="headClip">
-              <rect x="58" y="28" width="264" height="300" rx="50"/>
+            <radialGradient id="gMag" cx="270" cy="468" r="152" gradientUnits="userSpaceOnUse">
+              <stop offset="0"   stop-color="#7ff4ec" stop-opacity="0.95"/>
+              <stop offset="0.4" stop-color="#22e0d6" stop-opacity="0.6"/>
+              <stop offset="1"   stop-color="#8b5cf6" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="gShim" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0"   stop-color="#22e0d6" stop-opacity="0"/>
+              <stop offset="0.5" stop-color="#7fe9ff" stop-opacity="0.5"/>
+              <stop offset="1"   stop-color="#22e0d6" stop-opacity="0"/>
+            </linearGradient>
+            <clipPath id="visorClip">
+              <rect x="150" y="150" width="240" height="200" rx="92"/>
             </clipPath>
-            <!-- Ağız içini kırp -->
-            <clipPath id="mouthClip">
-              <rect x="108" y="224" width="164" height="38" rx="8"/>
-            </clipPath>
+            <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="9"/>
+            </filter>
           </defs>
 
-          <!-- ── Boyun ───────────────────────────────────────── -->
-          <rect x="150" y="324" width="80" height="52" rx="6"
-                fill="#060d1c" stroke="#0d2040" stroke-width="1.5"/>
-          <rect x="164" y="329" width="52" height="5" rx="2"
-                fill="rgba(30,110,255,.15)"/>
-          <line x1="190" y1="336" x2="190" y2="372"
-                stroke="rgba(30,110,255,.2)" stroke-width="1"/>
-          <rect x="175" y="340" width="30" height="2" rx="1"
-                fill="rgba(30,110,255,.12)"/>
-          <rect x="179" y="345" width="22" height="2" rx="1"
-                fill="rgba(30,110,255,.08)"/>
+          <!-- ambient glow -->
+          <ellipse id="ambient" cx="270" cy="250" rx="255" ry="230" fill="url(#gAmbient)"/>
 
-          <!-- ── Kafa gölgesi (derinlik) ─────────────────────── -->
-          <rect x="66" y="38" width="264" height="298" rx="50"
-                fill="#010610" opacity="0.5" transform="translate(4,6)"/>
-
-          <!-- ── Kafa ana gövde ───────────────────────────────── -->
-          <rect x="60" y="30" width="260" height="296" rx="50"
-                fill="url(#headGrad)" stroke="#112244" stroke-width="2"/>
-
-          <!-- ── Kafa içi panel (kırpılmış) ─────────────────── -->
-          <g clip-path="url(#headClip)">
-            <!-- Yatay tarama çizgileri -->
-            <line x1="60" y1="95"  x2="320" y2="95"  stroke="rgba(30,110,255,.05)" stroke-width="1"/>
-            <line x1="60" y1="135" x2="320" y2="135" stroke="rgba(30,110,255,.05)" stroke-width="1"/>
-            <line x1="60" y1="175" x2="320" y2="175" stroke="rgba(30,110,255,.05)" stroke-width="1"/>
-            <line x1="60" y1="215" x2="320" y2="215" stroke="rgba(30,110,255,.05)" stroke-width="1"/>
-            <line x1="60" y1="255" x2="320" y2="255" stroke="rgba(30,110,255,.05)" stroke-width="1"/>
-            <line x1="60" y1="295" x2="320" y2="295" stroke="rgba(30,110,255,.05)" stroke-width="1"/>
-            <!-- Alın parlaklığı -->
-            <ellipse cx="190" cy="52" rx="95" ry="28" fill="rgba(255,255,255,.025)"/>
-            <!-- Yanak vurguları -->
-            <ellipse cx="88"  cy="185" rx="22" ry="44" fill="rgba(30,110,255,.03)"/>
-            <ellipse cx="292" cy="185" rx="22" ry="44" fill="rgba(30,110,255,.03)"/>
+          <!-- ground shadow + maglev pad -->
+          <ellipse cx="270" cy="492" rx="128" ry="17" fill="#000" opacity="0.32" filter="url(#soft)"/>
+          <g id="maglev">
+            <ellipse cx="270" cy="468" rx="150" ry="24" fill="url(#gMag)" filter="url(#soft)"/>
+            <ellipse cx="270" cy="468" rx="118" ry="5.5" fill="#a9fff6" opacity="0.9"/>
           </g>
 
-          <!-- ── Kafa dış sınır vurgusu ──────────────────────── -->
-          <rect x="60" y="30" width="260" height="296" rx="50"
-                fill="none" stroke="#0a1e38" stroke-width="1.5"/>
+          <!-- dinleme sonar halkaları (pod arkasında) -->
+          <circle class="ring ring1" cx="270" cy="238" r="172"
+                  fill="none" stroke="#22e0d6" stroke-width="2.4"/>
+          <circle class="ring ring2" cx="270" cy="238" r="172"
+                  fill="none" stroke="#7fb0ff" stroke-width="2"/>
 
-          <!-- ── SOL GÖZ ──────────────────────────────────────── -->
-          <!-- Göz yuvası -->
-          <rect x="84"  y="126" width="88" height="32" rx="7" fill="#020810"/>
-          <rect x="86"  y="128" width="84" height="28" rx="6" fill="#010508"/>
-          <!-- LED şerit -->
-          <rect id="eyeL" x="89" y="131" width="78" height="22" rx="5"
-                fill="var(--col)" filter="url(#eyeGlow)" opacity="0.88"/>
-          <!-- Üst highlight -->
-          <rect x="89" y="131" width="78" height="6" rx="3"
-                fill="rgba(255,255,255,.14)"/>
-          <!-- Tarama göstergesi (JS ile hareket eder) -->
-          <rect id="scanL" x="105" y="133" width="12" height="18" rx="3"
-                fill="rgba(255,255,255,.28)"/>
+          <!-- yüzen pod -->
+          <g id="pod">
+            <!-- gövde -->
+            <rect x="110" y="90" width="320" height="310" rx="122" fill="url(#gBody)"/>
+            <rect x="110" y="90" width="320" height="310" rx="122"
+                  fill="none" stroke="#c7d2ec" stroke-width="1.5" opacity="0.6"/>
+            <!-- alın parlaklığı -->
+            <ellipse cx="205" cy="158" rx="96" ry="42" fill="#ffffff" opacity="0.3" filter="url(#soft)"/>
+            <!-- alt gölge -->
+            <ellipse cx="270" cy="372" rx="150" ry="46" fill="#6b779b" opacity="0.16" filter="url(#soft)"/>
 
-          <!-- ── SAĞ GÖZ ───────────────────────────────────────── -->
-          <rect x="208" y="126" width="88" height="32" rx="7" fill="#020810"/>
-          <rect x="210" y="128" width="84" height="28" rx="6" fill="#010508"/>
-          <rect id="eyeR" x="213" y="131" width="78" height="22" rx="5"
-                fill="var(--col)" filter="url(#eyeGlow)" opacity="0.88"/>
-          <rect x="213" y="131" width="78" height="6" rx="3"
-                fill="rgba(255,255,255,.14)"/>
-          <rect id="scanR" x="253" y="133" width="12" height="18" rx="3"
-                fill="rgba(255,255,255,.28)"/>
+            <!-- crown LED -->
+            <circle id="sensor" cx="270" cy="108" r="6.5" fill="#22e0d6"/>
 
-          <!-- ── BURUN (küçük merkez nokta) ──────────────────── -->
-          <circle cx="190" cy="188" r="3.5"
-                  fill="var(--col)" opacity="0.25"/>
+            <!-- visor -->
+            <rect x="150" y="150" width="240" height="200" rx="92" fill="url(#gVisor)"/>
+            <!-- visor üst parlaklık -->
+            <path d="M172 200 Q270 158 368 200 Q300 176 172 200 Z" fill="#3a4a7a" opacity="0.5"/>
 
-          <!-- ── AĞIZ ÇERÇEVE ─────────────────────────────────── -->
-          <!-- Dış çerçeve -->
-          <rect x="104" y="220" width="172" height="46" rx="11"
-                fill="#020810" stroke="#0d2244" stroke-width="1.5"/>
-          <!-- İç koyu alan -->
-          <rect x="108" y="224" width="164" height="38" rx="8"
-                fill="#010308"/>
+            <!-- düşünme shimmer (visor'a kırpılmış) -->
+            <g clip-path="url(#visorClip)">
+              <rect class="shimmer" x="215" y="150" width="70" height="200" fill="url(#gShim)"/>
+            </g>
 
-          <!-- Ağız içi glow (konuşurken parlar) — kırpılmış -->
-          <g clip-path="url(#mouthClip)">
-            <rect id="mouthGlow" x="108" y="224" width="164" height="38" rx="8"
-                  fill="var(--col)" opacity="0"/>
+            <!-- gözler -->
+            <g id="eyes-scan"><g id="eyes">
+              <rect x="213" y="203" width="46" height="58" rx="23" fill="url(#gEye)"/>
+              <rect x="281" y="203" width="46" height="58" rx="23" fill="url(#gEye)"/>
+              <ellipse cx="228" cy="219" rx="7" ry="10" fill="#ffffff" opacity="0.75"/>
+              <ellipse cx="296" cy="219" rx="7" ry="10" fill="#ffffff" opacity="0.75"/>
+            </g></g>
+
+            <!-- ağız: dinlenme gülümsemesi -->
+            <path id="smile"
+                  d="M210 305 Q270 327 330 305"
+                  fill="none" stroke="url(#gSpectrum)"
+                  stroke-width="7" stroke-linecap="round"/>
+
+            <!-- ağız: konuşma spektrum çubukları -->
+            <g id="mouth-bars">
+              <rect class="mbar" x="198" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
+              <rect class="mbar" x="220" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
+              <rect class="mbar" x="242" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
+              <rect class="mbar" x="264" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
+              <rect class="mbar" x="286" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
+              <rect class="mbar" x="308" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
+              <rect class="mbar" x="330" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
+            </g>
           </g>
-
-          <!-- ÜDÜDÜDÜ ÜST DUDAK (konuşurken yukarı çıkar) -->
-          <rect id="mouthTop" x="111" y="238" width="158" height="6" rx="3"
-                fill="var(--col)" opacity="0.9" filter="url(#softGlow)"/>
-          <!-- ALT DUDAK (konuşurken aşağı iner) -->
-          <rect id="mouthBot" x="111" y="247" width="158" height="6" rx="3"
-                fill="var(--col)" opacity="0.9" filter="url(#softGlow)"/>
-
-          <!-- Ağız köşe noktaları -->
-          <circle cx="111" cy="244" r="3.5" fill="var(--col)" opacity="0.55"/>
-          <circle cx="269" cy="244" r="3.5" fill="var(--col)" opacity="0.55"/>
-
-          <!-- ── YAN PANEL DETAYLARI ──────────────────────────── -->
-          <!-- Sol panel şerit -->
-          <rect x="61" y="160" width="4" height="46" rx="2"
-                fill="#122040" opacity="0.9"/>
-          <rect x="67" y="165" width="3" height="36" rx="1"
-                fill="#0a1530" opacity="0.7"/>
-          <!-- Sol durum LED'leri -->
-          <circle id="indL0" cx="76" cy="174" r="3.5" fill="var(--col)" opacity="0.7"/>
-          <circle id="indL1" cx="76" cy="186" r="3.5" fill="var(--col)" opacity="0.35"/>
-          <circle id="indL2" cx="76" cy="198" r="3.5" fill="var(--col)" opacity="0.15"/>
-
-          <!-- Sağ panel şerit -->
-          <rect x="315" y="160" width="4" height="46" rx="2"
-                fill="#122040" opacity="0.9"/>
-          <rect x="310" y="165" width="3" height="36" rx="1"
-                fill="#0a1530" opacity="0.7"/>
-          <!-- Sağ durum LED'leri -->
-          <circle id="indR0" cx="304" cy="174" r="3.5" fill="var(--col)" opacity="0.7"/>
-          <circle id="indR1" cx="304" cy="186" r="3.5" fill="var(--col)" opacity="0.35"/>
-          <circle id="indR2" cx="304" cy="198" r="3.5" fill="var(--col)" opacity="0.15"/>
-
-          <!-- ── ÜST DETAYLAR (anten/sensör) ─────────────────── -->
-          <rect x="152" y="24" width="76" height="9" rx="4"
-                fill="#070d1c" stroke="#0d2040" stroke-width="1.5"/>
-          <rect x="172" y="22" width="36" height="4" rx="2" fill="#0d2040"/>
-          <!-- Anten nokta (nabız yapar) -->
-          <circle id="antDot" cx="190" cy="19" r="5"
-                  fill="#020810" stroke="var(--col)" stroke-width="1.5"/>
-
-          <!-- Alın aksan çizgisi -->
-          <line x1="118" y1="88" x2="262" y2="88"
-                stroke="rgba(30,110,255,.18)" stroke-width="1"/>
-          <line x1="138" y1="94" x2="242" y2="94"
-                stroke="rgba(30,110,255,.08)" stroke-width="1"/>
-
-          <!-- ── ÇENE DETAYLARI ───────────────────────────────── -->
-          <rect x="155" y="298" width="70" height="7" rx="3"
-                fill="#0a1a30" stroke="#0d2040" stroke-width="1"/>
-          <rect x="168" y="308" width="44" height="3" rx="1"
-                fill="rgba(30,110,255,.18)"/>
-          <rect x="178" y="313" width="24" height="2" rx="1"
-                fill="rgba(30,110,255,.09)"/>
         </svg>
         <!-- ══════════════════════════════════════════════════════ -->
 
-        <!-- Peripheral efektler (dalga, düşünme noktaları) -->
-        <canvas id="fxCanvas" width="380" height="380"></canvas>
+        <!-- Dış efektler canvas'ı (nabız halkası + tick) -->
+        <canvas id="fxCanvas" width="380" height="420"></canvas>
       </div>
     </div>
 
@@ -432,17 +450,17 @@
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  CANVAS — ÇEVRE EFEKTLERİ (dalga, düşünme, nabız)
+//  CANVAS — DIŞ NABIZ HALKASI VE TICK İŞARETLERİ
 // ═══════════════════════════════════════════════════════════════
 const canvas = document.getElementById('fxCanvas');
 const ctx    = canvas.getContext('2d');
-const CX = 190, CY = 188, FR = 155;
+const CX = 190, CY = 210, FR = 160; // canvas merkezi (420px yükseklik)
 
 const STATE_RGB = {
   idle:      [30,  110, 255],
-  listening: [0,   255, 200],
-  thinking:  [255, 170,   0],
-  speaking:  [220, 235, 255],
+  listening: [34,  224, 214],
+  thinking:  [139,  92, 246],
+  speaking:  [255,  87, 216],
 };
 const STATE_LABEL = {
   idle:      '● BEKLİYOR',
@@ -451,68 +469,40 @@ const STATE_LABEL = {
   speaking:  '◎ KONUŞUYOR',
 };
 
-let state    = 'idle';
-let curRGB   = [...STATE_RGB.idle];
-let frame    = 0;
-let pulse    = 0;
-let thinkDot = 0;
+let state   = 'idle';
+let curRGB  = [...STATE_RGB.idle];
+let frame   = 0;
+let pulse   = 0;
 
 const lerpRGB = (a,b,t) => a.map((v,i) => v+(b[i]-v)*t);
-const rgb     = c => `rgb(${c.map(Math.round).join(',')})`;
 const rgba    = (c,a) => `rgba(${c.map(Math.round).join(',')},${a})`;
 
-function update() {
+function updateCanvas() {
   frame++;
-  pulse    = Math.sin(frame * 0.048) * 0.5 + 0.5;
-  curRGB   = lerpRGB(curRGB, STATE_RGB[state], 0.07);
-  thinkDot = Math.floor(frame / 10) % 3;
+  pulse  = Math.sin(frame * 0.048) * 0.5 + 0.5;
+  curRGB = lerpRGB(curRGB, STATE_RGB[state], 0.07);
 }
 
-function draw() {
-  ctx.clearRect(0, 0, 380, 380);
+function drawCanvas() {
+  ctx.clearRect(0, 0, 380, 420);
   const c = curRGB;
 
+  // Nabız halkası
   const pr = FR + 14 + pulse * 12;
   ctx.beginPath(); ctx.arc(CX, CY, pr, 0, Math.PI * 2);
   ctx.strokeStyle = rgba(c, 0.18);
   ctx.lineWidth = 1.5; ctx.stroke();
 
+  // Tick işaretleri
   for (let i = 0; i < 8; i++) {
     const a   = i * Math.PI / 4;
     const len = i % 2 === 0 ? 10 : 5;
     ctx.beginPath();
-    ctx.moveTo(CX + Math.cos(a) * (FR + 1), CY + Math.sin(a) * (FR + 1));
+    ctx.moveTo(CX + Math.cos(a) * (FR + 1),       CY + Math.sin(a) * (FR + 1));
     ctx.lineTo(CX + Math.cos(a) * (FR + len + 1), CY + Math.sin(a) * (FR + len + 1));
     ctx.strokeStyle = rgba(c, 0.5);
     ctx.lineWidth = 1.5; ctx.stroke();
   }
-
-  if (state === 'thinking')  drawThinking(c);
-  if (state === 'listening') drawWave(c);
-}
-
-function drawThinking(c) {
-  for (let i = 0; i < 3; i++) {
-    const a = -Math.PI / 2 + i * 2 * Math.PI / 3 + frame * 0.048;
-    const x = CX + Math.cos(a) * (FR + 30);
-    const y = CY + Math.sin(a) * (FR + 30);
-    const r = i === thinkDot ? 7 : 3.5;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = i === thinkDot ? rgb(c) : rgba(c, 0.25);
-    ctx.fill();
-  }
-}
-
-function drawWave(c) {
-  const wY = CY + FR + 18, wW = 250;
-  ctx.beginPath();
-  for (let i = 0; i < 64; i++) {
-    const x   = CX - wW / 2 + i * (wW / 63);
-    const amp = 9 * Math.sin(i * 0.36 + frame * 0.28)
-              + 4 * Math.sin(i * 0.82 + frame * 0.5);
-    i === 0 ? ctx.moveTo(x, wY + amp) : ctx.lineTo(x, wY + amp);
-  }
-  ctx.strokeStyle = rgb(c); ctx.lineWidth = 2; ctx.stroke();
 }
 
 function syncCSS() {
@@ -522,145 +512,128 @@ function syncCSS() {
   document.documentElement.style.setProperty('--glow', g);
 }
 
+(function loop() {
+  updateCanvas();
+  drawCanvas();
+  syncCSS();
+  requestAnimationFrame(loop);
+})();
+
 // ═══════════════════════════════════════════════════════════════
-//  AĞIZ ANİMASYONU — Türkçe heceden LipSync
+//  SPECTRA MASKOT JS (ağız animasyonu, göz kırpma, state API)
 // ═══════════════════════════════════════════════════════════════
-// Türkçe sesli harfler: açık sesli (a,e,o,ö) → büyük açılma
-//                       kapalı sesli (ı,i,u,ü) → küçük açılma
-const VOWELS_RE      = /[aeıioöuüAEIİOÖUÜ]/g;
-const OPEN_VOWELS    = new Set('aeAEoöOÖ');
+(function () {
+  var svg   = document.getElementById('spectra');
+  var bars  = Array.prototype.slice.call(svg.querySelectorAll('.mbar'));
+  var eyes  = svg.querySelector('#eyes');
+  var MOUTH_Y  = 305;
+  var CLOSED   = 6;
+  var ENV      = [0.5, 0.72, 0.9, 1, 0.9, 0.72, 0.5];
+  var MAX_HALF = ENV.map(function (e) { return 6 + e * 30; });
+  var barTarget = ENV.map(function () { return CLOSED; });
+  var barCur    = ENV.map(function () { return CLOSED; });
+  var openLevel = 0, olSmooth = 0, lastActive = 0, mouthOpen = false;
 
-// SVG elemanları
-const elMT = document.getElementById('mouthTop');
-const elMB = document.getElementById('mouthBot');
-const elMG = document.getElementById('mouthGlow');
+  function clamp(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
 
-// Kapalı konum: her iki dudak da y=238, h=6 → üst üste = kapalı
-const MT_CLOSE_Y = 238;
-const MB_CLOSE_Y = 238;
-const MT_OPEN_DY = 14;   // üst dudak kaç px yukarı çıkar (max)
-const MB_OPEN_DY = 15;   // alt dudak kaç px aşağı iner (max)
-const LIP_H_CLOSE = 6;
-const LIP_H_OPEN  = 9;   // açıkken dudak kalınlaşır
+  function setMouthOpen(v) {
+    v = clamp(v || 0);
+    openLevel = v;
+    if (v > 0.04) lastActive = performance.now();
+  }
 
-let mouthTimeline = [];  // [{t: ms, open: 0..1}]
-let mouthStart    = 0;
-let mouthTarget   = 0;
-let mouthCurrent  = 0;   // 0=kapalı, 1=tamamen açık
+  var cadence = 0;
+  function updateTargets(dt) {
+    cadence += dt;
+    if (cadence < 82) return;
+    cadence = 0;
+    var lvl = olSmooth;
+    for (var i = 0; i < bars.length; i++) {
+      if (lvl < 0.05) {
+        barTarget[i] = CLOSED;
+      } else {
+        var j = 0.6 + Math.random() * 0.4;
+        barTarget[i] = CLOSED + (MAX_HALF[i] - CLOSED) * lvl * j;
+      }
+    }
+  }
 
-// TTS hızı 190wpm, ortalama Türkçe kelimede ~2.5 sesli harf
-// → ~475 hece/dk → ~7.9 hece/sn → ~127ms/hece
-const MS_PER_SYLLABLE = 130;
+  var last = performance.now();
+  function loop(now) {
+    var dt = Math.min(50, now - last); last = now;
+    olSmooth += (openLevel - olSmooth) * 0.25;
+    updateTargets(dt);
+    for (var i = 0; i < bars.length; i++) {
+      barCur[i] += (barTarget[i] - barCur[i]) * 0.35;
+      var h = barCur[i];
+      bars[i].setAttribute('y',      (MOUTH_Y - h).toFixed(2));
+      bars[i].setAttribute('height', (h * 2).toFixed(2));
+    }
+    var active = olSmooth > 0.05 || (now - lastActive) < 220;
+    if (active && !mouthOpen) { mouthOpen = true;  svg.classList.add('mouth-open');    }
+    if (!active && mouthOpen) { mouthOpen = false; svg.classList.remove('mouth-open'); }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // Göz kırpma
+  var blinkT;
+  function blink() {
+    eyes.classList.add('blink');
+    setTimeout(function () { eyes.classList.remove('blink'); }, 120);
+  }
+  function scheduleBlink() {
+    clearTimeout(blinkT);
+    blinkT = setTimeout(function () {
+      if (svg.getAttribute('data-state') !== 'thinking') blink();
+      scheduleBlink();
+    }, 2600 + Math.random() * 3400);
+  }
+  scheduleBlink();
+
+  // State değiştir
+  function setState(s) {
+    svg.setAttribute('data-state', s);
+    if (s !== 'speaking') setMouthOpen(0);
+  }
+
+  // Genel API
+  window.Spectra = {
+    setState:     setState,
+    setMouthOpen: setMouthOpen,
+    blink:        blink,
+  };
+
+  setState('idle');
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  TÜRKÇE HECE → AĞIZ LİP-SYNC
+// ═══════════════════════════════════════════════════════════════
+const VOWELS_RE   = /[aeıioöuüAEIİOÖUÜ]/g;
+const OPEN_VOWELS = new Set('aeAEoöOÖ');
+const MS_PER_SYL  = 130; // 190wpm TTS @ ~7.7 hece/sn
 
 function scheduleSpeech(text) {
-  mouthTimeline = [];
-  if (!text) return;
+  if (!text || !window.Spectra) return;
   const vowels = [...text.matchAll(VOWELS_RE)];
   if (!vowels.length) return;
 
-  vowels.forEach((m, i) => {
-    const t     = i * MS_PER_SYLLABLE;
-    const big   = OPEN_VOWELS.has(m[0]);
-    const open  = big
-      ? 0.55 + Math.random() * 0.45   // açık sesli → %55–100
-      : 0.15 + Math.random() * 0.30;  // kapalı sesli → %15–45
-    mouthTimeline.push({ t,       open });
-    mouthTimeline.push({ t: t+70, open: 0 });   // kısa kapan
-  });
+  vowels.forEach(function (v, i) {
+    const big  = OPEN_VOWELS.has(v[0]);
+    const open = big
+      ? 0.55 + Math.random() * 0.45   // a,e,o,ö → geniş açılma
+      : 0.15 + Math.random() * 0.30;  // ı,i,u,ü → dar açılma
 
-  mouthStart = performance.now();
-}
+    setTimeout(function () {
+      if (state === 'speaking') Spectra.setMouthOpen(open);
+    }, i * MS_PER_SYL);
 
-function tickMouth() {
-  // Timeline tüketimi
-  if (state === 'speaking' && mouthTimeline.length) {
-    const elapsed = performance.now() - mouthStart;
-    while (mouthTimeline.length && mouthTimeline[0].t <= elapsed) {
-      mouthTarget = mouthTimeline.shift().open;
-    }
-  } else {
-    mouthTarget = 0;
-  }
-
-  // Yumuşak lerp
-  mouthCurrent += (mouthTarget - mouthCurrent) * 0.28;
-  const t = mouthCurrent;
-
-  // SVG güncelle
-  elMT.setAttribute('y',      MT_CLOSE_Y - t * MT_OPEN_DY);
-  elMT.setAttribute('height', LIP_H_CLOSE + t * (LIP_H_OPEN - LIP_H_CLOSE));
-  elMB.setAttribute('y',      MB_CLOSE_Y + t * MB_OPEN_DY);
-  elMB.setAttribute('height', LIP_H_CLOSE + t * (LIP_H_OPEN - LIP_H_CLOSE));
-  elMG.setAttribute('opacity', t * 0.55);
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  GÖZ & MASKOT ANİMASYONU
-// ═══════════════════════════════════════════════════════════════
-const elScanL = document.getElementById('scanL');
-const elScanR = document.getElementById('scanR');
-const elAntDot = document.getElementById('antDot');
-const EYE_L_X = 89, EYE_R_X = 213, EYE_W = 78, SCAN_W = 12;
-
-let scanPos   = 0;   // 0..EYE_W-SCAN_W
-let blinkTimer = 0;  // kare sayacı, dolunca kırpış
-let blinkAmt  = 0;   // 0=açık, 1=kapalı
-
-function tickEyes() {
-  // Tarama hızı state'e göre değişir
-  const speed = state === 'thinking' ? 2.8
-              : state === 'speaking' ? 1.6
-              : 0.9;
-  scanPos = (scanPos + speed) % (EYE_W - SCAN_W);
-  elScanL.setAttribute('x', EYE_L_X + scanPos);
-  elScanR.setAttribute('x', EYE_R_X + scanPos);
-
-  // Göz kırpma: her ~220 kare bir kırpar (~3.7sn @60fps)
-  blinkTimer++;
-  if (blinkTimer >= 220) {
-    blinkAmt = Math.min(blinkAmt + 0.18, 1);
-    if (blinkAmt >= 1) blinkTimer = 0;
-  } else {
-    blinkAmt = Math.max(blinkAmt - 0.12, 0);
-  }
-  // Kırparken göz yüksekliği küçülür
-  const eyeH = Math.round(22 * (1 - blinkAmt * 0.88));
-  const eyeY = 131 + Math.round(11 * blinkAmt * 0.88);
-  document.getElementById('eyeL').setAttribute('height', eyeH);
-  document.getElementById('eyeL').setAttribute('y', eyeY);
-  document.getElementById('eyeR').setAttribute('height', eyeH);
-  document.getElementById('eyeR').setAttribute('y', eyeY);
-}
-
-function tickIndicators() {
-  // Anten nabzı
-  const antPulse = (Math.sin(frame * 0.07) + 1) / 2;
-  elAntDot.setAttribute('stroke-opacity', 0.35 + antPulse * 0.65);
-
-  // Sol/sağ panel LED'leri kaskad
-  const ids = ['indL0','indL1','indL2','indR0','indR1','indR2'];
-  const base = [0.7, 0.35, 0.15, 0.7, 0.35, 0.15];
-  ids.forEach((id, i) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const phase = (frame * 0.05 - i * 0.6);
-    const op = base[i] + Math.sin(phase) * 0.15;
-    el.setAttribute('opacity', Math.max(0, Math.min(1, op)));
+    setTimeout(function () {
+      if (state === 'speaking') Spectra.setMouthOpen(0.02);
+    }, i * MS_PER_SYL + 70);
   });
 }
-
-// ═══════════════════════════════════════════════════════════════
-//  ANA RAF DÖNGÜSÜ
-// ═══════════════════════════════════════════════════════════════
-(function loop() {
-  update();
-  draw();
-  syncCSS();
-  tickMouth();
-  tickEyes();
-  tickIndicators();
-  requestAnimationFrame(loop);
-})();
 
 // ═══════════════════════════════════════════════════════════════
 //  GLITCH
@@ -685,6 +658,7 @@ function setUIState(s) {
   if (s !== prevState) { triggerGlitch(); prevState = s; }
   state = s;
   document.getElementById('stateLbl').textContent = STATE_LABEL[s] || '● BEKLİYOR';
+  if (window.Spectra) Spectra.setState(s);
 }
 
 function setPiInfo(data) {
@@ -713,14 +687,15 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  BROWSER PTT (S tuşu)
+//  BROWSER PTT (S tuşu → socket ptt_start/ptt_stop)
 // ═══════════════════════════════════════════════════════════════
 let pttActive = false;
+const keyS = document.getElementById('keyS');
+
 document.addEventListener('keydown', e => {
   if ((e.key === 's' || e.key === 'S') && !pttActive && !e.repeat) {
     pttActive = true;
-    const ks = document.getElementById('keyS');
-    if (ks) { ks.style.background = 'var(--col)'; ks.style.color = '#000'; }
+    if (keyS) keyS.classList.add('active');
     if (typeof socket !== 'undefined' && socket.connected) socket.emit('ptt_start');
   }
   if ((e.key === 'r' || e.key === 'R') && !e.repeat) {
@@ -730,8 +705,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keyup', e => {
   if ((e.key === 's' || e.key === 'S') && pttActive) {
     pttActive = false;
-    const ks = document.getElementById('keyS');
-    if (ks) { ks.style.background = ''; ks.style.color = ''; }
+    if (keyS) keyS.classList.remove('active');
     if (typeof socket !== 'undefined' && socket.connected) socket.emit('ptt_stop');
   }
 });
@@ -753,7 +727,6 @@ try {
     if (data.mode) setUIState(data.mode);
     if (data.text) {
       document.getElementById('respTxt').textContent = data.text;
-      // Konuşma başlayınca ağız animasyonu planla
       if (data.mode === 'speaking') scheduleSpeech(data.text);
     }
     setPiInfo(data);
