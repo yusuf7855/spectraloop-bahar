@@ -241,6 +241,37 @@ def on_ws_connect():
     })
     _sys_log("Arayüz bağlandı")
 
+
+@socketio.on("ptt_start")
+def on_ptt_start():
+    """Tarayıcıdan S basıldığında — pynput'tan bağımsız."""
+    global recording
+    if not recording:
+        stop_speaking()
+        recording = True
+        while not audio_q.empty():
+            audio_q.get()
+        _emit("state", {"mode": "listening"})
+        _emit("clear", {})
+        print("\n[● Dinliyor... (web)]")
+
+
+@socketio.on("ptt_stop")
+def on_ptt_stop():
+    """Tarayıcıdan S bırakıldığında."""
+    global recording
+    if recording:
+        recording = False
+        threading.Thread(target=process_audio, daemon=True).start()
+
+
+@socketio.on("reset_chat")
+def on_reset_chat():
+    """Tarayıcıdan R basıldığında."""
+    brain.reset()
+    speak("Tamam, konuşmayı sıfırladım.")
+    _sys_log("Geçmiş sıfırlandı")
+
 # ── Başlatma ─────────────────────────────────────────────────────────────────
 def main():
     global whisper, brain
