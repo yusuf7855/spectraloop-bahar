@@ -98,6 +98,19 @@ _COMMAND_WORDS = {
     "soyle","anlat","yardim","kontrol","test","sistem","rapor","oku"
 }
 
+# ── Anlamadım Yanıtları (3 kademeli tırmanma) ────────────────────────────────
+_NO_UNDERSTANDING = [
+    "Özür dilerim, tam anlayamadım. Tekrar söyler misiniz?",
+    "Sesınizi yeterince duyamıyorum. Biraz daha yakın ya da yüksek sesle söyler misiniz?",
+    "Hâlâ anlayamıyorum. Bir takım üyemizi yardıma çağırmamı ister misiniz?",
+]
+
+# CONFIRM_MODE onay sözcükleri
+_YES_WORDS: frozenset = frozenset({
+    "evet", "yes", "dogru", "doğru", "aynen", "kesinlikle",
+    "tamam", "tabi", "tabii", "elbette", "harika", "olur",
+})
+
 
 def _split_sentences(text: str):
     buf = text
@@ -137,6 +150,8 @@ class Brain:
         self.vip_info:  Optional[dict] = None
         self.greeted          = False
         self.waiting_for_name = True   # İlk girişi isim olarak işle
+        self.consecutive_no_understanding: int  = 0   # ardışık anlayamadım sayacı
+        self._pending_confirm: Optional[tuple]  = None  # (answer, entry_id)
 
     # ── İsim çıkarma (cümlede gömülü isim) ──────────────────────────────────
     def _extract_embedded_name(self, text: str) -> Optional[str]:
@@ -197,6 +212,45 @@ class Brain:
 
         return None, None
 
+    # ── STT Kapısı Başarısızlık İşleyici ─────────────────────────────────────
+    def stt_gate_failed(self, stt_meta: Optional[dict] = None) -> str:
+        """
+        STT güven kapısı sesi reddetti.
+        Konuşma geçmişine yazılmaz; yalnızca sesli geri bildirim döndürür.
+        """
+        return self._no_understanding_response()
+
+    def _no_understanding_response(self) -> str:
+        """Kademeli tırmanma: ilk 3 ardışık başarısızlıkta farklı yanıt."""
+        idx = min(self.consecutive_no_understanding, len(_NO_UNDERSTANDING) - 1)
+        self.consecutive_no_understanding += 1
+        return _NO_UNDERSTANDING[idx]
+
+    def _handle_confirm_response(self, user_input: str):
+        """
+        Generator — CONFIRM_MODE doğrulama yanıtını işler.
+        Evet → bekleyen cevabı seslendir.
+        Hayır → nötr yönlendirme.
+        """
+        norm_words = set(_normalize_tr(user_input).split())
+        if norm_words & _YES_WORDS:
+            answer, _entry_id = self._pending_confirm
+            self._pending_confirm = None
+            self.consecutive_no_understanding = 0
+            self.history.append({"role": "user",      "content": user_input})
+            self.history.append({"role": "assistant",  "content": answer})
+            if len(self.history) > MAX_HISTORY:
+                self.history = self.history[-MAX_HISTORY:]
+            yield answer
+        else:
+            self._pending_confirm = None
+            resp = "Anladım. Başka bir konuda yardımcı olabilir miyim?"
+            self.history.append({"role": "user",      "content": user_input})
+            self.history.append({"role": "assistant",  "content": resp})
+            if len(self.history) > MAX_HISTORY:
+                self.history = self.history[-MAX_HISTORY:]
+            yield resp
+
     # ── Düşük seviye Ollama çağrısı ──────────────────────────────────────────
     def _ollama(self, messages: list, use_tools: bool = False,
                 options: Optional[dict] = None) -> dict:
@@ -229,7 +283,7 @@ class Brain:
         return sys
 
     # ── Ana sohbet ───────────────────────────────────────────────────────────
-    def chat_stream(self, user_input: str):
+    def chat_stream(self, user_input: str, stt_meta: Optional[dict] = None):
         """Generator — cümle cümle Türkçe yanıt yield eder."""
 
         def _push(text: str):
@@ -237,6 +291,11 @@ class Brain:
             self.history.append({"role": "assistant",  "content": text})
             if len(self.history) > MAX_HISTORY:
                 self.history = self.history[-MAX_HISTORY:]
+
+        # ── 0. Doğrulama modu (CONFIRM_MODE) ─────────────────────────────────
+        if self._pending_confirm is not None:
+            yield from self._handle_confirm_response(user_input)
+            return
 
         norm_in = _normalize_tr(user_input)
         is_greeting = any(
@@ -329,12 +388,33 @@ class Brain:
             return
 
         # ── 3.5 QA Bilgi Tabanı ──────────────────────────────────────────────
-        qa_answer, qa_score = _qa_router.route(user_input)
-        if qa_answer:
-            # Deterministik eşleşme — doğrudan seslendir, LLM'e gitme
+        qa_answer, qa_decision, qa_score, top1_id, top2_id = \
+            _qa_router.route_v2(user_input, stt_meta=stt_meta)
+
+        if qa_decision == "answer" and qa_answer:
+            self.consecutive_no_understanding = 0
             _push(qa_answer)
             yield qa_answer
             return
+
+        elif qa_decision == "confirm":
+            # CONFIRM_MODE=True — doğrulama sorusu sor; cevabı sakla
+            pending_answer = _qa_router.get_by_id(top1_id)
+            self._pending_confirm = (pending_answer, top1_id)
+            display = _qa_router.get_display_name(top1_id)
+            confirm_q = f"{display} hakkında mı soruyorsunuz?"
+            _push(confirm_q)
+            yield confirm_q
+            return
+
+        elif qa_decision == "repeat":
+            # Belirsiz eşleşme ve CONFIRM_MODE=False — anlamadım yoluna git
+            resp = self._no_understanding_response()
+            _push(resp)
+            yield resp
+            return
+
+        # qa_decision == "llm" → Ollama'ya geç (aşağıya düş)
 
         # ── 4. Ollama (grounding ile) ─────────────────────────────────────────
         # QA router eşleşmedi: bilgi tabanını grounding olarak system prompt'a enjekte et
@@ -367,6 +447,7 @@ class Brain:
 
             content = clean_response(msg.get("content", ""))
             self.history.append({"role": "assistant", "content": content})
+            self.consecutive_no_understanding = 0
             yield from _split_sentences(content)
 
         except requests.exceptions.ConnectionError:
@@ -385,4 +466,6 @@ class Brain:
         self.vip_info         = None
         self.greeted          = False
         self.waiting_for_name = True
+        self.consecutive_no_understanding = 0
+        self._pending_confirm = None
         print("[Brain] Geçmiş sıfırlandı.")

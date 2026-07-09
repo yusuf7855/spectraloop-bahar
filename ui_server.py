@@ -23,6 +23,9 @@ from brain            import Brain
 from hardware         import send_vehicle_command, PI_HOST, PI_PORT
 from vehicle_commands import detect_vehicle_command
 from qa_router        import get_router
+from stt_gate         import STTGate
+
+_stt_gate = STTGate()
 
 # ── Flask + SocketIO ─────────────────────────────────────────────────────────
 app      = Flask(__name__, static_folder=".", static_url_path="")
@@ -136,9 +139,20 @@ def process_audio():
     _emit("state", {"mode": "thinking"})
     print("...")
 
-    segments, _ = whisper.transcribe(
+    raw_segments, _ = whisper.transcribe(
         audio, language="tr", beam_size=1, vad_filter=True
     )
+    segments = list(raw_segments)  # generator'ı materielize et; metadata korunsun
+
+    # ── STT Güven Kapısı ─────────────────────────────────────────────────
+    gate_passed, gate_reason, stt_meta = _stt_gate.check(segments)
+    if not gate_passed:
+        print(f"[STTGate] Reddedildi: {gate_reason} — {stt_meta}")
+        _sys_log(f"STT kapısı: {gate_reason}", "err")
+        _emit("state", {"mode": "idle"})
+        speak(brain.stt_gate_failed(stt_meta))
+        return
+
     text = " ".join(seg.text for seg in segments).strip()
 
     if not text:
@@ -156,7 +170,7 @@ def process_audio():
         speak(result)
         return
 
-    for sentence in brain.chat_stream(text):
+    for sentence in brain.chat_stream(text, stt_meta=stt_meta):
         speak(sentence)
 
 # ── Klavye ───────────────────────────────────────────────────────────────────

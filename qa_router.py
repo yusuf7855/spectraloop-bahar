@@ -4,14 +4,18 @@ Spectraloop — QA Router
 Küratörlü bilgi tabanına dayalı deterministik cevap yönlendirici.
 
 Yönlendirme sırası:
-  1. KEYWORD: Sorgu normalize edilir; herhangi bir variant metni sorgu içinde
-     geçiyorsa o cevap anında döndürülür. Embedding gerekmez.
-  2. SEMANTIC: Sorgu embed edilir, tüm semantic variant'larla cosine similarity
-     hesaplanır. En yüksek skor eşik >= 0.72 ise cevap döndürülür.
-  3. FALLBACK: Her ikisi de eşleşmezse None döner; brain.py grounded Ollama'ya geçer.
+  1. KEYWORD  : Sorgu normalize edilir; herhangi bir variant metni sorgu içinde
+                geçiyorsa o cevap anında döndürülür. Embedding gerekmez.
+  2. SEMANTIC : Hibrit skor = W_SEM * cosine + W_LEX * lexical (RapidFuzz).
+                Üç bantlı karar:
+                  final >= T_HIGH              → answer
+                  T_MED <= final < T_HIGH      → margin >= MARGIN_MIN → answer
+                                                 margin <  MARGIN_MIN → confirm / repeat
+                  final < T_MED               → llm (grounded Ollama fallback)
+  3. FALLBACK : karar "llm" ise brain.py grounded Ollama'ya geçer.
 
-Config: QA_CONFIG sözlüğünü değiştirerek model/eşik ayarlanabilir.
-Loglama: Her sorgu (match_type, id, skor) logs/qa_misses.jsonl'e yazılır.
+Config  : spectra_config.py
+Loglama : logs/qa_misses.jsonl — STT metadata, top1/top2 skor, karar dahil
 Singleton: get_router() ile modül genelinde tek örnek kullanılır.
 """
 
@@ -20,16 +24,33 @@ import re
 import threading
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple, Dict, Any
 
 import numpy as np
 import requests
+
+import spectra_config as cfg
+
+# ── RapidFuzz (opsiyonel; yoksa difflib fallback) ─────────────────────────────
+try:
+    from rapidfuzz.fuzz import token_set_ratio as _rf_tsr
+
+    def _lexical(a: str, b: str) -> float:
+        """RapidFuzz token_set_ratio → [0, 1]"""
+        return _rf_tsr(a, b) / 100.0
+
+except ImportError:
+    import difflib
+
+    def _lexical(a: str, b: str) -> float:  # type: ignore[misc]
+        """difflib fallback — yükle: pip install rapidfuzz"""
+        return difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 # ── Config ────────────────────────────────────────────────────────────────────
 QA_CONFIG: dict = {
     "embed_model": "nomic-embed-text",
     "chat_model":  "qwen2.5:3b",
-    "threshold":   0.72,
+    "threshold":   cfg.T_HIGH,   # geriye dönük uyumluluk; asıl eşikler spectra_config'de
     "top_k":       3,
 }
 
@@ -43,6 +64,23 @@ _EMBED_URL = "http://localhost:11434/api/embeddings"
 
 # Grounding'den hariç tutulacak kategori prefix'leri (kişiye özel / VIP)
 _GROUNDING_SKIP_CATEGORIES = {"kisiye_ozel_vip", "kisiye_ozel_takim"}
+
+# CONFIRM_MODE için okunabilir kategori isimleri
+_CATEGORY_DISPLAY: Dict[str, str] = {
+    "tanitim":           "Takım ve proje tanıtımı",
+    "teknik_itki":       "İtki sistemi",
+    "teknik_enerji":     "Enerji ve batarya sistemi",
+    "teknik_fren":       "Fren sistemi",
+    "teknik_kontrol":    "Kontrol sistemi",
+    "teknik_detay":      "Teknik detaylar",
+    "guvenlik":          "Güvenlik",
+    "yarisma_vizyon":    "Yarışma ve vizyon",
+    "etkilesim":         "Genel konuşma",
+    "proje_detay":       "Proje detayları",
+    "sohbet":            "Sohbet",
+    "kisiye_ozel_vip":   "VIP protokol",
+    "kisiye_ozel_takim": "Takım üyeleri",
+}
 
 
 # ── Normalizasyon ─────────────────────────────────────────────────────────────
@@ -76,21 +114,35 @@ def _embed(text: str, model: str) -> np.ndarray:
 
 # ── Loglama ───────────────────────────────────────────────────────────────────
 def _log(
-    query: str,
+    query:      str,
     matched_id: Optional[str],
-    score: float,
-    matched: bool,
+    score:      float,
+    matched:    bool,
     match_type: str = "semantic",
+    *,
+    stt_meta:   Optional[Dict[str, Any]] = None,
+    decision:   str  = "answer",
+    top1_id:    Optional[str]  = None,
+    top2_id:    Optional[str]  = None,
+    top1_score: float = 0.0,
+    top2_score: float = 0.0,
 ) -> None:
     try:
-        record = {
+        record: Dict[str, Any] = {
             "ts":         datetime.now().isoformat(timespec="seconds"),
             "query":      query,
             "matched":    matched,
             "match_type": match_type,
             "id":         matched_id,
             "score":      round(score, 4),
+            "decision":   decision,
+            "top1_id":    top1_id,
+            "top1_score": round(top1_score, 4),
+            "top2_id":    top2_id,
+            "top2_score": round(top2_score, 4),
         }
+        if stt_meta:
+            record["stt"] = stt_meta
         with open(_LOG_PATH, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     except Exception:
@@ -102,18 +154,15 @@ class QARouter:
     """
     Kullanım (singleton tercih edilir):
         from qa_router import get_router
-        answer, score = get_router().route("İtki sistemi nasıl çalışıyor?")
+        answer, decision, score, top1_id, top2_id = get_router().route_v2("İtki sistemi nasıl çalışıyor?")
     """
 
     def __init__(self) -> None:
-        # _entries: [{id, category, match_type, answer, tags, variants, vecs:[]}]
         self._entries:   list  = []
         self._ready:     bool  = False
-        self._threshold: float = QA_CONFIG["threshold"]
         self._top_k:     int   = QA_CONFIG["top_k"]
         self._model:     str   = QA_CONFIG["embed_model"]
         self._lock = threading.Lock()
-        # Arka planda başlat
         t = threading.Thread(target=self._load_safe, daemon=True, name="qa-router-load")
         t.start()
 
@@ -125,16 +174,8 @@ class QARouter:
             print(f"[QARouter] Yükleme hatası: {e}")
 
     def load(self) -> None:
-        """
-        qa_base.json'u okur.
-        - keyword girişleri: vecs=[] (embedding yok, sadece metin eşleştirme)
-        - semantic girişleri: tüm variant'lar embed edilir.
-        Senkron; eval_qa.py tarafından doğrudan çağrılır.
-        """
         with open(_QA_PATH, encoding="utf-8") as f:
-            data: list[dict] = json.load(f)
-
-        # match_type eksik girişlere varsayılan olarak "semantic" ata
+            data: list = json.load(f)
         for e in data:
             e.setdefault("match_type", "semantic")
 
@@ -148,8 +189,6 @@ class QARouter:
             if entry["match_type"] == "keyword":
                 entries.append({**entry, "vecs": []})
                 continue
-
-            # Semantic: embed et
             vecs = []
             for variant in entry.get("variants", []):
                 try:
@@ -169,11 +208,8 @@ class QARouter:
         print(f"[QARouter] Hazır — {len(entries)} giriş, {total_vecs} semantic vektör.")
 
     # ── Keyword Eşleştirme ────────────────────────────────────────────────────
-    def _keyword_match(self, query: str) -> tuple[Optional[str], Optional[str]]:
-        """
-        (answer, matched_id) veya (None, None) döndürür.
-        Sorgunun normalize edilmiş halinde herhangi bir keyword variant geçiyorsa eşleşir.
-        """
+    def _keyword_match(self, query: str) -> Tuple[Optional[str], Optional[str]]:
+        """(answer, matched_id) veya (None, None)"""
         q_norm = _norm_kw(query)
         with self._lock:
             kw_entries = [e for e in self._entries if e.get("match_type") == "keyword"]
@@ -183,99 +219,176 @@ class QARouter:
                     return entry["answer"], entry["id"]
         return None, None
 
-    # ── Semantic Eşleştirme ───────────────────────────────────────────────────
-    def _semantic_match(
+    # ── Hibrit Semantic Eşleştirme ────────────────────────────────────────────
+    def _semantic_match_hybrid(
         self, query: str
-    ) -> tuple[Optional[str], float, Optional[str]]:
-        """(answer | None, best_score, best_id) döndürür."""
+    ) -> Tuple[float, Optional[str], Optional[str], Optional[str], float]:
+        """
+        Hibrit skor (cosine + lexical) ile top-2 eşleşme.
+
+        Dönüş: (top1_score, top1_answer, top1_id, top2_id, top2_score)
+        Eşik uygulamaz; karar route_v2()'ye bırakılır.
+        """
         if not self._ready:
-            return None, 0.0, None
+            return 0.0, None, None, None, 0.0
         try:
             q_vec = _embed(query, self._model)
         except Exception as e:
             print(f"[QARouter] Query embed hatası: {e}")
-            return None, 0.0, None
-
-        best_score  = 0.0
-        best_answer = None
-        best_id     = None
+            return 0.0, None, None, None, 0.0
 
         with self._lock:
             sem_entries = [e for e in self._entries if e.get("match_type") != "keyword"]
+
+        candidates = []
         for entry in sem_entries:
-            for vec in entry["vecs"]:
-                score = _cosine(q_vec, vec)
-                if score > best_score:
-                    best_score  = score
-                    best_answer = entry["answer"]
-                    best_id     = entry["id"]
+            if not entry["vecs"]:
+                continue
+            # Cosine: variant embedding'leri üzerinden max
+            cos = max(_cosine(q_vec, v) for v in entry["vecs"])
+            # Lexical: variant metinleri üzerinden max RapidFuzz skoru
+            lex = max(_lexical(query, v) for v in entry.get("variants", [""]))
+            # Hibrit final skor
+            final = cfg.W_SEM * cos + cfg.W_LEX * lex
+            candidates.append((final, entry))
 
-        if best_score >= self._threshold:
-            return best_answer, best_score, best_id
-        return None, best_score, best_id
+        if not candidates:
+            return 0.0, None, None, None, 0.0
 
-    # ── Ana Route ─────────────────────────────────────────────────────────────
-    def route(self, query: str) -> tuple[Optional[str], float]:
+        candidates.sort(key=lambda x: x[0], reverse=True)
+        top1_score, top1_entry = candidates[0]
+        top2_score = candidates[1][0] if len(candidates) > 1 else 0.0
+        top2_id    = candidates[1][1]["id"] if len(candidates) > 1 else None
+
+        return top1_score, top1_entry["answer"], top1_entry["id"], top2_id, top2_score
+
+    # ── Üç Bantlı Karar: route_v2 ────────────────────────────────────────────
+    def route_v2(
+        self,
+        query:    str,
+        stt_meta: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[Optional[str], str, float, Optional[str], Optional[str]]:
         """
-        1. Keyword → 2. Semantic → None
+        Ana yönlendirici — üç bantlı karar mantığı.
 
-        Döndürür: (answer | None, score)
-          - keyword eşleşmesinde score=1.0
-          - semantic eşleşmesinde cosine skoru
-          - eşleşmede answer=None
+        Dönüş: (answer | None, decision, score, top1_id, top2_id)
+
+        decision:
+          "answer"  — eşleşme bulundu, cevabı döndür
+          "confirm" — belirsiz; CONFIRM_MODE açıksa doğrulama sorusu sor
+          "repeat"  — anlayamadım; "anlamadım" yanıtına git
+          "llm"     — bilgi tabanı dışı; grounded Ollama fallback
+
+        Karar tablosu:
+          keyword eşleşmesi          → "answer"
+          final >= T_HIGH            → "answer"
+          T_MED <= final < T_HIGH
+            margin >= MARGIN_MIN     → "answer"   (baskın eşleşme)
+            margin <  MARGIN_MIN
+              CONFIRM_MODE=True      → "confirm"
+              CONFIRM_MODE=False     → "repeat"
+          final < T_MED             → "llm"
         """
-        # 1. Keyword
+        # ── 1. Keyword ────────────────────────────────────────────────────────
         kw_answer, kw_id = self._keyword_match(query)
         if kw_answer is not None:
-            _log(query, kw_id, 1.0, True, "keyword")
+            _log(query, kw_id, 1.0, True, "keyword",
+                 stt_meta=stt_meta, decision="answer",
+                 top1_id=kw_id, top2_id=None, top1_score=1.0, top2_score=0.0)
             print(f"[QARouter] Keyword eşleşti: {kw_id}")
-            return kw_answer, 1.0
+            return kw_answer, "answer", 1.0, kw_id, None
 
-        # 2. Semantic
-        sem_answer, score, sem_id = self._semantic_match(query)
-        matched = sem_answer is not None
-        _log(query, sem_id, score, matched, "semantic")
+        # ── 2. Hibrit semantic ────────────────────────────────────────────────
+        top1_score, top1_answer, top1_id, top2_id, top2_score = \
+            self._semantic_match_hybrid(query)
+        margin = top1_score - top2_score
+
+        # ── 3. Üç bantlı karar ───────────────────────────────────────────────
+        if top1_score >= cfg.T_HIGH:
+            decision = "answer"
+            answer   = top1_answer
+
+        elif top1_score >= cfg.T_MED:
+            if margin >= cfg.MARGIN_MIN:
+                decision = "answer"
+                answer   = top1_answer
+            else:
+                if cfg.CONFIRM_MODE and top1_id:
+                    decision = "confirm"
+                else:
+                    decision = "repeat"
+                answer = None
+
+        else:
+            decision = "llm"
+            answer   = None
+
+        matched = decision == "answer" and answer is not None
+        _log(query, top1_id if matched else top1_id, top1_score, matched, "semantic",
+             stt_meta=stt_meta, decision=decision,
+             top1_id=top1_id, top2_id=top2_id,
+             top1_score=top1_score, top2_score=top2_score)
 
         if matched:
-            print(f"[QARouter] Semantic eşleşti: {sem_id} (skor={score:.3f})")
-            return sem_answer, score
+            print(f"[QARouter] Semantic eşleşti: {top1_id} "
+                  f"(skor={top1_score:.3f}, margin={margin:.3f})")
+        else:
+            print(f"[QARouter] Karar={decision} "
+                  f"(top1={top1_id}, skor={top1_score:.3f}, margin={margin:.3f})")
 
-        print(f"[QARouter] Eşleşmedi (en iyi={sem_id}, skor={score:.3f}) → Ollama")
-        return None, score
+        return answer, decision, top1_score, top1_id, top2_id
 
+    # ── Geriye Dönük Uyumluluk ────────────────────────────────────────────────
+    def route(
+        self,
+        query:    str,
+        stt_meta: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[Optional[str], float]:
+        """Eski arayüz — brain.py'nin mevcut çağrıları için korunur."""
+        answer, decision, score, top1_id, _ = self.route_v2(query, stt_meta=stt_meta)
+        return (answer if decision == "answer" else None), score
+
+    # ── Eval / Debug ──────────────────────────────────────────────────────────
     def route_debug(
         self, query: str
-    ) -> tuple[Optional[str], float, Optional[str], str]:
+    ) -> Tuple[Optional[str], float, Optional[str], str, str]:
         """
         Eval için genişletilmiş route.
 
-        Döndürür: (answer | None, score, matched_id | None, match_type)
+        Dönüş: (answer | None, score, matched_id | None, match_type, decision)
         """
-        # 1. Keyword
         kw_answer, kw_id = self._keyword_match(query)
         if kw_answer is not None:
-            _log(query, kw_id, 1.0, True, "keyword")
-            return kw_answer, 1.0, kw_id, "keyword"
+            _log(query, kw_id, 1.0, True, "keyword",
+                 decision="answer", top1_id=kw_id, top1_score=1.0)
+            return kw_answer, 1.0, kw_id, "keyword", "answer"
 
-        # 2. Semantic
-        sem_answer, score, sem_id = self._semantic_match(query)
-        matched = sem_answer is not None
-        _log(query, sem_id, score, matched, "semantic")
-        return sem_answer, score, sem_id, "semantic"
+        top1_score, top1_answer, top1_id, top2_id, top2_score = \
+            self._semantic_match_hybrid(query)
+        margin = top1_score - top2_score
+
+        if top1_score >= cfg.T_HIGH:
+            decision = "answer"
+        elif top1_score >= cfg.T_MED:
+            decision = "answer" if margin >= cfg.MARGIN_MIN else "repeat"
+        else:
+            decision = "llm"
+
+        answer  = top1_answer if decision == "answer" else None
+        matched = answer is not None
+        _log(query, top1_id, top1_score, matched, "semantic",
+             decision=decision, top1_id=top1_id, top2_id=top2_id,
+             top1_score=top1_score, top2_score=top2_score)
+        return answer, top1_score, top1_id, "semantic", decision
 
     # ── Grounding Metni ──────────────────────────────────────────────────────
     def grounding_text(self, query: Optional[str] = None) -> str:
-        """
-        Ollama system prompt'una enjekte edilecek fact bloğu.
-        VIP/kişiye özel kategoriler hariç tutulur.
-        query verilirse top_k en alakalı semantic giriş seçilir.
-        """
+        """Ollama system prompt'una enjekte edilecek fact bloğu."""
         with self._lock:
             eligible = [
                 e for e in self._entries
                 if e.get("category", "") not in _GROUNDING_SKIP_CATEGORIES
             ]
-
         if not eligible:
             return ""
 
@@ -312,16 +425,28 @@ class QARouter:
         ]
         return "\n".join(lines)
 
-    # ── Yardımcı ─────────────────────────────────────────────────────────────
+    # ── Yardımcılar ──────────────────────────────────────────────────────────
     def get_by_id(self, qa_id: str) -> Optional[str]:
-        """VIP tetikleme gibi operatör kullanımı için id'ye göre cevap döndürür."""
+        """ID'ye göre cevap döndürür (VIP tetikleme ve CONFIRM_MODE için)."""
         with self._lock:
             for entry in self._entries:
                 if entry["id"] == qa_id:
                     return entry["answer"]
         return None
 
-    def vip_ids(self) -> list[str]:
+    def get_display_name(self, qa_id: str) -> str:
+        """CONFIRM_MODE doğrulama sorusu için okunabilir kategori ismi."""
+        with self._lock:
+            for entry in self._entries:
+                if entry["id"] == qa_id:
+                    cat = entry.get("category", "")
+                    return _CATEGORY_DISPLAY.get(
+                        cat,
+                        entry.get("variants", [qa_id])[0],
+                    )
+        return qa_id
+
+    def vip_ids(self) -> list:
         """Kategori kisiye_ozel_vip olan tüm id'leri listeler."""
         with self._lock:
             return [e["id"] for e in self._entries if e.get("category") == "kisiye_ozel_vip"]
@@ -337,10 +462,7 @@ _router_lock = threading.Lock()
 
 
 def get_router() -> QARouter:
-    """
-    Modül genelinde tek QARouter örneği döndürür.
-    brain.py ve ui_server.py bu fonksiyonu çağırarak aynı instance'ı paylaşır.
-    """
+    """Modül genelinde tek QARouter örneği döndürür."""
     global _router_instance
     if _router_instance is None:
         with _router_lock:
