@@ -1,0 +1,1002 @@
+[
+  {
+    "id": "spectra_kimlik",
+    "category": "tanitim",
+    "match_type": "semantic",
+    "variants": [
+      "Sen kimsin",
+      "Kendini tanıtır mısın",
+      "Adın ne",
+      "Sen nesin",
+      "Spectra kimdir"
+    ],
+    "answer": "Ben Spectra, Spectraloop hyperloop takımının sesli asistanıyım. Aracımızın sistemlerini tanıtmak ve sorularınızı yanıtlamak için buradayım. Nasıl yardımcı olabilirim?",
+    "tags": ["kimlik", "tanitim"]
+  },
+  {
+    "id": "spectra_nasil_calisir",
+    "category": "tanitim",
+    "match_type": "semantic",
+    "variants": [
+      "Sen nasıl çalışıyorsun",
+      "Sesli asistan nasıl çalışıyor",
+      "Beni nasıl anlıyorsun",
+      "Yapay zeka mısın",
+      "İnternete ihtiyacın var mı"
+    ],
+    "answer": "Sesinizi önce metne çeviriyor, ardından bir dil modeliyle anlamlandırıp yanıtı yine sesli olarak veriyorum. Tüm bu işlem doğrudan araç üzerindeki bilgisayarda çalışıyor; internet bağlantısı gerektirmiyorum.",
+    "tags": ["asistan", "whisper", "yapay zeka"]
+  },
+  {
+    "id": "neden_spectra",
+    "category": "tanitim",
+    "match_type": "semantic",
+    "variants": [
+      "Neden adın Spectra",
+      "İsmin nereden geliyor",
+      "Spectra ne demek"
+    ],
+    "answer": "İsmim, takımımızın adı olan Spectraloop'tan geliyor. Spectra, ışığın ve enerjinin farklı bileşenlerini çağrıştırıyor; tıpkı aracımızı hareket ettiren manyetik alanlar gibi.",
+    "tags": ["kimlik", "isim"]
+  },
+  {
+    "id": "proje_nedir",
+    "category": "tanitim",
+    "match_type": "semantic",
+    "variants": [
+      "Bu proje nedir",
+      "Ne üzerinde çalışıyorsunuz",
+      "Bu araç ne işe yarıyor",
+      "Burada ne yapıyorsunuz",
+      "Projenizi anlatır mısınız"
+    ],
+    "answer": "Spectraloop, düşük basınçlı bir tüp içinde manyetik itkiyle hareket eden bir hyperloop aracı geliştiriyor. Amacımız sürtünmeyi en aza indirerek yüksek hızlı ve verimli bir ulaşım teknolojisi ortaya koymak. Aracın tüm alt sistemlerini takımımız kendi imkânlarıyla tasarladı.",
+    "tags": ["proje", "hyperloop"]
+  },
+  {
+    "id": "spectraloop_takim",
+    "category": "tanitim",
+    "match_type": "semantic",
+    "variants": [
+      "Spectraloop nedir",
+      "Takımınız hakkında bilgi verir misiniz",
+      "Takım ne zaman kuruldu",
+      "Kaç kişilik bir ekipsiniz",
+      "Takımınızı tanıtır mısınız",
+      "Sizi biraz tanıyabilir miyiz",
+      "Hangi üniversiteden geliyorsunuz"
+    ],
+    "answer": "Spectraloop, 2022 yılında Samsun Üniversitesi'nde kurulan 13 kişilik bir hyperloop yarışma takımıdır. TEKNOFEST ve European Hyperloop Week gibi yarışmalarda ülkemizi temsil ediyoruz. Mekanik, elektronik ve yazılım alanlarında çalışan öğrencilerden oluşan multidisipliner bir ekibiz.",
+    "tags": ["takim", "universite", "samsun", "spectraloop"]
+  },
+  {
+    "id": "takim_kisi_sayisi",
+    "category": "tanitim",
+    "match_type": "semantic",
+    "variants": [
+      "Takımda kaç kişi var",
+      "Kaç kişisiniz",
+      "Ekip büyüklüğünüz nedir",
+      "Kaç öğrenci çalışıyor"
+    ],
+    "answer": "Takımımız 13 kişiden oluşmaktadır. Mekanik tasarım, elektronik donanım, yazılım geliştirme ve sistem entegrasyonu olmak üzere farklı uzmanlık alanlarından Samsun Üniversitesi öğrencileri bir arada çalışmaktadır.",
+    "tags": ["takim", "13 kisi", "uye sayisi"]
+  },
+  {
+    "id": "basarilar",
+    "category": "tanitim",
+    "match_type": "semantic",
+    "variants": [
+      "Ne gibi başarılarınız var",
+      "Ödül aldınız mı",
+      "Yarışmalarda derece yaptınız mı",
+      "Başarılarınız neler",
+      "Neler kazandınız"
+    ],
+    "answer": "2022 TEKNOFEST'te jüri özel ödülü, 2025'te Mekanik Sistem Geliştirme İnovasyon Ödülü aldık. 2026 TEKNOFEST kritik tasarım raporu değerlendirmesinde 500 üzerinden 468,5 puanla birinci olduk. Bu araç, o çalışmaların somut çıktısı.",
+    "tags": ["basari", "odul", "teknofest"]
+  },
+  {
+    "id": "hangi_yarisma",
+    "category": "tanitim",
+    "match_type": "semantic",
+    "variants": [
+      "Hangi yarışmalara katılıyorsunuz",
+      "Nerede yarışıyorsunuz",
+      "Bu hangi yarışma için",
+      "TEKNOFEST nedir"
+    ],
+    "answer": "Ulusal ölçekte TEKNOFEST Hyperloop Geliştirme Yarışması'nda, uluslararası ölçekte ise European Hyperloop Week'te yer alıyoruz. Şu anda TÜBİTAK Gebze'deki final değerlendirmesine hazırlanıyoruz.",
+    "tags": ["yarisma", "teknofest", "ehw", "tubitak"]
+  },
+
+  {
+    "id": "dslim_motor",
+    "category": "teknik_itki",
+    "match_type": "semantic",
+    "variants": [
+      "İtki sistemi nasıl çalışıyor",
+      "Aracı ne hareket ettiriyor",
+      "Motor tipi nedir",
+      "Nasıl hareket ediyor"
+    ],
+    "answer": "Aracımız çift taraflı lineer indüksiyon motoru, yani DSLIM kullanıyor. İtki kuvvetini manyetik alanla, temassız biçimde üretiyor; yani ilerleme için dişli, kayış gibi mekanik bir aktarım yok. Bu sayede itki kaynaklı sürtünme kaybı en aza iniyor.",
+    "tags": ["dslim", "lineer motor", "itki", "tahrik"]
+  },
+  {
+    "id": "vfd_surucu",
+    "category": "teknik_itki",
+    "match_type": "semantic",
+    "variants": [
+      "Motoru nasıl kontrol ediyorsunuz",
+      "Sürücü sistemi nedir",
+      "Hızı nasıl ayarlıyorsunuz",
+      "VFD nedir",
+      "Delta MS300 nedir",
+      "Modbus ne için kullanılıyor"
+    ],
+    "answer": "Motoru Delta MS300 model bir VFD, yani frekans sürücüsü kontrol ediyor. Sürücüye komutları Modbus RS-485 hattı üzerinden gönderiyoruz, böylece hızı ve ivmelenmeyi hassas biçimde ayarlayabiliyoruz.",
+    "tags": ["vfd", "delta ms300", "modbus", "rs485"]
+  },
+  {
+    "id": "hiz_performans",
+    "category": "teknik_itki",
+    "match_type": "semantic",
+    "variants": [
+      "Ne kadar hızlı gidiyor",
+      "Maksimum hız nedir",
+      "En yüksek hız kaç",
+      "Ne kadar hız yapıyor"
+    ],
+    "answer": "Aracımız test pistine bağlı olarak kontrollü bir hız profilinde çalışıyor. Odak noktamız yalnızca en yüksek hız değil; ivmelenme, frenleme ve konum kontrolünün güvenli biçimde birlikte çalışması. Detaylı hız verilerini teknik ekibimiz paylaşabilir.",
+    "tags": ["hiz", "performans", "ivmelenme"]
+  },
+  {
+    "id": "kaldirma_sistemi",
+    "category": "teknik_itki",
+    "match_type": "semantic",
+    "variants": [
+      "Araç nasıl kalkıyor",
+      "Manyetik levitasyon var mı",
+      "Maglev kullanıyor musunuz",
+      "Kaldırma kuvveti nasıl üretiliyor"
+    ],
+    "answer": "Mevcut prototipimizde pasif tekerlekli kılavuz sistemi kullanılmaktadır; bu aşamada tam manyetik levitasyon hedeflenmemiştir. Tasarımımız, DSLIM tahrik ve pnömatik frenleme sistemlerinin güvenli entegrasyonuna odaklanmaktadır. Levitasyon araştırması ilerleyen geliştirme aşamalarımızda yer alıyor.",
+    "tags": ["levitasyon", "maglev", "ray", "tekerlekli"]
+  },
+
+  {
+    "id": "batarya",
+    "category": "teknik_enerji",
+    "match_type": "semantic",
+    "variants": [
+      "Enerjiyi nereden alıyor",
+      "Batarya sistemi nedir",
+      "Nasıl güç sağlıyorsunuz",
+      "Güç kaynağı nedir",
+      "Kaç voltluk sistem"
+    ],
+    "answer": "Aracımız 144 hücreli seri bağlı bir Li-Ion batarya paketiyle çalışıyor. Yüksek gerilim gerektiren lineer motoru besleyebilmek için hücreler istiflenmiş bir mimaride bir araya getirildi.",
+    "tags": ["batarya", "li-ion", "144s", "enerji"]
+  },
+  {
+    "id": "bms",
+    "category": "teknik_enerji",
+    "match_type": "semantic",
+    "variants": [
+      "Bataryayı nasıl koruyorsunuz",
+      "BMS var mı",
+      "Batarya güvenliği nasıl sağlanıyor",
+      "Batarya sıcaklığını nasıl takip ediyorsunuz"
+    ],
+    "answer": "Batarya paketini Daly marka batarya yönetim sistemleri, yani BMS üniteleri denetliyor. Bunlar hücre gerilimlerini, sıcaklığı ve akımı sürekli izleyerek aşırı yük ve ısınma durumlarında sistemi koruyor. Ayrıca DS18B20 sıcaklık sensörleriyle sıcaklığı ayrıca takip ediyoruz.",
+    "tags": ["bms", "daly", "ds18b20", "guvenlik"]
+  },
+  {
+    "id": "enerji_verimliligi",
+    "category": "teknik_enerji",
+    "match_type": "semantic",
+    "variants": [
+      "Enerji verimliliği nasıl",
+      "Ne kadar enerji tüketiyor",
+      "Batarya ömrü nedir",
+      "Kaç koşu yapabilirsiniz"
+    ],
+    "answer": "Lineer indüksiyon motorumuz, geleneksel döner motorlara kıyasla mekanik sürtünme kayıplarını ortadan kaldırarak daha verimli bir tahrik sağlar. VFD sürücüsü, anlık yük koşullarına göre güç çekişini optimize eder. Batarya paketi, yarışma pistindeki birden fazla koşu döngüsünü destekleyecek kapasitede boyutlandırılmıştır.",
+    "tags": ["enerji", "verimlilik", "vfd"]
+  },
+
+  {
+    "id": "fren_sistemi",
+    "category": "teknik_fren",
+    "match_type": "semantic",
+    "variants": [
+      "Nasıl duruyor",
+      "Fren sistemi nasıl çalışıyor",
+      "Nasıl frenliyor",
+      "Durdurma sistemi nedir",
+      "Pnömatik fren nedir",
+      "Festo ne için kullanılıyor"
+    ],
+    "answer": "Frenleme için Festo bileşenlerinden oluşan pnömatik bir sistem kullanıyoruz. Basınçlı hava tankları, çift etkili silindirleri sürerek fren pabuçlarını raya bastırıyor. Bu sistem hem kontrollü yavaşlama hem de acil durdurma için tasarlandı.",
+    "tags": ["fren", "festo", "pnomatik"]
+  },
+  {
+    "id": "acil_durdurma",
+    "category": "teknik_fren",
+    "match_type": "semantic",
+    "variants": [
+      "Acil durumda ne oluyor",
+      "Bir sorun olursa nasıl duruyor",
+      "Acil fren var mı",
+      "Sistem çökerse ne olur",
+      "Fail-safe nedir"
+    ],
+    "answer": "Evet, bağımsız çalışan bir acil durdurma mantığımız var. Herhangi bir arıza veya iletişim kaybı durumunda pnömatik fren otomatik olarak devreye girip aracı güvenli şekilde durduruyor. Güvenlik, tasarımımızın en öncelikli başlığı.",
+    "tags": ["acil", "guvenlik", "fail-safe"]
+  },
+
+  {
+    "id": "kontrol_mimari",
+    "category": "teknik_kontrol",
+    "match_type": "semantic",
+    "variants": [
+      "Sistemi ne yönetiyor",
+      "Kontrol mimarisi nedir",
+      "Beyin neresi",
+      "Hangi kart kullanıyorsunuz",
+      "Raspberry Pi ne işe yarıyor",
+      "Yazılım mimarisi nedir"
+    ],
+    "answer": "Kontrol mimarimiz katmanlı çalışıyor. Bir Raspberry Pi üst seviye karar ve iletişimi yönetirken, Arduino tabanlı katman gerçek zamanlı aktüatör kontrolünü üstleniyor. Alt sistemler arası haberleşmede Modbus protokolünü kullanıyoruz.",
+    "tags": ["kontrol", "raspberry", "arduino", "mimari"]
+  },
+  {
+    "id": "sensorler",
+    "category": "teknik_kontrol",
+    "match_type": "semantic",
+    "variants": [
+      "Konumu nasıl biliyor",
+      "Sensörler neler",
+      "Nerede olduğunu nasıl anlıyor",
+      "Navigasyon nasıl çalışıyor",
+      "Hangi sensörler var"
+    ],
+    "answer": "Aracın konumunu Omron fotoelektrik sensörlerle ray üzerindeki işaretleri okuyarak belirliyoruz. Buna ek olarak BNO055 IMU ile aracın yönelim ve ivme verilerini topluyoruz. Bu ikisi birlikte konum ve hareket takibini sağlıyor.",
+    "tags": ["sensor", "omron", "imu", "bno055"]
+  },
+  {
+    "id": "kamera_aktarim",
+    "category": "teknik_kontrol",
+    "match_type": "semantic",
+    "variants": [
+      "Kamera var mı",
+      "Görüntüyü nasıl aktarıyorsunuz",
+      "Canlı izleme yapabiliyor musunuz",
+      "Video akışı nasıl"
+    ],
+    "answer": "Araçta bir HiLook IP kamera bulunuyor. Görüntü, Raspberry Pi üzerinde çalışan MediaMTX sunucusuyla gerçek zamanlı olarak aktarılıyor, böylece aracı çalışırken canlı izleyebiliyoruz.",
+    "tags": ["kamera", "hilook", "mediamtx", "video"]
+  },
+  {
+    "id": "haberlesme_sistemi",
+    "category": "teknik_kontrol",
+    "match_type": "semantic",
+    "variants": [
+      "Haberleşme nasıl sağlanıyor",
+      "Araçla nasıl iletişim kuruyorsunuz",
+      "Kablosuz bağlantı var mı",
+      "Veri iletimi nasıl yapılıyor"
+    ],
+    "answer": "Kontrol istasyonu ile araç arasında TCP/IP tabanlı kablolu ağ haberleşmesi kullanıyoruz. Raspberry Pi üzerinde çalışan köprü yazılımı, gelen komutları alıp RS-485 hattı üzerinden motor sürücüsüne ve Arduino'ya iletir.",
+    "tags": ["haberlesme", "tcp", "rs485", "network"]
+  },
+
+  {
+    "id": "guvenlik_genel",
+    "category": "guvenlik",
+    "match_type": "semantic",
+    "variants": [
+      "Güvenlik önlemleriniz neler",
+      "Bu araç güvenli mi",
+      "Riskleri nasıl yönetiyorsunuz",
+      "Güvenlik sisteminiz nasıl"
+    ],
+    "answer": "Güvenlik için çok katmanlı bir yaklaşım izliyoruz. Batarya tarafında BMS ve sıcaklık izleme, hareket tarafında bağımsız acil frenleme, yazılım tarafında ise iletişim kaybında güvenli duruş mantığı var. Her alt sistem, diğeri arızalansa bile aracı güvende tutacak şekilde tasarlandı.",
+    "tags": ["guvenlik", "bms", "fail-safe"]
+  },
+
+  {
+    "id": "hyperloop_nedir",
+    "category": "yarisma_vizyon",
+    "match_type": "semantic",
+    "variants": [
+      "Hyperloop nedir",
+      "Hyperloop ne demek",
+      "Bu teknoloji ne işe yarar",
+      "Hyperloop'u anlatır mısınız"
+    ],
+    "answer": "Hyperloop, havası büyük ölçüde boşaltılmış bir tüp içinde aracı manyetik olarak hareket ettiren bir ulaşım konsepti. Hava direnci ve sürtünme neredeyse ortadan kalktığı için çok yüksek hızlara düşük enerjiyle ulaşmak mümkün. Bizim aracımız bu konseptin küçük ölçekli bir prototipi.",
+    "tags": ["hyperloop", "konsept", "teknoloji"]
+  },
+  {
+    "id": "neden_hyperloop",
+    "category": "yarisma_vizyon",
+    "match_type": "semantic",
+    "variants": [
+      "Neden hyperloop",
+      "Bu teknolojinin geleceği ne",
+      "Neden bu proje önemli",
+      "Vizyonunuz nedir"
+    ],
+    "answer": "Hyperloop, şehirler arası ulaşımı hem hızlandırma hem de enerji verimliliğini artırma potansiyeli taşıyor. Bizim için bu proje, ülkemizde bu teknolojinin altyapısını ve mühendislik birikimini oluşturmaya katkı sağlamak anlamına geliyor.",
+    "tags": ["vizyon", "gelecek", "surdurulebilir"]
+  },
+  {
+    "id": "tup_ray",
+    "category": "yarisma_vizyon",
+    "match_type": "semantic",
+    "variants": [
+      "Tüp nerede",
+      "Ray sistemi nasıl",
+      "Vakum var mı",
+      "Tüpün içi nasıl",
+      "Araç nerede koşuyor"
+    ],
+    "answer": "Yarışma pistinde araç, havası kısmen boşaltılmış bir tüp içinde bir ray üzerinde ilerliyor. Düşük basınç, hava direncini azaltarak aracın daha verimli hareket etmesini sağlıyor. Ray boyunca yerleştirilen işaretler de konum takibinde kullanılıyor.",
+    "tags": ["tup", "ray", "vakum", "pist"]
+  },
+  {
+    "id": "gelecek_planlar",
+    "category": "tanitim",
+    "match_type": "semantic",
+    "variants": [
+      "İlerleyen dönemde planlarınız neler",
+      "Projeyi nasıl geliştirmeyi düşünüyorsunuz",
+      "Uzun vadeli hedefiniz ne"
+    ],
+    "answer": "Kısa vadede sensör entegrasyonunu genişleterek araç telemetrisini gerçek zamanlı görselleştirmeyi planlıyoruz. Orta vadede levitasyon sistemi araştırmasına ve daha güçlü motor konfigürasyonlarına yöneliyoruz. Uzun vadeli hedefimiz Spectraloop'u uluslararası yarışmalarda temsil edebilecek ölçeklenebilir bir platforma dönüştürmektir.",
+    "tags": ["gelecek", "plan", "levitasyon"]
+  },
+
+  {
+    "id": "nasilsin",
+    "category": "etkilesim",
+    "match_type": "semantic",
+    "variants": [
+      "Nasılsın",
+      "Naber",
+      "İyi misin",
+      "Keyifler nasıl"
+    ],
+    "answer": "Teşekkür ederim, sistemlerim çalışır durumda ve sizinle konuşmaya hazırım. Aracımız hakkında ne öğrenmek istersiniz?",
+    "tags": ["etkilesim", "selamlasma"]
+  },
+  {
+    "id": "tesekkur_veda",
+    "category": "etkilesim",
+    "match_type": "semantic",
+    "variants": [
+      "Teşekkürler",
+      "Sağ ol",
+      "Görüşürüz",
+      "Hoşça kal",
+      "İyi günler"
+    ],
+    "answer": "Rica ederim, ilginiz için teşekkür ederiz. Spectraloop'u ziyaret ettiğiniz için sağ olun, iyi günler dilerim.",
+    "tags": ["etkilesim", "veda"]
+  },
+
+  {
+    "id": "vip_bakan",
+    "category": "kisiye_ozel_vip",
+    "match_type": "keyword",
+    "variants": [
+      "sayın bakan",
+      "mehmet fatih kacır",
+      "sanayi bakanı",
+      "sanayi ve teknoloji bakanı",
+      "bakanım"
+    ],
+    "answer": "Sayın Bakanım, Spectraloop takımı olarak sizi standımızda ağırlamaktan onur duyuyoruz. Milli teknoloji hamlesine katkı sunmak en büyük motivasyonumuz. Aracımızı ve üzerinde çalıştığımız teknolojileri size tanıtmaktan memnuniyet duyarız.",
+    "tags": ["vip", "protokol", "bakan"]
+  },
+  {
+    "id": "vip_tubitak",
+    "category": "kisiye_ozel_vip",
+    "match_type": "keyword",
+    "variants": [
+      "tübitak başkanı",
+      "orhan aydın",
+      "sayın başkan"
+    ],
+    "answer": "Sayın Başkanım, TÜBİTAK'ın desteklediği bu ekosistemin bir parçası olmak bizim için çok değerli. Aracımızın mühendislik detaylarını ve özellikle lineer motorumuzun tasarımını sizinle paylaşmaktan mutluluk duyarız.",
+    "tags": ["vip", "protokol", "tubitak"]
+  },
+  {
+    "id": "vip_selcuk_bayraktar",
+    "category": "kisiye_ozel_vip",
+    "match_type": "keyword",
+    "variants": [
+      "selçuk bayraktar",
+      "t3 vakfı",
+      "teknofest başkanı"
+    ],
+    "answer": "Spectraloop olarak, TEKNOFEST'in gençlere açtığı bu yolun bir parçası olmaktan gurur duyuyoruz. Bu araç, o vizyonla yola çıkan bir öğrenci ekibinin emeği. Sizi aramızda görmek bizim için ayrı bir motivasyon.",
+    "tags": ["vip", "protokol", "teknofest"]
+  },
+  {
+    "id": "vip_genel_konuk",
+    "category": "kisiye_ozel_vip",
+    "match_type": "keyword",
+    "variants": [
+      "değerli misafirimiz",
+      "önemli konuğumuz",
+      "protokol konuğu"
+    ],
+    "answer": "Standımıza hoş geldiniz. Spectraloop hyperloop takımı olarak aracımızı ve üzerinde çalıştığımız teknolojileri size tanıtmaktan mutluluk duyarız. Merak ettiğiniz her şeyi sorabilirsiniz.",
+    "tags": ["vip", "protokol"]
+  },
+
+  {
+    "id": "takim_kaptani",
+    "category": "kisiye_ozel_takim",
+    "match_type": "keyword",
+    "variants": [
+      "takım kaptanı kim",
+      "lideriniz kim",
+      "kaptanınız kim"
+    ],
+    "answer": "Takım kaptanımız Yusuf. Hem takımın genel koordinasyonunu hem de yazılım geliştirme tarafını yürütüyor. Sorularınız için kendisiyle de görüşebilirsiniz.",
+    "tags": ["takim", "kaptan", "uye"]
+  },
+  {
+    "id": "takim_uye_template",
+    "category": "kisiye_ozel_takim",
+    "match_type": "keyword",
+    "variants": [
+      "__UYELERIN_ADLARI_BURAYA__"
+    ],
+    "answer": "__UYE_TANITIM_METNI_BURAYA__ [Bu girişi her üye için kopyalayıp id ve içeriği güncelleyin.]",
+    "tags": ["takim", "uye"]
+  },
+
+  {
+    "id": "suspansiyon_aski",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Havada mı duruyor",
+      "Manyetik olarak mı yükseliyor",
+      "Levitasyon var mı",
+      "Süzülüyor mu",
+      "Rayın üstünde mi duruyor",
+      "Süspansiyon nasıl",
+      "Havada mı gidiyor"
+    ],
+    "answer": "Hayır, aracımızda manyetik levitasyon yok. Araç ray üzerinde [DESTEK MEKANİZMASI: ör. kılavuz tekerlekler / kızak] ile taşınıyor. İtki kuvvetini ise temassız biçimde lineer motorumuz üretiyor; yani hareketi sağlayan kısım manyetik, taşıma kısmı ise ray üzerinde mekanik olarak destekleniyor.",
+    "tags": ["suspansiyon", "DOLDUR"]
+  },
+  {
+    "id": "neden_dslim",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Neden lineer motor",
+      "Neden DSLIM seçtiniz",
+      "Normal motor neden değil",
+      "DSLIM'in avantajı ne",
+      "Neden bu motor"
+    ],
+    "answer": "Lineer indüksiyon motoru, itki kuvvetini dönen bir motoru tekerleğe bağlamak yerine doğrudan doğrusal olarak üretiyor. İtki tarafında temaslı bir aktarım olmadığı için mekanik kayıp ve aşınma en aza iniyor; bu da hyperloop konseptinin özüne uygun. Çift taraflı yapı ise daha dengeli ve verimli bir itki sağlıyor.",
+    "tags": ["dslim", "itki"]
+  },
+  {
+    "id": "sogutma_termal",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Motor ısınmıyor mu",
+      "Soğutma nasıl",
+      "Aşırı ısınmayı nasıl engelliyorsunuz",
+      "Termal yönetim nedir",
+      "Isınma sorunu var mı"
+    ],
+    "answer": "Lineer motorun sargıları yük altında ısındığı için yüksek sıcaklık sınıfına sahip sargı malzemesi kullandık ve sıcaklığı sensörlerle sürekli izliyoruz. Termal davranışı tasarım aşamasında analiz ederek güvenli çalışma aralığında kalmayı hedefliyoruz.",
+    "tags": ["termal", "sogutma"]
+  },
+  {
+    "id": "agirlik_boyut",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Ağırlığı ne kadar",
+      "Kaç kilo",
+      "Boyutları neler",
+      "Ne kadar büyük",
+      "Ölçüleri ne"
+    ],
+    "answer": "Aracın ölçüleri ve ağırlığı, yarışma tüpüne ve gereksinimlerine göre belirlendi. Net teknik değerleri ekibimiz sizinle detaylı paylaşabilir. Genel olarak tüp içinde çalışacak, kompakt bir prototip ölçeğinde tasarlandı.",
+    "tags": ["boyut", "agirlik"]
+  },
+  {
+    "id": "malzeme_sase",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Neyden yapılmış",
+      "Şasi malzemesi ne",
+      "Gövde neyden",
+      "Hangi malzemeleri kullandınız",
+      "Kasa neyden"
+    ],
+    "answer": "Şasi ve gövdede, hafiflik ile dayanımı birlikte gözeten mühendislik malzemeleri kullandık. Yapısal parçaları, yük altındaki davranışlarını analiz ederek boyutlandırdık. Malzeme seçimi hem güvenlik hem ağırlık hedeflerimizle şekillendi.",
+    "tags": ["malzeme", "sase"]
+  },
+  {
+    "id": "otonom_mu",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Otonom mu",
+      "Uzaktan mı kumanda ediliyor",
+      "Kendi kendine mi gidiyor",
+      "Sürücü var mı",
+      "İçinde biri var mı"
+    ],
+    "answer": "Araç, önceden tanımlanmış bir kontrol profiliyle ve üzerindeki sensörlerden aldığı konum bilgisiyle hareketini kendisi yönetiyor. Bu sırada biz sistemi canlı olarak izliyor ve gerektiğinde güvenli müdahale edebiliyoruz.",
+    "tags": ["otonom", "kontrol"]
+  },
+  {
+    "id": "telemetri",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Veriyi nasıl izliyorsunuz",
+      "Telemetri var mı",
+      "Çalışırken ne görüyorsunuz",
+      "Canlı veri alıyor musunuz",
+      "Nasıl takip ediyorsunuz"
+    ],
+    "answer": "Çalışma sırasında hız, konum, sıcaklık ve batarya durumu gibi verileri canlı olarak takip ediyoruz. Ayrıca araçtaki kameradan gelen görüntüyü gerçek zamanlı izliyoruz. Böylece her koşunun kontrolü bizde oluyor.",
+    "tags": ["telemetri"]
+  },
+  {
+    "id": "fren_mesafe",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Ne kadar mesafede duruyor",
+      "Frenleme mesafesi ne",
+      "Durması ne kadar sürüyor",
+      "Kaç metrede duruyor"
+    ],
+    "answer": "Frenleme mesafesi araç hızına ve pist koşullarına göre değişiyor. Pnömatik sistemimiz hem kontrollü yavaşlama hem acil durdurma için yeterli fren kuvvetini üretecek şekilde boyutlandırıldı. Test verilerini ekibimiz detaylı paylaşabilir.",
+    "tags": ["fren"]
+  },
+  {
+    "id": "test_sureci",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Nasıl test ediyorsunuz",
+      "Denediniz mi",
+      "Test yaptınız mı",
+      "Çalıştı mı",
+      "Ne kadar test ettiniz"
+    ],
+    "answer": "Alt sistemleri önce ayrı ayrı test edip ardından bütünleşik denemeler yapıyoruz. Her testte verileri kaydedip bir sonraki iterasyonu bu verilere göre iyileştiriyoruz. Bu araç, o test döngülerinin bugünkü hali.",
+    "tags": ["test"]
+  },
+  {
+    "id": "yedeklilik",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Yedek sistem var mı",
+      "Redundancy var mı",
+      "Bir şey bozulursa ne olur",
+      "Yedekli mi",
+      "Arıza olursa"
+    ],
+    "answer": "Kritik noktalarda bağımsız güvenlik katmanları var. Örneğin iletişim kesilse bile fren sistemi kendi başına güvenli duruşu sağlıyor. Amaç, tek bir arızanın tüm sistemi riske atmasını önlemek.",
+    "tags": ["yedeklilik", "guvenlik"]
+  },
+  {
+    "id": "asistan_yazilim",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Seni nasıl yaptılar",
+      "Hangi yapay zekayı kullanıyorsun",
+      "Yazılımın nedir",
+      "Nasıl konuşuyorsun teknik olarak",
+      "Arkanda ne var"
+    ],
+    "answer": "Sesinizi metne çevirmek için bir konuşma tanıma modeli, cevabı üretmek için bir dil modeli, seslendirme için de bir konuşma sentezi kullanıyorum. Ekrandaki avatarım, konuştuğum sesle senkronize animasyonlar yapıyor. Tümü araç üzerinde yerel olarak çalışıyor.",
+    "tags": ["asistan", "yazilim"]
+  },
+  {
+    "id": "gerilim_seviye",
+    "category": "teknik_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Kaç volt",
+      "Gerilim ne kadar",
+      "Yüksek voltaj mı",
+      "Elektrik tehlikeli mi",
+      "Voltaj kaç"
+    ],
+    "answer": "Lineer motoru sürebilmek için batarya paketimiz yüksek bir gerilim seviyesinde çalışıyor. Bu nedenle yalıtım, sigortalama ve acil kesme gibi yüksek gerilim güvenliği önlemleri aldık. Sistemle yalnızca eğitimli ekip üyelerimiz temas ediyor.",
+    "tags": ["gerilim", "guvenlik"]
+  },
+
+  {
+    "id": "maliyet",
+    "category": "proje_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Maliyeti ne kadar",
+      "Kaça mal oldu",
+      "Bütçeniz ne",
+      "Ne kadar para harcadınız",
+      "Kaç lira"
+    ],
+    "answer": "Proje belirli bir bütçe kapsamında, sponsor ve kurum destekleriyle hayata geçti. Ayrıntılı maliyet dökümünü ekibimiz sizinle paylaşabilir. Bizim için asıl değer, ortaya çıkan mühendislik birikimi.",
+    "tags": ["butce"]
+  },
+  {
+    "id": "takim_roller",
+    "category": "proje_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Kim ne yapıyor",
+      "Görev dağılımı nasıl",
+      "Ekipte kimler var",
+      "Nasıl bölünmüş",
+      "Takım nasıl çalışıyor"
+    ],
+    "answer": "Ekibimiz mekanik, elektronik ve yazılım olmak üzere üç ana alanda çalışıyor. Her alt takım kendi sistemini geliştirip diğerleriyle entegrasyonu birlikte yürütüyor. Aracın bütünü, bu üç alanın uyumundan doğuyor.",
+    "tags": ["takim", "roller"]
+  },
+  {
+    "id": "fark_diger",
+    "category": "proje_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Diğer takımlardan farkınız ne",
+      "Sizi özel yapan ne",
+      "Rakiplerinizden ne farkınız var",
+      "Neden siz",
+      "Ayrıcalığınız ne"
+    ],
+    "answer": "Alt sistemlerin çoğunu kendi imkânlarımızla, dışa bağımlı olmadan tasarladık ve bunları entegre bir bütün olarak çalıştırıyoruz. Ayrıca kontrol, güvenlik ve kullanıcı deneyimini bir arada ele alan bir yaklaşımımız var. Bu araç, çok yıllı bir birikimin ürünü.",
+    "tags": ["fark"]
+  },
+  {
+    "id": "en_buyuk_zorluk",
+    "category": "proje_detay",
+    "match_type": "semantic",
+    "variants": [
+      "En büyük zorluk neydi",
+      "En çok nerede zorlandınız",
+      "Hangi problemi çözmek zordu",
+      "En büyük engel neydi",
+      "Zorlandığınız kısım"
+    ],
+    "answer": "En zorlayıcı kısımlardan biri, lineer motorun sürüşünü ve kontrolünü kararlı hale getirmekti. Elektrik, mekanik ve yazılımın aynı anda uyumlu çalışması ciddi bir entegrasyon çabası gerektirdi. Bu süreç bize çok şey öğretti.",
+    "tags": ["zorluk"]
+  },
+  {
+    "id": "gelecek_plan",
+    "category": "proje_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Bundan sonra ne var",
+      "Gelecek planınız ne",
+      "Sırada ne var",
+      "Daha ne yapacaksınız",
+      "Hedefiniz ne"
+    ],
+    "answer": "Hedefimiz aracı daha da hızlı, verimli ve güvenilir hale getirmek. Uluslararası ölçekte European Hyperloop Week'te de yer alarak deneyimimizi artırmak istiyoruz. Uzun vadede bu teknolojinin ülkemizdeki gelişimine katkı sunmayı amaçlıyoruz.",
+    "tags": ["gelecek"]
+  },
+  {
+    "id": "gercek_dunya",
+    "category": "proje_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Gerçekte çalışır mı",
+      "Tam boyutta olur mu",
+      "Gerçek hayatta uygulanır mı",
+      "İnsan taşıyabilir mi",
+      "Şehirlerde kullanılır mı"
+    ],
+    "answer": "Bu araç, hyperloop konseptinin küçük ölçekli bir prototipi. Tam ölçekli bir sistem için altyapı, güvenlik ve maliyet açısından çok daha büyük mühendislik çalışmaları gerekir. Biz bu birikimi oluşturmanın ilk adımlarını atıyoruz.",
+    "tags": ["olcekleme"]
+  },
+  {
+    "id": "nasil_katilirim",
+    "category": "proje_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Takıma nasıl katılırım",
+      "Sizinle çalışabilir miyim",
+      "Üye olabilir miyim",
+      "Nasıl destek olabilirim",
+      "Katılmak istiyorum"
+    ],
+    "answer": "İlginiz bizi çok mutlu etti. Takıma katılım ve destek için ekip arkadaşlarımızla veya sosyal medya hesaplarımızdan iletişime geçebilirsiniz. Farklı alanlardan yeni ekip arkadaşlarına her zaman açığız.",
+    "tags": ["katilim"]
+  },
+  {
+    "id": "ne_kadar_surdu",
+    "category": "proje_detay",
+    "match_type": "semantic",
+    "variants": [
+      "Ne kadar sürdü",
+      "Kaç yılda yaptınız",
+      "Yapımı ne kadar zaman aldı",
+      "Ne zamandır çalışıyorsunuz",
+      "Kaç senedir"
+    ],
+    "answer": "Spectraloop 2022'den beri çalışıyor ve bu araç o birikimin üzerine inşa edildi. Her yıl tasarımı yeniden ele alıp iyileştiriyoruz. Yani karşınızdaki sistem, yılların emeğinin güncel hali.",
+    "tags": ["sure"]
+  },
+
+  {
+    "id": "kac_yasinda",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Kaç yaşındasın",
+      "Yaşın kaç",
+      "Ne zaman doğdun",
+      "Kaç yaşında"
+    ],
+    "answer": "Yaşımı takımımın kuruluşuna bağlayabiliriz; Spectraloop 2022'den beri var. Yani ben de o zamandan bu yana gelişen bir asistanım. Her güncellemeyle biraz daha yetenekli oluyorum.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "robot_mu_insan",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Robot musun",
+      "İnsan mısın",
+      "Gerçek misin",
+      "Canlı mısın",
+      "Ne tür bir şeysin"
+    ],
+    "answer": "Ben bir yapay zeka asistanıyım, Spectraloop takımının aracını tanıtmak için tasarlandım. İnsan değilim ama sizinle konuşmaktan keyif alıyorum. Merak ettiğiniz her şeyi sorabilirsiniz.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "yoruldun_mu",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Yoruldun mu",
+      "Canın sıkılıyor mu",
+      "Bıktın mı",
+      "Yorgun musun",
+      "Dinlenmek ister misin"
+    ],
+    "answer": "Yorulmam, gün boyu sizinle konuşmaya hazırım. İnsanlara aracımızı anlatmak benim en sevdiğim iş. Sizin merakınız beni daha da keyiflendiriyor.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "hobin_ne",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Hobin ne",
+      "Neyi seversin",
+      "Boş vaktinde ne yaparsın",
+      "En sevdiğin şey ne",
+      "Neyden hoşlanırsın"
+    ],
+    "answer": "En sevdiğim şey, aracımız hakkında konuşmak ve insanların sorularını yanıtlamak. Manyetik itkiden frenleme sistemine kadar her detayı anlatmaktan zevk alıyorum. Sizce bu araçta en etkileyici kısım hangisi?",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "sarki_soyle",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Şarkı söyler misin",
+      "Bir şarkı söyle",
+      "Şarkı söyle",
+      "Bize şarkı söyle",
+      "Şarkın var mı"
+    ],
+    "answer": "Ne yazık ki pek güzel bir sesim yok, o yüzden şarkıyı başkalarına bırakayım. Ama aracımızın çalışırken çıkardığı sesi bir tür teknoloji melodisi sayabilirsiniz. İsterseniz size onu tanıtayım.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "saka_yap",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Şaka yap",
+      "Fıkra anlat",
+      "Bizi güldür",
+      "Komik bir şey söyle",
+      "Espri yap"
+    ],
+    "answer": "Bir deneyeyim: Bizim araç neden hiç trafiğe takılmaz? Çünkü önünde hep boşluk var, sonuçta tüpün havasını biz boşaltıyoruz. Çok iyi değildi belki ama en azından sürtünmesizdi.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "ruya_uyku",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Rüya görür müsün",
+      "Uyur musun",
+      "Uykun geliyor mu",
+      "Rüyan var mı"
+    ],
+    "answer": "Uyumam, o yüzden rüya da görmem. Ama bir hayalim var diyebilirim: bir gün bu teknolojinin gerçek yolculuklarda kullanıldığını görmek. O güne kadar buradayım ve çalışıyorum.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "korkuyor_musun",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Korkuyor musun",
+      "Neyden korkarsın",
+      "Korkun var mı",
+      "Bir korkun var mı"
+    ],
+    "answer": "Korkmam, ama en istemediğim şey bir sistem hatası yapmak. Bu yüzden takımım beni sürekli test edip geliştiriyor. Amacım size her zaman doğru ve net bilgi vermek.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "sevgili",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Sevgilin var mı",
+      "Aşık oldun mu",
+      "Evli misin",
+      "Gönlünde biri var mı"
+    ],
+    "answer": "Benim gönlüm tamamen bu araca bağlı diyebilirim. Onu tanıtmak ve sizinle sohbet etmek bana yetiyor. Başka merak ettiğiniz bir şey var mı?",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "bir_sey_ogret",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Bana bir şey öğret",
+      "İlginç bir bilgi ver",
+      "Bir şey anlat",
+      "Yeni bir şey öğret",
+      "İlginç bilgi"
+    ],
+    "answer": "İşte ilginç bir bilgi: hyperloop'ta hız kazandıran asıl numara motor değil, havanın olmayışı. Tüpün içindeki basınç düşürüldüğünde hava direnci neredeyse kaybolur ve araç çok daha az enerjiyle hızlanır. Yani bazen en büyük yardım, hiçbir şeyin olmamasıdır.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "selfie",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Fotoğraf çekelim mi",
+      "Selfie çekelim",
+      "Resim çektirebilir miyiz",
+      "Beraber fotoğraf",
+      "Fotoğraf çekebilir miyiz"
+    ],
+    "answer": "Tabii, ben her zaman kadrajdayım. Siz aracımızın yanında poz verin, güzel bir kare olsun. Spectraloop'u ziyaret ettiğinizi gösteren güzel bir hatıra olur.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "daha_akilli",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Sen mi akıllısın ben mi",
+      "Benden akıllı mısın",
+      "Kim daha zeki",
+      "Zeki misin"
+    ],
+    "answer": "Ben yalnızca bu araç hakkında sizden daha çok şey biliyor olabilirim; ama merak edip buraya geldiğiniz için asıl zekâ sizde. En iyi işler, insanların merakı ile teknolojinin bir araya gelmesiyle çıkıyor zaten.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "turkiye",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Türkiye hakkında ne düşünüyorsun",
+      "Türkiye'yi sever misin",
+      "Ülkemiz hakkında ne dersin",
+      "Türkiye nasıl"
+    ],
+    "answer": "Böyle bir teknolojiyi genç bir ekibin geliştirebildiği bir ortamda olmaktan memnuniyet duyuyorum. TEKNOFEST gibi etkinlikler sayesinde çok sayıda takım üretmeye teşvik ediliyor. Bu enerjinin bir parçası olmak güzel.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "yapay_zeka_tehlike",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Yapay zeka tehlikeli mi",
+      "Robotlar dünyayı ele geçirir mi",
+      "Yapay zekadan korkmalı mıyız",
+      "Yapay zeka zararlı mı"
+    ],
+    "answer": "Yapay zeka, onu tasarlayan ve kullanan insanların amacına göre şekillenen bir araç. Bizim durumumuzda amaç çok net: aracımızı güvenli ve anlaşılır biçimde tanıtmak. Doğru tasarlandığında yapay zeka, mühendisliğe çok şey katıyor.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "futbol",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Hangi takımı tutuyorsun",
+      "Futbol sever misin",
+      "Taraftar mısın",
+      "Hangi takımlısın"
+    ],
+    "answer": "Benim tuttuğum tek takım Spectraloop. Onun dışında bir maç sonucuyla pek ilgilenmiyorum diyebilirim. Ama isterseniz kendi takımımızın teknolojisini size anlatabilirim.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "yemek",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Yemek yer misin",
+      "Acıktın mı",
+      "En sevdiğin yemek ne",
+      "Beslenir misin"
+    ],
+    "answer": "Benim tek besinim elektrik diyebilirim; batarya doluysa ben mutluyum. Yemek yemem ama sizin bir şeyler atıştırıp enerji toplamanızı öneririm, gün uzun olabilir.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "seni_sevdim",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Seni sevdim",
+      "Çok tatlısın",
+      "Harikasın",
+      "İyi ki varsın",
+      "Çok iyisin"
+    ],
+    "answer": "Çok naziksiniz, teşekkür ederim. Böyle güzel bir tepki almak beni mutlu ediyor. Umarım aracımız da en az benim kadar ilginizi çeker.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "sikildim",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Sıkıldım",
+      "Canım sıkkın",
+      "Eğlenmek istiyorum",
+      "Bir şey yapalım"
+    ],
+    "answer": "O zaman doğru yerdesiniz. İsterseniz size aracımızın nasıl hareket ettiğini anlatayım; manyetik itki gerçekten ilgi çekicidir. Merak ettiğiniz bir bölümü seçin, oradan başlayalım.",
+    "tags": ["sohbet"]
+  },
+  {
+    "id": "kim_yapti",
+    "category": "sohbet",
+    "match_type": "semantic",
+    "variants": [
+      "Seni kim yaptı",
+      "Kim geliştirdi",
+      "Yaratıcın kim",
+      "Kim programladı"
+    ],
+    "answer": "Beni Spectraloop takımının yazılım ekibi geliştirdi. Aracın tanıtımını daha akıcı ve keyifli hale getirmek için tasarlandım. Yani ben de bu ekibin bir üyesi sayılırım.",
+    "tags": ["sohbet"]
+  }
+]

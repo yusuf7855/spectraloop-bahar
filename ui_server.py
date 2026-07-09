@@ -22,6 +22,7 @@ from flask_socketio import SocketIO
 from brain            import Brain
 from hardware         import send_vehicle_command, PI_HOST, PI_PORT
 from vehicle_commands import detect_vehicle_command
+from qa_router        import get_router
 
 # ── Flask + SocketIO ─────────────────────────────────────────────────────────
 app      = Flask(__name__, static_folder=".", static_url_path="")
@@ -230,6 +231,18 @@ def _pi_monitor():
 def index():
     return send_from_directory(".", "ui.html")
 
+@app.route("/bg.mp4")
+def bg_video():
+    return send_from_directory(".", "bg.mp4")
+
+@app.route("/konusan_loop.mp4")
+def konusan_video():
+    return send_from_directory(".", "konusan_loop.mp4")
+
+@app.route("/duragan_loop.mp4")
+def duragan_video():
+    return send_from_directory(".", "duragan_loop.mp4")
+
 
 @socketio.on("connect")
 def on_ws_connect():
@@ -240,6 +253,24 @@ def on_ws_connect():
         "pi_ping":      _pi_ping_ms,
     })
     _sys_log("Arayüz bağlandı")
+
+
+@socketio.on("vip_greet")
+def on_vip_greet(data):
+    """
+    Operatör tarafından tetiklenen VIP selamlama.
+    Browser konsolundan: socket.emit('vip_greet', {id: 'vip_bakan'})
+    Klavye kısayolundan: ui.html V+1/2/3/4 kombinasyonları.
+
+    data: {id: str}  — qa_base.json'daki kisiye_ozel_vip id'si
+    """
+    qa_id  = data.get("id", "vip_genel_konuk") if isinstance(data, dict) else "vip_genel_konuk"
+    answer = get_router().get_by_id(qa_id)
+    if answer:
+        _sys_log(f"VIP selam tetiklendi: {qa_id}")
+        speak(answer)
+    else:
+        _sys_log(f"VIP id bulunamadı: {qa_id}", "err")
 
 # ── Başlatma ─────────────────────────────────────────────────────────────────
 def main():
@@ -261,8 +292,8 @@ def main():
 
     speak(
         "Merhaba! Ben Spectra, Samsun Üniversitesi Spectraloop takımının "
-        "sesli asistanıyım. Motor, fren, sensör kontrolü ve daha fazlası "
-        "için buradayım. Nasıl yardımcı olabilirim?"
+        "sesli asistanıyım. Sizi tanımak isterim — "
+        "adınızı öğrenebilir miyim?"
     )
 
     def _keyboard():

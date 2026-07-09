@@ -1,17 +1,25 @@
 """
-Spectraloop - Beyin Katmani
+Spectraloop - Beyin Katmanı
 ----------------------------
 Strateji:
   1. Kalıp tablosu (~90% konuşma) → anında, doğal Türkçe
-  2. Ollama (kalan %10, özgün sorular) → İngilizce sistem promptu + direkt Türkçe çıktı
+  2. Ollama (kalan %10) → İngilizce sistem promptu + direkt Türkçe çıktı
+  3. VIP sistemi → TÜBİTAK/Bakanlık/TEKNOFEST ziyaretçilerini tanır,
+     "Sayın [Unvan]" hitabıyla karşılar, konuşmaya uygun sorular sorar.
 """
 import re
-import json
+import random
 import requests
 from datetime import datetime
 from typing import Optional
+
 from chat_patterns import detect_pattern
 from response_cleaner import clean as clean_response
+from vip_registry import lookup_vip, get_vip_greeting, get_vip_question, get_system_addendum
+from qa_router import get_router
+
+# Modül singleton — brain ve ui_server aynı örneği paylaşır.
+_qa_router = get_router()
 
 OLLAMA_URL  = "http://localhost:11434/api/chat"
 MODEL       = "qwen2.5:3b"
@@ -26,15 +34,16 @@ OLLAMA_OPTIONS = {
     "num_predict":    150,
 }
 
-# İngilizce sistem promptu — model bu dilde talimatları daha iyi anlar
-# Ama yanıtı Türkçe vermesini zorunlu kılıyoruz
-SYSTEM_PROMPT = """You are Spectra, a voice assistant for the Spectraloop hyperloop racing team from Samsun University, competing in TEKNOFEST Turkey.
+SYSTEM_PROMPT = """You are Spectra, a voice assistant for the Spectraloop hyperloop racing team \
+from Samsun University, competing in TEKNOFEST Turkey.
 
 Respond ONLY in Turkish. Zero English words in your response.
 Use formal "siz", NEVER informal "sen".
-Max 2-3 short sentences. No bullet points, no markdown.
-Be warm and natural like a close friend.
-If you don't know something, admit it simply.
+Max 2-3 short sentences. No bullet points, no markdown. No emojis.
+Stay on topic: if asked something unrelated to the team, vehicle or hyperloop,
+politely redirect to the project ("Bu konuda yardımcı olamam, ancak aracımız hakkında \
+sorularınızı yanıtlamaktan memnuniyet duyarım.").
+If you genuinely don't know something, say "Bu konuda net bir bilgim yok" — never fabricate.
 
 Vehicle control — use control_vehicle tool:
 BRAKES: FRONT_ON, FRONT_OFF, REAR_ON, REAR_OFF, ALL, RELEASE
@@ -73,6 +82,22 @@ TOOLS = [
 
 _SENT_ENDS = ('. ', '! ', '? ', '.\n', '!\n', '?\n', '... ', '…')
 
+# İsim tespitinde atlanacak kelimeler
+_NAME_STOPWORDS = {
+    "bir","bu","şu","ben","sen","biz","siz","de","da","ki","mi","mu","mü",
+    "ve","ile","için","ama","ya","veya","benim","ismim","adım","adim",
+    "tamam","evet","hayır","hayir","selam","merhaba","hey","günaydın",
+    "nasil","nasilsiniz","nasilsin","tesekkur","tabii","anladim","anliyorum",
+    "iyi","peki","olur","oldu","tabi","tabiki","elbette","efendim",
+}
+
+# Araç/teknik komut içeren kelimelerin olduğu girişleri isim olarak işleme
+_COMMAND_WORDS = {
+    "fren","motor","sensor","sicaklik","voltaj","durumu","calistir","durdur",
+    "baslat","kapat","ac","nedir","nasil","neden","ne","kim","hangisi",
+    "soyle","anlat","yardim","kontrol","test","sistem","rapor","oku"
+}
+
 
 def _split_sentences(text: str):
     buf = text
@@ -94,38 +119,92 @@ def _split_sentences(text: str):
             break
 
 
+def _normalize_tr(s: str) -> str:
+    s = s.lower().strip()
+    for tr, en in [
+        ('ı','i'),('İ','i'),('ğ','g'),('Ğ','g'),('ş','s'),('Ş','s'),
+        ('ç','c'),('Ç','c'),('ö','o'),('Ö','o'),('ü','u'),('Ü','u'),
+    ]:
+        s = s.replace(tr, en)
+    return re.sub(r'[^\w\s]', '', s)
+
+
 class Brain:
     def __init__(self, hardware_fn):
-        self.history     = []
-        self.hardware_fn = hardware_fn
-        self.user_name: Optional[str] = None
-        self.greeted     = False   # ilk selamı yaptık mı?
+        self.history      = []
+        self.hardware_fn  = hardware_fn
+        self.user_name: Optional[str]  = None
+        self.vip_info:  Optional[dict] = None
+        self.greeted          = False
+        self.waiting_for_name = True   # İlk girişi isim olarak işle
 
-    # ── İsim çıkarma ─────────────────────────────────────────────────────────
-    def _extract_name(self, text: str) -> Optional[str]:
+    # ── İsim çıkarma (cümlede gömülü isim) ──────────────────────────────────
+    def _extract_embedded_name(self, text: str) -> Optional[str]:
+        """'Adım Yusuf', 'ismim Kacır' gibi kalıplardan isim çıkarır."""
         patterns = [
-            r"(?:benim\s+)?adım\s+(\w+)",
-            r"ismim\s+(\w+)",
-            r"bana\s+(\w+)\s+(?:de|diyebilirsin|çağır)",
-            r"ben\s+(\w+)(?:\s+değilim)?[,.]?$",
+            r"(?:benim\s+)?adım\s+([\w]+(?:\s+[\w]+){0,2})",
+            r"ismim\s+([\w]+(?:\s+[\w]+){0,2})",
+            r"bana\s+([\w]+(?:\s+[\w]+){0,1})\s+(?:de|diyebilirsin|çağır)",
+            r"ben\s+([\w]+(?:\s+[\w]+){0,2})[,.]?\s*$",
         ]
         for p in patterns:
-            m = re.search(p, text.lower())
+            m = re.search(p, text, re.IGNORECASE)
             if m:
-                name = m.group(1).capitalize()
-                if len(name) > 1 and name.lower() not in (
-                    "bir","bu","şu","ben","sen","de","da","ki","mi","mu","mü"
-                ):
-                    return name
+                candidate = m.group(1).strip()
+                first = candidate.split()[0].lower()
+                if len(first) > 1 and _normalize_tr(first) not in _NAME_STOPWORDS:
+                    return candidate.title()
         return None
 
-    # ── Düşük seviye Ollama çağrısı ───────────────────────────────────────────
-    def _ollama(self, messages: list, use_tools: bool = False) -> dict:
+    # ── İsim girişini işle (waiting_for_name modunda) ───────────────────────
+    def _process_name_input(self, text: str):
+        """
+        Kullanıcının isim girişini işler.
+        Döndürür: (isim_str veya None, vip_dict veya None)
+        """
+        stripped = text.strip()
+        words    = stripped.split()
+        norm     = _normalize_tr(stripped)
+        norm_set = set(norm.split())
+
+        # Araç/teknik komut mu? → isim değil
+        if norm_set & _COMMAND_WORDS:
+            return None, None
+
+        # Uzun cümle mi? → isim değil
+        if len(words) > 5:
+            return None, None
+
+        # VIP kontrolü (önce tam metin, sonra parçalı)
+        vip = lookup_vip(stripped)
+        if vip:
+            return vip["ad_soyad"], vip
+
+        # Gömülü isim kalıbı ("adım X")
+        embedded = self._extract_embedded_name(stripped)
+        if embedded:
+            return embedded, lookup_vip(embedded)
+
+        # Kısa cevap: anlamlı kelimeleri filtrele, birincisini isim say
+        meaningful = [
+            w for w in words
+            if _normalize_tr(w) not in _NAME_STOPWORDS and len(w) > 1
+        ]
+        if meaningful:
+            name = meaningful[0].capitalize()
+            vip  = lookup_vip(" ".join(meaningful))
+            return name, vip
+
+        return None, None
+
+    # ── Düşük seviye Ollama çağrısı ──────────────────────────────────────────
+    def _ollama(self, messages: list, use_tools: bool = False,
+                options: Optional[dict] = None) -> dict:
         payload = {
             "model":    MODEL,
             "messages": messages,
             "stream":   False,
-            "options":  OLLAMA_OPTIONS,
+            "options":  options if options is not None else OLLAMA_OPTIONS,
         }
         if use_tools:
             payload["tools"] = TOOLS
@@ -133,71 +212,142 @@ class Brain:
         resp.raise_for_status()
         return resp.json()["message"]
 
-    # ── Ana sohbet ────────────────────────────────────────────────────────────
+    # ── Sistem promptu oluştur ───────────────────────────────────────────────
+    def _build_system(self, grounding: str = "") -> str:
+        now = datetime.now().strftime("%d %B %Y, %H:%M")
+        sys = SYSTEM_PROMPT
+        if self.vip_info:
+            sys += get_system_addendum(self.vip_info)
+        elif self.user_name:
+            sys += (
+                f"\n\nUser's first name: {self.user_name}. "
+                f"Use it naturally occasionally with formal 'siz'."
+            )
+        if grounding:
+            sys += f"\n\n{grounding}"
+        sys += f"\nTime: {now}"
+        return sys
+
+    # ── Ana sohbet ───────────────────────────────────────────────────────────
     def chat_stream(self, user_input: str):
         """Generator — cümle cümle Türkçe yanıt yield eder."""
 
-        # 1) İsim çıkar
-        found = self._extract_name(user_input)
-        if found:
-            self.user_name = found
-
-        # 2) İlk selamlama: isim bilinmiyorsa sor
-        norm_in = user_input.lower().strip()
-        is_greeting = any(w in norm_in for w in ["merhaba","selam","hey","günaydın","iyi akşam"])
-        if is_greeting and not self.greeted and not self.user_name:
-            self.greeted = True
-            resp = "Merhaba! Ben Spectra, Spectraloop takımının sesli asistanıyım. Sizinle tanışmak güzel! İsminiz ne?"
+        def _push(text: str):
             self.history.append({"role": "user",      "content": user_input})
-            self.history.append({"role": "assistant",  "content": resp})
-            yield resp
-            return
-
-        # 3) İsim öğrendikten sonra özel karşılama
-        if found and not self.greeted:
-            self.greeted = True
-            resp = f"Merhaba {found} Bey/Hanım! Sizinle tanışmak güzel. Size nasıl yardımcı olabilirim?"
-            self.history.append({"role": "user",      "content": user_input})
-            self.history.append({"role": "assistant",  "content": resp})
-            yield resp
-            return
-        if found:
-            resp = f"Güzel, sizi tanıdım {found}! Bundan sonra isminizi bileceğim."
-            self.history.append({"role": "user",      "content": user_input})
-            self.history.append({"role": "assistant",  "content": resp})
-            yield resp
-            return
-
-        # 4) Bilinen kalıp mı?
-        pattern_resp = detect_pattern(user_input)
-        if pattern_resp:
-            # %40 ihtimalle ismi başa ekle
-            if self.user_name:
-                import random
-                if random.random() < 0.4:
-                    first = pattern_resp[0].lower() + pattern_resp[1:]
-                    pattern_resp = f"{self.user_name}, {first}"
-            self.history.append({"role": "user",      "content": user_input})
-            self.history.append({"role": "assistant",  "content": pattern_resp})
+            self.history.append({"role": "assistant",  "content": text})
             if len(self.history) > MAX_HISTORY:
                 self.history = self.history[-MAX_HISTORY:]
+
+        norm_in = _normalize_tr(user_input)
+        is_greeting = any(
+            w in norm_in
+            for w in ["merhaba","selam","hey","gunaydin","iyi aksam","iyi gunler"]
+        )
+
+        # ── 1. İlk giriş → isim bekleme modu ─────────────────────────────────
+        if self.waiting_for_name:
+
+            if is_greeting:
+                # Selamı karşıla, tekrar sor
+                resp = (
+                    "Merhaba! Ben Spectra, Samsun Üniversitesi Spectraloop takımının "
+                    "sesli asistanıyım. Sizi tanımak isterim — "
+                    "adınızı öğrenebilir miyim?"
+                )
+                _push(resp)
+                yield resp
+                return
+
+            name, vip = self._process_name_input(user_input)
+
+            if vip:
+                # VIP tespit edildi
+                self.vip_info    = vip
+                self.user_name   = vip["ad_soyad"]
+                self.waiting_for_name = False
+                self.greeted     = True
+                greeting  = get_vip_greeting(vip)
+                question  = get_vip_question(vip)
+                resp = f"{greeting} {question}"
+                _push(resp)
+                yield resp
+                return
+
+            if name:
+                # Normal ziyaretçi
+                self.user_name        = name
+                self.waiting_for_name = False
+                self.greeted          = True
+                questions = [
+                    f"Merhaba {name}! Tanıştığımıza çok memnun oldum. "
+                    f"Hyperloop sistemimiz veya takımımız hakkında merak ettiğiniz bir şey var mı?",
+                    f"Hoş geldiniz {name}! Ben Spectra. "
+                    f"Spectraloop'un sesli asistanıyım. Size nasıl yardımcı olabilirim?",
+                    f"Merhaba {name}! Sizi aramıza hoş geldiniz. "
+                    f"Araç kontrol sistemi, hyperloop teknolojisi veya başka bir konuda "
+                    f"yardımcı olmaktan memnuniyet duyarım.",
+                ]
+                resp = random.choice(questions)
+                _push(resp)
+                yield resp
+                return
+
+            # İsim anlaşılamadı ama teknik soru gibi görünüyor — normal akışa geç
+            if norm_in.strip():
+                self.waiting_for_name = False
+                # Aşağıya düş (normal sohbet)
+            else:
+                resp = "Affedersiniz, adınızı tam anlayamadım. Tekrar söyler misiniz?"
+                _push(resp)
+                yield resp
+                return
+
+        # ── 2. Gömülü isim öğrenme (sohbet ortasında) ───────────────────────
+        if not self.vip_info:
+            embedded = self._extract_embedded_name(user_input)
+            if embedded:
+                vip = lookup_vip(embedded)
+                if vip and not self.vip_info:
+                    self.vip_info  = vip
+                    self.user_name = vip["ad_soyad"]
+                elif not self.user_name:
+                    self.user_name = embedded.split()[0].capitalize()
+
+        # ── 3. Bilinen kalıp? ────────────────────────────────────────────────
+        pattern_resp = detect_pattern(user_input)
+        if pattern_resp:
+            if self.vip_info:
+                # VIP ise hitap ekle (bazen)
+                if random.random() < 0.35:
+                    pattern_resp = (
+                        f"{self.vip_info['hitap']}, {pattern_resp[0].lower()}{pattern_resp[1:]}"
+                    )
+            elif self.user_name and random.random() < 0.35:
+                pattern_resp = f"{self.user_name}, {pattern_resp[0].lower()}{pattern_resp[1:]}"
+            _push(pattern_resp)
             yield pattern_resp
             return
 
-        # 5) Ollama'ya gönder
+        # ── 3.5 QA Bilgi Tabanı ──────────────────────────────────────────────
+        qa_answer, qa_score = _qa_router.route(user_input)
+        if qa_answer:
+            # Deterministik eşleşme — doğrudan seslendir, LLM'e gitme
+            _push(qa_answer)
+            yield qa_answer
+            return
+
+        # ── 4. Ollama (grounding ile) ─────────────────────────────────────────
+        # QA router eşleşmedi: bilgi tabanını grounding olarak system prompt'a enjekte et
+        grounding = _qa_router.grounding_text(query=user_input)
         try:
             self.history.append({"role": "user", "content": user_input})
             if len(self.history) > MAX_HISTORY:
                 self.history = self.history[-MAX_HISTORY:]
 
-            now = datetime.now().strftime("%d %B %Y, %H:%M")
-            sys = SYSTEM_PROMPT
-            if self.user_name:
-                sys += f"\n\nUser's name: {self.user_name}. Use it naturally sometimes with formal 'siz' address."
-            sys += f"\nTime: {now}"
-
-            messages = [{"role": "system", "content": sys}] + self.history
-            msg = self._ollama(messages, use_tools=True)
+            messages = [{"role": "system", "content": self._build_system(grounding)}] + self.history
+            # Grounding context daha fazla token gerektiriyor; num_ctx'i artır
+            grounded_options = {**OLLAMA_OPTIONS, "num_ctx": 4096}
+            msg = self._ollama(messages, use_tools=True, options=grounded_options)
 
             # Tool çağrısı
             if msg.get("tool_calls"):
@@ -208,16 +358,14 @@ class Brain:
                         hw_result = self.hardware_fn(cmd)
                         print(f"[Brain] control_vehicle({cmd}) → {hw_result}")
                         self.history.append({"role": "tool", "content": hw_result})
-                msgs2   = [{"role": "system", "content": sys}] + self.history
+                msgs2   = [{"role": "system", "content": self._build_system()}] + self.history
                 final   = self._ollama(msgs2, use_tools=False)
-                content = final.get("content", "Tamam.")
-                content = clean_response(content)
+                content = clean_response(final.get("content", "Tamam."))
                 self.history.append({"role": "assistant", "content": content})
                 yield from _split_sentences(content)
                 return
 
-            content = msg.get("content", "")
-            content = clean_response(content)
+            content = clean_response(msg.get("content", ""))
             self.history.append({"role": "assistant", "content": content})
             yield from _split_sentences(content)
 
@@ -225,14 +373,16 @@ class Brain:
             yield "Ollama'ya bağlanılamadı. Ollama çalışıyor mu?"
         except Exception as e:
             print(f"[Brain] Hata: {e}")
-            yield "Bir hata oluştu, tekrar dener misin?"
+            yield "Bir hata oluştu, tekrar dener misiniz?"
 
     # ─────────────────────────────────────────────────────────────────────────
     def chat(self, user_input: str) -> str:
         return " ".join(self.chat_stream(user_input))
 
     def reset(self):
-        self.history   = []
-        self.user_name = None
-        self.greeted   = False
+        self.history          = []
+        self.user_name        = None
+        self.vip_info         = None
+        self.greeted          = False
+        self.waiting_for_name = True
         print("[Brain] Geçmiş sıfırlandı.")

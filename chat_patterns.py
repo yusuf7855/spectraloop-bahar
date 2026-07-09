@@ -455,8 +455,8 @@ _RESPONSES = {
         "Samsun Üniversitesi'nden bir yarışma takımıyız. Hyperloop araç kontrolü, tasarım ve yazılım geliştiriyoruz. TEKNOFEST'te yarışıyoruz!",
     ],
     "takım kaç kişi": [
-        "Takımın tam büyüklüğünü bilmiyorum, ama multidisipliner bir ekip olduğunu biliyorum. Mekanik, elektronik ve yazılım var.",
-        "Büyük bir ekip bu. Tasarım, üretim, elektronik ve yazılım ekipleri birlikte çalışıyor.",
+        "Takımımız 13 kişiden oluşuyor. Mekanik, elektronik ve yazılım alanlarından Samsun Üniversitesi öğrencileri bir arada çalışıyor.",
+        "13 kişilik bir ekibiz. Mekanik tasarım, elektronik donanım ve yazılım geliştirme ekipleri birlikte çalışıyor.",
     ],
     "proje ne kadar süredir": [
         "Projenin başlangıç tarihini tam bilmiyorum, ama takımın bu işe ciddi emek verdiğini biliyorum.",

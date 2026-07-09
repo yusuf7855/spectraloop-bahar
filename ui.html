@@ -8,424 +8,401 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     :root {
-      --col:     #1e6eff;
-      --glow:    rgba(30,110,255,.4);
-      --bg:      #050515;
-      /* Spectra maskot renk paleti */
-      --cyan:    #22e0d6;
-      --blue:    #4c7cff;
-      --violet:  #8b5cf6;
-      --magenta: #ff57d8;
+      --col:  #1e6eff;
+      --glow: rgba(30,110,255,.4);
+      --bg:   #131c2e;
     }
 
     html, body {
       width:100%; height:100%;
-      background: var(--bg);
-      font-family: 'Courier New', Courier, monospace;
-      color:#fff;
+      background:var(--bg);
+      font-family:'Courier New', Courier, monospace;
+      color:#e2e8f0;
       overflow:hidden;
     }
 
-    /* ── Holografik grid ──────────────────────────────────────── */
+    /* ── Izgara arkaplan ── */
     body::before {
       content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
       background-image:
-        linear-gradient(rgba(0,212,255,.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,255,.02) 1px, transparent 1px);
-      background-size:48px 48px;
+        linear-gradient(rgba(99,179,237,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,179,237,.04) 1px, transparent 1px);
+      background-size:56px 56px;
     }
-    body::after {
-      content:''; position:fixed; inset:0; z-index:999; pointer-events:none;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0,0,0,.1) 2px, rgba(0,0,0,.1) 4px
-      );
-    }
-    .scan-beam {
-      position:fixed; left:0; right:0; height:5px; z-index:998; pointer-events:none;
-      background:linear-gradient(transparent, rgba(0,212,255,.05), transparent);
-      animation:scan 9s linear infinite;
-    }
-    @keyframes scan { 0%{top:-5px} 100%{top:100vh} }
 
-    @keyframes crt { 0%,100%{opacity:1} 91%{opacity:1} 92%{opacity:.96} 94%{opacity:1} }
-    #app { animation: crt 9s infinite; }
-
-    @keyframes glitch {
-      0%  { transform:translate(0);         clip-path:none; }
-      18% { transform:translate(-3px, 1px); clip-path:inset(8% 0 84% 0); }
-      36% { transform:translate( 3px,-1px); clip-path:inset(43% 0 41% 0); }
-      54% { transform:translate(-2px, 2px); clip-path:inset(78% 0 7% 0); }
-      72% { transform:translate( 1px, 0);   clip-path:none; }
-      100%{ transform:translate(0);         clip-path:none; }
+    /* ── Merkezdeki radyal parlaklık ── */
+    .bg-radial {
+      position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:radial-gradient(ellipse 60% 55% at 50% 52%,
+        rgba(30,110,255,.07) 0%, transparent 70%);
     }
-    .glitch { animation:glitch .26s steps(1) forwards; }
 
-    /* ── Layout ───────────────────────────────────────────────── */
+    /* ── Layout ── */
     #app {
       position:relative; z-index:1;
       display:flex; flex-direction:column;
       width:100vw; height:100vh;
     }
 
-    /* ── Header ───────────────────────────────────────────────── */
+    /* ══════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════ */
     header {
       flex-shrink:0;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:11px 32px 9px;
-      border-bottom:1px solid rgba(30,110,255,.16);
-      background:linear-gradient(180deg,rgba(5,5,20,.92) 0%,transparent 100%);
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      gap:12px;
+      padding:0 32px;
+      height:64px;
+      background:rgba(10,14,30,.75);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(255,255,255,.06);
     }
-    .brand { display:flex; flex-direction:column; gap:2px; }
+
+    /* Sol — Brand */
+    .brand {
+      display:flex; flex-direction:column; gap:3px;
+      min-width:0;
+    }
     .brand-name {
-      font-size:15px; font-weight:bold; letter-spacing:5px;
-      color:#ffffff; text-shadow:0 0 16px rgba(255,255,255,.3);
+      font-size:13px; font-weight:bold; letter-spacing:4px;
+      color:#fff;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
-    .brand-sub { font-size:9px; letter-spacing:3px; color:#4a5a70; }
-    .center-title { text-align:center; }
+    .brand-sep {
+      width:28px; height:1px;
+      background:linear-gradient(90deg, var(--col), transparent);
+      transition:background .5s;
+      margin:2px 0;
+    }
+    .brand-sub {
+      font-size:8px; letter-spacing:3px;
+      color:#4a6080;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+
+    /* Orta — Başlık */
+    .center-title {
+      text-align:center;
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+    }
     .center-title h1 {
-      font-size:30px; font-weight:bold; letter-spacing:14px;
-      color:#ffffff; text-shadow:0 0 32px rgba(255,255,255,.25);
+      font-size:clamp(20px, 3vw, 32px);
+      font-weight:bold;
+      letter-spacing:clamp(8px, 1.5vw, 16px);
+      color:#fff;
+      text-shadow:0 0 32px rgba(255,255,255,.15), 0 0 60px var(--glow);
+      transition:text-shadow .5s;
+      white-space:nowrap;
     }
-    .center-title p { font-size:10px; letter-spacing:4px; color:#4a5a70; margin-top:3px; }
-    .badge { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+    .header-divider {
+      width:100%; height:1px;
+      background:linear-gradient(90deg, transparent, var(--col), transparent);
+      opacity:.35;
+      transition:background .5s;
+    }
+    .center-title p {
+      font-size:clamp(7px, 0.85vw, 10px);
+      letter-spacing:clamp(2px, 0.6vw, 5px);
+      color:#4a6080;
+      white-space:nowrap;
+    }
+
+    /* Sağ — Rozet */
+    .badge {
+      display:flex; flex-direction:column; align-items:flex-end; gap:3px;
+      min-width:0;
+    }
     .badge-main {
-      font-size:14px; font-weight:bold; letter-spacing:4px;
-      color:#ffffff; text-shadow:0 0 14px rgba(255,255,255,.2);
+      font-size:13px; font-weight:bold; letter-spacing:4px;
+      color:#fff;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
-    .badge-sub { font-size:9px; letter-spacing:3px; color:#4a5a70; }
+    .badge-sep {
+      width:28px; height:1px;
+      background:linear-gradient(270deg, var(--col), transparent);
+      transition:background .5s;
+      margin:2px 0;
+      align-self:flex-end;
+    }
+    .badge-sub {
+      font-size:8px; letter-spacing:3px;
+      color:#4a6080;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
 
-    /* ── İçerik ───────────────────────────────────────────────── */
+    /* ══════════════════════════════════════
+       MERKEZ İÇERİK
+    ══════════════════════════════════════ */
     .content {
-      flex:1; display:flex; flex-direction:column;
+      flex:1;
+      display:flex; flex-direction:column;
       align-items:center; justify-content:center;
-      gap:18px; min-height:0;
+      gap:clamp(14px, 2.5vh, 28px);
+      min-height:0; padding:12px;
     }
 
-    /* ── Yüz sarmalayıcı ─────────────────────────────────────── */
-    .face-wrap {
-      position:relative; flex-shrink:0;
-      width:380px; height:420px;
-    }
-
-    /* Köşe bracket */
-    .face-wrap::before,.face-wrap::after,
-    .face-inner::before,.face-inner::after {
-      content:''; position:absolute;
-      width:22px; height:22px;
-      border-color:var(--col); border-style:solid;
-      transition:border-color .5s; z-index:2;
-    }
-    .face-wrap::before  { top:-6px;    left:-6px;    border-width:2px 0 0 2px; }
-    .face-wrap::after   { top:-6px;    right:-6px;   border-width:2px 2px 0 0; }
-    .face-inner::before { bottom:-6px; left:-6px;    border-width:0 0 2px 2px; }
-    .face-inner::after  { bottom:-6px; right:-6px;   border-width:0 2px 2px 0; }
-
-    .face-inner { position:relative; width:100%; height:100%; }
-
-    /* Glow halkaları */
-    .glow-ring {
-      position:absolute; border-radius:50%;
-      border:1px solid var(--col); transition:border-color .5s; pointer-events:none;
-    }
-    .glow-ring-1{ inset:-14px; opacity:.22; animation:rp 2.3s ease-in-out infinite; }
-    .glow-ring-2{ inset:-28px; opacity:.12; animation:rp 2.3s ease-in-out infinite .4s; }
-    .glow-ring-3{ inset:-46px; opacity:.06; animation:rp 2.3s ease-in-out infinite .8s; }
-    @keyframes rp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
-
-    /* ── Spectra SVG maskot ──────────────────────────────────── */
-    #spectra {
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      display:block;
-    }
-
-    /* ── Efekt canvas (üstte, saydam) ───────────────────────── */
-    #fxCanvas {
-      position:absolute; inset:0;
-      pointer-events:none; z-index:1;
-    }
-
-    /* ── Durum etiketi ───────────────────────────────────────── */
+    /* Durum etiketi — pill badge */
     .state-lbl {
-      font-size:15px; font-weight:bold; letter-spacing:4px;
-      color:var(--col); transition:color .5s;
-      text-shadow:0 0 14px var(--glow);
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 22px;
+      border-radius:100px;
+      background:color-mix(in srgb, var(--col) 10%, transparent);
+      border:1px solid color-mix(in srgb, var(--col) 30%, transparent);
+      font-size:11px; font-weight:bold; letter-spacing:4px;
+      color:var(--col);
+      text-shadow:0 0 12px var(--glow);
+      transition:color .5s, border-color .5s, background .5s;
+      white-space:nowrap;
     }
 
-    /* ── Metinler ─────────────────────────────────────────────── */
-    .texts { text-align:center; max-width:460px; }
+    /* ══════════════════════════════════════
+       MASKOT
+    ══════════════════════════════════════ */
+    .mascot-wrapper {
+      position:relative;
+      display:flex; align-items:center; justify-content:center;
+      --sz: clamp(300px, 48vmin, 460px);
+      width:calc(var(--sz) + 40px);
+      height:calc(var(--sz) + 40px);
+      flex-shrink:0;
+    }
+
+    .mascot-logo {
+      width:var(--sz); height:var(--sz);
+      object-fit:contain;
+      position:relative; z-index:2;
+      filter:drop-shadow(0 0 clamp(18px,2.5vmin,32px) var(--col));
+      transition:filter .5s ease;
+      user-select:none; pointer-events:none;
+    }
+
+    .wave-ring {
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      border:1.5px solid var(--col);
+      width:calc(var(--sz) + 8px);
+      height:calc(var(--sz) + 8px);
+      opacity:0;
+      pointer-events:none;
+      z-index:1;
+    }
+
+    /* ── Idle ── */
+    .mascot-wrapper.idle .mascot-logo {
+      animation:logo-breathe 3.5s ease-in-out infinite;
+    }
+
+    /* ── Dinliyor ── */
+    .mascot-wrapper.listening .wave-ring {
+      animation:wave-out 1.8s ease-out infinite;
+    }
+    .mascot-wrapper.listening .ring-2 { animation-delay:.6s; }
+    .mascot-wrapper.listening .ring-3 { animation-delay:1.2s; }
+    .mascot-wrapper.listening .mascot-logo {
+      animation:logo-listen 1.4s ease-in-out infinite;
+    }
+
+    /* ── Düşünüyor ── */
+    .mascot-wrapper.thinking .mascot-logo {
+      animation:logo-think 2s ease-in-out infinite;
+    }
+
+    /* ── Konuşuyor ── */
+    .mascot-wrapper.speaking .wave-ring {
+      animation:wave-out .82s ease-out infinite;
+    }
+    .mascot-wrapper.speaking .ring-2 { animation-delay:.27s; }
+    .mascot-wrapper.speaking .ring-3 { animation-delay:.54s; }
+    .mascot-wrapper.speaking .mascot-logo {
+      animation:logo-speak .6s ease-in-out infinite;
+    }
+
+    @keyframes wave-out {
+      0%   { width:calc(var(--sz) + 12px); height:calc(var(--sz) + 12px); opacity:.72; }
+      100% { width:calc(var(--sz) * 2.1);  height:calc(var(--sz) * 2.1);  opacity:0;  }
+    }
+    @keyframes logo-breathe {
+      0%,100% { filter:drop-shadow(0 0 20px var(--col));              transform:scale(1);     }
+      50%     { filter:drop-shadow(0 0 44px var(--col));              transform:scale(1.025); }
+    }
+    @keyframes logo-listen {
+      0%,100% { filter:drop-shadow(0 0 26px var(--col));              transform:scale(1);     }
+      50%     { filter:drop-shadow(0 0 56px var(--col));              transform:scale(1.03);  }
+    }
+    @keyframes logo-think {
+      0%,100% { filter:drop-shadow(0 0 28px var(--col)) brightness(1);   transform:scale(1);    }
+      50%     { filter:drop-shadow(0 0 62px var(--col)) brightness(1.3); transform:scale(1.04); }
+    }
+    @keyframes logo-speak {
+      0%,100% { filter:drop-shadow(0 0 30px var(--col));                  transform:scale(1);     }
+      50%     { filter:drop-shadow(0 0 74px var(--col)) brightness(1.35); transform:scale(1.05);  }
+    }
+
+    /* ══════════════════════════════════════
+       METİNLER
+    ══════════════════════════════════════ */
+    .texts {
+      text-align:center;
+      max-width:min(520px, 85vw);
+      display:flex; flex-direction:column; gap:10px;
+    }
     .heard-txt {
-      font-size:13px; color:#5577aa; font-style:italic;
-      margin-bottom:8px; min-height:18px;
-      text-shadow:0 0 8px rgba(80,120,180,.35);
+      font-size:clamp(11px, 1.4vw, 14px);
+      color:#7a9cc0;
+      font-style:italic;
+      min-height:1.4em;
+      line-height:1.5;
     }
     .resp-txt {
-      font-size:15px; font-weight:bold; letter-spacing:.5px;
-      color:var(--col); transition:color .5s; min-height:20px;
-      text-shadow:0 0 14px var(--glow);
+      font-size:clamp(13px, 1.6vw, 16px);
+      font-weight:bold;
+      letter-spacing:.4px;
+      color:#e2e8f0;
+      min-height:1.4em;
+      line-height:1.6;
+      text-shadow:0 0 18px var(--glow);
+      transition:text-shadow .5s;
     }
 
-    /* ── Footer ───────────────────────────────────────────────── */
+    /* ══════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════ */
     footer {
       flex-shrink:0;
       display:flex; align-items:center; justify-content:space-between;
-      padding:9px 32px;
-      border-top:1px solid rgba(30,110,255,.16);
-      background:linear-gradient(0deg,rgba(5,5,20,.92) 0%,transparent 100%);
+      flex-wrap:wrap; gap:8px;
+      padding:0 32px;
+      height:48px;
+      background:rgba(10,14,30,.75);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border-top:1px solid rgba(255,255,255,.06);
     }
-    .pi-info { display:flex; align-items:center; gap:20px; font-size:11px; }
-    .pi-block { display:flex; align-items:center; gap:7px; }
+
+    /* Pi bilgisi */
+    .pi-info {
+      display:flex; align-items:center; gap:16px;
+      font-size:10px;
+      white-space:nowrap;
+    }
+    .pi-block { display:flex; align-items:center; gap:6px; }
     .pi-dot {
-      width:8px; height:8px; border-radius:50%;
+      width:7px; height:7px; border-radius:50%;
       background:#ff4444;
       transition:background .4s,box-shadow .4s;
+      flex-shrink:0;
     }
-    .pi-dot.on { background:#00ff88; box-shadow:0 0 8px #00ff88; }
-    .pi-label { color:#253040; }
+    .pi-dot.on { background:#00e87a; box-shadow:0 0 6px #00e87a; }
+    .pi-label { color:#4a6080; }
     .pi-val   { color:var(--col); transition:color .5s; }
-    .pi-ping  { color:#253040; }
-    .pi-ping.fast { color:#00ff88; }
-    .pi-ping.slow { color:#ffaa00; }
+    .pi-ping  { color:#4a6080; }
+    .pi-ping.fast { color:#00e87a; }
+    .pi-ping.slow { color:#f59e0b; }
     .pi-ping.dead { color:#ff4444; }
-    .keys { display:flex; gap:10px; align-items:center; }
+
+    /* Tuş göstergeleri */
+    .keys {
+      display:flex; gap:8px; align-items:center;
+      flex-wrap:nowrap;
+    }
+    .key-group {
+      display:flex; align-items:center; gap:5px;
+    }
     .key {
       display:inline-flex; align-items:center; justify-content:center;
-      min-width:26px; height:22px; padding:0 5px;
-      border:1px solid rgba(30,110,255,.32);
-      color:var(--col); font-size:11px; font-weight:bold;
-      transition:color .3s,border-color .3s,background .3s;
+      min-width:24px; height:20px; padding:0 5px;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:3px;
+      color:#94a3b8; font-size:10px; font-weight:bold;
+      background:rgba(255,255,255,.04);
+      transition:all .25s;
+      white-space:nowrap;
     }
-    .key.active { background:var(--col); color:#000; }
-    .key-desc { font-size:10px; color:#253040; margin-right:6px; }
+    .key.active {
+      background:var(--col);
+      border-color:var(--col);
+      color:#000;
+    }
+    .key-desc { font-size:9px; color:#4a6080; letter-spacing:1px; }
 
+    /* ── Bağlantı uyarısı ── */
     .conn-warn {
-      position:fixed; top:13px; left:50%; transform:translateX(-50%);
-      font-size:11px; letter-spacing:2px; color:#ff6644;
+      position:fixed; top:74px; left:50%; transform:translateX(-50%);
+      font-size:10px; letter-spacing:2px;
+      color:#fff;
+      background:rgba(220,60,30,.85);
+      backdrop-filter:blur(8px);
+      padding:5px 16px; border-radius:100px;
       opacity:0; transition:opacity .4s; pointer-events:none; z-index:1000;
     }
     .conn-warn.show { opacity:1; }
 
-    /* ══════════════════════════════════════════════════════════
-       SPECTRA MASKOT CSS ANİMASYONLARI
-       ══════════════════════════════════════════════════════════ */
-
-    /* Ağız crossfade: normalde gülümseme, konuşunca çubuklar */
-    #mouth-bars { opacity:0; transition:opacity .18s }
-    #smile      { opacity:1; transition:opacity .18s }
-    .mouth-open #mouth-bars { opacity:1  }
-    .mouth-open #smile      { opacity:0  }
-    #mouth-bars, #smile { filter:drop-shadow(0 0 7px rgba(90,150,255,.65)) }
-
-    /* Gözler */
-    #eyes {
-      transform-box:fill-box; transform-origin:center;
-      transition:transform .09s;
-      transform:scaleY(var(--eyeScale,1));
-      filter:drop-shadow(0 0 9px rgba(34,224,214,.8))
-             drop-shadow(0 0 20px rgba(34,224,214,.4));
+    /* ══════════════════════════════════════
+       KÜÇÜK EKRANLAR
+    ══════════════════════════════════════ */
+    @media (max-height: 600px) {
+      header { height:52px; }
+      footer { height:40px; }
+      .content { gap:10px; }
     }
-    #eyes.blink   { transform:scaleY(0.08) }
-    #eyes-scan    { transform-box:fill-box; transform-origin:center }
-
-    /* Crown LED */
-    #sensor {
-      filter:drop-shadow(0 0 6px rgba(34,224,214,.9));
-      animation:led 3s ease-in-out infinite;
-    }
-    @keyframes led { 0%,100%{opacity:.6} 50%{opacity:1} }
-
-    /* Yüzen pod animasyonu */
-    #pod { transform-box:fill-box; transform-origin:center; animation:float 4.4s ease-in-out infinite }
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-11px)} }
-
-    /* Maglev pad */
-    #maglev { transform-box:fill-box; transform-origin:center; animation:mag 2.4s ease-in-out infinite }
-    @keyframes mag { 0%,100%{opacity:.78;transform:scaleX(1)} 50%{opacity:1;transform:scaleX(1.06)} }
-
-    /* Ambient glow */
-    #ambient { animation:amb 6s ease-in-out infinite }
-    @keyframes amb { 0%,100%{opacity:.6} 50%{opacity:.85} }
-
-    /* Dinleme sonar halkaları — SADECE spectra SVG içindekiler */
-    #spectra .ring { opacity:0; transform-box:fill-box; transform-origin:center }
-    [data-state="listening"] #spectra .ring1 { animation:sonar 2.3s ease-out infinite }
-    [data-state="listening"] #spectra .ring2 { animation:sonar 2.3s ease-out 1.05s infinite }
-    @keyframes sonar {
-      0%  { opacity:.5; transform:scale(.62) }
-      70% { opacity:.12 }
-      100%{ opacity:0;  transform:scale(1.22) }
-    }
-    [data-state="listening"] #eyes { --eyeScale:1.06 }
-
-    /* Düşünme shimmer + göz tarama */
-    .shimmer { opacity:0; transform-box:fill-box; transform-origin:center }
-    [data-state="thinking"] .shimmer { opacity:1; animation:sweep 1.9s linear infinite }
-    @keyframes sweep { 0%{transform:translateX(-150px)} 100%{transform:translateX(150px)} }
-    [data-state="thinking"] #eyes-scan { animation:eyescan 2.5s ease-in-out infinite }
-    @keyframes eyescan {
-      0%,100%{ transform:translate(0,-3px) }
-      25%    { transform:translate(-11px,-4px) }
-      60%    { transform:translate(10px,-4px) }
+    @media (max-width: 500px) {
+      header { padding:0 16px; gap:8px; }
+      footer { padding:0 16px; }
+      .brand-sub, .badge-sub { display:none; }
+      .pi-ping, .pi-label:not(.pi-block .pi-label) { display:none; }
     }
   </style>
 </head>
 <body>
-<div class="scan-beam"></div>
-
+<div class="bg-radial"></div>
 <div id="app">
+
+  <!-- ── HEADER ── -->
   <header>
     <div class="brand">
       <div class="brand-name">SPECTRALOOP</div>
+      <div class="brand-sep" id="brandSep"></div>
       <div class="brand-sub">SAMSUN ÜNİVERSİTESİ</div>
     </div>
+
     <div class="center-title">
       <h1>SPECTRA</h1>
+      <div class="header-divider"></div>
       <p>SESLİ ARAÇ ASİSTANI</p>
     </div>
+
     <div class="badge">
       <div class="badge-main">TEKNOFEST</div>
+      <div class="badge-sep"></div>
       <div class="badge-sub">HYPERLOOP · 2025</div>
     </div>
   </header>
 
+  <!-- ── MERKEZ ── -->
   <div class="content">
-    <div class="face-wrap">
-      <div class="face-inner" id="faceInner">
-        <div class="glow-ring glow-ring-1"></div>
-        <div class="glow-ring glow-ring-2"></div>
-        <div class="glow-ring glow-ring-3"></div>
-
-        <!-- ══════════════════════════════════════════════════════
-             SPECTRA MASKOT SVG
-             ══════════════════════════════════════════════════════ -->
-        <svg id="spectra" data-state="idle" viewBox="0 0 540 600"
-             role="img" aria-label="Spectra maskotu">
-          <defs>
-            <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0"    stop-color="#ffffff"/>
-              <stop offset="0.48" stop-color="#d7def2"/>
-              <stop offset="1"    stop-color="#9aa6c6"/>
-            </linearGradient>
-            <linearGradient id="gVisor" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#111834"/>
-              <stop offset="1" stop-color="#070b1c"/>
-            </linearGradient>
-            <linearGradient id="gEye" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0"   stop-color="#b9fff7"/>
-              <stop offset="0.5" stop-color="#2ce0d4"/>
-              <stop offset="1"   stop-color="#12a6c4"/>
-            </linearGradient>
-            <linearGradient id="gSpectrum" x1="196" y1="0" x2="344" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0"    stop-color="#22e0d6"/>
-              <stop offset="0.34" stop-color="#4c7cff"/>
-              <stop offset="0.64" stop-color="#8b5cf6"/>
-              <stop offset="1"    stop-color="#ff57d8"/>
-            </linearGradient>
-            <radialGradient id="gAmbient" cx="270" cy="250" r="270" gradientUnits="userSpaceOnUse">
-              <stop offset="0"    stop-color="#22e0d6" stop-opacity="0.22"/>
-              <stop offset="0.55" stop-color="#4c7cff" stop-opacity="0.08"/>
-              <stop offset="1"    stop-color="#4c7cff" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="gMag" cx="270" cy="468" r="152" gradientUnits="userSpaceOnUse">
-              <stop offset="0"   stop-color="#7ff4ec" stop-opacity="0.95"/>
-              <stop offset="0.4" stop-color="#22e0d6" stop-opacity="0.6"/>
-              <stop offset="1"   stop-color="#8b5cf6" stop-opacity="0"/>
-            </radialGradient>
-            <linearGradient id="gShim" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0"   stop-color="#22e0d6" stop-opacity="0"/>
-              <stop offset="0.5" stop-color="#7fe9ff" stop-opacity="0.5"/>
-              <stop offset="1"   stop-color="#22e0d6" stop-opacity="0"/>
-            </linearGradient>
-            <clipPath id="visorClip">
-              <rect x="150" y="150" width="240" height="200" rx="92"/>
-            </clipPath>
-            <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="9"/>
-            </filter>
-          </defs>
-
-          <!-- ambient glow -->
-          <ellipse id="ambient" cx="270" cy="250" rx="255" ry="230" fill="url(#gAmbient)"/>
-
-          <!-- ground shadow + maglev pad -->
-          <ellipse cx="270" cy="492" rx="128" ry="17" fill="#000" opacity="0.32" filter="url(#soft)"/>
-          <g id="maglev">
-            <ellipse cx="270" cy="468" rx="150" ry="24" fill="url(#gMag)" filter="url(#soft)"/>
-            <ellipse cx="270" cy="468" rx="118" ry="5.5" fill="#a9fff6" opacity="0.9"/>
-          </g>
-
-          <!-- dinleme sonar halkaları (pod arkasında) -->
-          <circle class="ring ring1" cx="270" cy="238" r="172"
-                  fill="none" stroke="#22e0d6" stroke-width="2.4"/>
-          <circle class="ring ring2" cx="270" cy="238" r="172"
-                  fill="none" stroke="#7fb0ff" stroke-width="2"/>
-
-          <!-- yüzen pod -->
-          <g id="pod">
-            <!-- gövde -->
-            <rect x="110" y="90" width="320" height="310" rx="122" fill="url(#gBody)"/>
-            <rect x="110" y="90" width="320" height="310" rx="122"
-                  fill="none" stroke="#c7d2ec" stroke-width="1.5" opacity="0.6"/>
-            <!-- alın parlaklığı -->
-            <ellipse cx="205" cy="158" rx="96" ry="42" fill="#ffffff" opacity="0.3" filter="url(#soft)"/>
-            <!-- alt gölge -->
-            <ellipse cx="270" cy="372" rx="150" ry="46" fill="#6b779b" opacity="0.16" filter="url(#soft)"/>
-
-            <!-- crown LED -->
-            <circle id="sensor" cx="270" cy="108" r="6.5" fill="#22e0d6"/>
-
-            <!-- visor -->
-            <rect x="150" y="150" width="240" height="200" rx="92" fill="url(#gVisor)"/>
-            <!-- visor üst parlaklık -->
-            <path d="M172 200 Q270 158 368 200 Q300 176 172 200 Z" fill="#3a4a7a" opacity="0.5"/>
-
-            <!-- düşünme shimmer (visor'a kırpılmış) -->
-            <g clip-path="url(#visorClip)">
-              <rect class="shimmer" x="215" y="150" width="70" height="200" fill="url(#gShim)"/>
-            </g>
-
-            <!-- gözler -->
-            <g id="eyes-scan"><g id="eyes">
-              <rect x="213" y="203" width="46" height="58" rx="23" fill="url(#gEye)"/>
-              <rect x="281" y="203" width="46" height="58" rx="23" fill="url(#gEye)"/>
-              <ellipse cx="228" cy="219" rx="7" ry="10" fill="#ffffff" opacity="0.75"/>
-              <ellipse cx="296" cy="219" rx="7" ry="10" fill="#ffffff" opacity="0.75"/>
-            </g></g>
-
-            <!-- ağız: dinlenme gülümsemesi -->
-            <path id="smile"
-                  d="M210 305 Q270 327 330 305"
-                  fill="none" stroke="url(#gSpectrum)"
-                  stroke-width="7" stroke-linecap="round"/>
-
-            <!-- ağız: konuşma spektrum çubukları -->
-            <g id="mouth-bars">
-              <rect class="mbar" x="198" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
-              <rect class="mbar" x="220" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
-              <rect class="mbar" x="242" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
-              <rect class="mbar" x="264" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
-              <rect class="mbar" x="286" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
-              <rect class="mbar" x="308" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
-              <rect class="mbar" x="330" y="299" width="12" height="12" rx="6" fill="url(#gSpectrum)"/>
-            </g>
-          </g>
-        </svg>
-        <!-- ══════════════════════════════════════════════════════ -->
-
-        <!-- Dış efektler canvas'ı (nabız halkası + tick) -->
-        <canvas id="fxCanvas" width="380" height="420"></canvas>
-      </div>
-    </div>
 
     <div class="state-lbl" id="stateLbl">● BEKLİYOR</div>
+
+    <div class="mascot-wrapper idle" id="mascotWrapper">
+      <div class="wave-ring ring-1"></div>
+      <div class="wave-ring ring-2"></div>
+      <div class="wave-ring ring-3"></div>
+      <img src="/spectraloop_logo.png" class="mascot-logo" alt="Spectra">
+    </div>
 
     <div class="texts">
       <div class="heard-txt" id="heardTxt"></div>
       <div class="resp-txt"  id="respTxt"></div>
     </div>
+
   </div>
 
+  <!-- ── FOOTER ── -->
   <footer>
     <div class="pi-info">
       <div class="pi-block">
@@ -434,28 +411,35 @@
         <span class="pi-val" id="piIp">—</span>
       </div>
       <span class="pi-ping" id="piPing">ping —</span>
-      <span class="pi-label">Son: <span class="pi-val" id="piLast">—</span></span>
+      <span class="pi-label">Son:&nbsp;<span class="pi-val" id="piLast">—</span></span>
     </div>
+
     <div class="keys">
-      <span class="key" id="keyS">S</span><span class="key-desc">Konuş</span>
-      <span class="key">R</span><span class="key-desc">Sıfırla</span>
-      <span class="key">F</span><span class="key-desc">Tam Ekran</span>
+      <div class="key-group">
+        <span class="key" id="keyS">S</span>
+        <span class="key-desc">Konuş</span>
+      </div>
+      <div class="key-group">
+        <span class="key">R</span>
+        <span class="key-desc">Sıfırla</span>
+      </div>
+      <div class="key-group">
+        <span class="key">F</span>
+        <span class="key-desc">Tam Ekran</span>
+      </div>
       <span class="key">ESC</span>
     </div>
   </footer>
+
 </div>
 
-<div class="conn-warn" id="connWarn">● SUNUCUYA BAĞLANIYOR...</div>
+<div class="conn-warn" id="connWarn">● SUNUCUYA BAĞLANIYOR</div>
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  CANVAS — DIŞ NABIZ HALKASI VE TICK İŞARETLERİ
+//  RENK GEÇİŞİ
 // ═══════════════════════════════════════════════════════════════
-const canvas = document.getElementById('fxCanvas');
-const ctx    = canvas.getContext('2d');
-const CX = 190, CY = 210, FR = 160; // canvas merkezi (420px yükseklik)
-
 const STATE_RGB = {
   idle:      [30,  110, 255],
   listening: [34,  224, 214],
@@ -469,196 +453,28 @@ const STATE_LABEL = {
   speaking:  '◎ KONUŞUYOR',
 };
 
-let state   = 'idle';
-let curRGB  = [...STATE_RGB.idle];
-let frame   = 0;
-let pulse   = 0;
-
-const lerpRGB = (a,b,t) => a.map((v,i) => v+(b[i]-v)*t);
-const rgba    = (c,a) => `rgba(${c.map(Math.round).join(',')},${a})`;
-
-function updateCanvas() {
-  frame++;
-  pulse  = Math.sin(frame * 0.048) * 0.5 + 0.5;
-  curRGB = lerpRGB(curRGB, STATE_RGB[state], 0.07);
-}
-
-function drawCanvas() {
-  ctx.clearRect(0, 0, 380, 420);
-  const c = curRGB;
-
-  // Nabız halkası
-  const pr = FR + 14 + pulse * 12;
-  ctx.beginPath(); ctx.arc(CX, CY, pr, 0, Math.PI * 2);
-  ctx.strokeStyle = rgba(c, 0.18);
-  ctx.lineWidth = 1.5; ctx.stroke();
-
-  // Tick işaretleri
-  for (let i = 0; i < 8; i++) {
-    const a   = i * Math.PI / 4;
-    const len = i % 2 === 0 ? 10 : 5;
-    ctx.beginPath();
-    ctx.moveTo(CX + Math.cos(a) * (FR + 1),       CY + Math.sin(a) * (FR + 1));
-    ctx.lineTo(CX + Math.cos(a) * (FR + len + 1), CY + Math.sin(a) * (FR + len + 1));
-    ctx.strokeStyle = rgba(c, 0.5);
-    ctx.lineWidth = 1.5; ctx.stroke();
-  }
-}
+let state  = 'idle';
+let curRGB = [...STATE_RGB.idle];
+const lerpRGB = (a,b,t) => a.map((v,i) => v + (b[i]-v)*t);
 
 function syncCSS() {
+  curRGB = lerpRGB(curRGB, STATE_RGB[state], 0.06);
   const h = `rgb(${curRGB.map(Math.round).join(',')})`;
   const g = `rgba(${curRGB.map(Math.round).join(',')},0.4)`;
   document.documentElement.style.setProperty('--col',  h);
   document.documentElement.style.setProperty('--glow', g);
+  requestAnimationFrame(syncCSS);
 }
-
-(function loop() {
-  updateCanvas();
-  drawCanvas();
-  syncCSS();
-  requestAnimationFrame(loop);
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  SPECTRA MASKOT JS (ağız animasyonu, göz kırpma, state API)
-// ═══════════════════════════════════════════════════════════════
-(function () {
-  var svg   = document.getElementById('spectra');
-  var bars  = Array.prototype.slice.call(svg.querySelectorAll('.mbar'));
-  var eyes  = svg.querySelector('#eyes');
-  var MOUTH_Y  = 305;
-  var CLOSED   = 6;
-  var ENV      = [0.5, 0.72, 0.9, 1, 0.9, 0.72, 0.5];
-  var MAX_HALF = ENV.map(function (e) { return 6 + e * 30; });
-  var barTarget = ENV.map(function () { return CLOSED; });
-  var barCur    = ENV.map(function () { return CLOSED; });
-  var openLevel = 0, olSmooth = 0, lastActive = 0, mouthOpen = false;
-
-  function clamp(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
-
-  function setMouthOpen(v) {
-    v = clamp(v || 0);
-    openLevel = v;
-    if (v > 0.04) lastActive = performance.now();
-  }
-
-  var cadence = 0;
-  function updateTargets(dt) {
-    cadence += dt;
-    if (cadence < 82) return;
-    cadence = 0;
-    var lvl = olSmooth;
-    for (var i = 0; i < bars.length; i++) {
-      if (lvl < 0.05) {
-        barTarget[i] = CLOSED;
-      } else {
-        var j = 0.6 + Math.random() * 0.4;
-        barTarget[i] = CLOSED + (MAX_HALF[i] - CLOSED) * lvl * j;
-      }
-    }
-  }
-
-  var last = performance.now();
-  function loop(now) {
-    var dt = Math.min(50, now - last); last = now;
-    olSmooth += (openLevel - olSmooth) * 0.25;
-    updateTargets(dt);
-    for (var i = 0; i < bars.length; i++) {
-      barCur[i] += (barTarget[i] - barCur[i]) * 0.35;
-      var h = barCur[i];
-      bars[i].setAttribute('y',      (MOUTH_Y - h).toFixed(2));
-      bars[i].setAttribute('height', (h * 2).toFixed(2));
-    }
-    var active = olSmooth > 0.05 || (now - lastActive) < 220;
-    if (active && !mouthOpen) { mouthOpen = true;  svg.classList.add('mouth-open');    }
-    if (!active && mouthOpen) { mouthOpen = false; svg.classList.remove('mouth-open'); }
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
-
-  // Göz kırpma
-  var blinkT;
-  function blink() {
-    eyes.classList.add('blink');
-    setTimeout(function () { eyes.classList.remove('blink'); }, 120);
-  }
-  function scheduleBlink() {
-    clearTimeout(blinkT);
-    blinkT = setTimeout(function () {
-      if (svg.getAttribute('data-state') !== 'thinking') blink();
-      scheduleBlink();
-    }, 2600 + Math.random() * 3400);
-  }
-  scheduleBlink();
-
-  // State değiştir
-  function setState(s) {
-    svg.setAttribute('data-state', s);
-    if (s !== 'speaking') setMouthOpen(0);
-  }
-
-  // Genel API
-  window.Spectra = {
-    setState:     setState,
-    setMouthOpen: setMouthOpen,
-    blink:        blink,
-  };
-
-  setState('idle');
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  TÜRKÇE HECE → AĞIZ LİP-SYNC
-// ═══════════════════════════════════════════════════════════════
-const VOWELS_RE   = /[aeıioöuüAEIİOÖUÜ]/g;
-const OPEN_VOWELS = new Set('aeAEoöOÖ');
-const MS_PER_SYL  = 130; // 190wpm TTS @ ~7.7 hece/sn
-
-function scheduleSpeech(text) {
-  if (!text || !window.Spectra) return;
-  const vowels = [...text.matchAll(VOWELS_RE)];
-  if (!vowels.length) return;
-
-  vowels.forEach(function (v, i) {
-    const big  = OPEN_VOWELS.has(v[0]);
-    const open = big
-      ? 0.55 + Math.random() * 0.45   // a,e,o,ö → geniş açılma
-      : 0.15 + Math.random() * 0.30;  // ı,i,u,ü → dar açılma
-
-    setTimeout(function () {
-      if (state === 'speaking') Spectra.setMouthOpen(open);
-    }, i * MS_PER_SYL);
-
-    setTimeout(function () {
-      if (state === 'speaking') Spectra.setMouthOpen(0.02);
-    }, i * MS_PER_SYL + 70);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  GLITCH
-// ═══════════════════════════════════════════════════════════════
-let glitching = false;
-function triggerGlitch() {
-  if (glitching) return;
-  glitching = true;
-  document.getElementById('faceInner').classList.add('glitch');
-  setTimeout(() => {
-    document.getElementById('faceInner').classList.remove('glitch');
-    glitching = false;
-  }, 260);
-}
+syncCSS();
 
 // ═══════════════════════════════════════════════════════════════
 //  UI GÜNCELLEME
 // ═══════════════════════════════════════════════════════════════
-let prevState = 'idle';
-
 function setUIState(s) {
-  if (s !== prevState) { triggerGlitch(); prevState = s; }
   state = s;
   document.getElementById('stateLbl').textContent = STATE_LABEL[s] || '● BEKLİYOR';
-  if (window.Spectra) Spectra.setState(s);
+  const w = document.getElementById('mascotWrapper');
+  if (w) w.className = 'mascot-wrapper ' + s;
 }
 
 function setPiInfo(data) {
@@ -687,7 +503,7 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  BROWSER PTT (S tuşu → socket ptt_start/ptt_stop)
+//  PTT (S) + RESET (R)
 // ═══════════════════════════════════════════════════════════════
 let pttActive = false;
 const keyS = document.getElementById('keyS');
@@ -695,7 +511,7 @@ const keyS = document.getElementById('keyS');
 document.addEventListener('keydown', e => {
   if ((e.key === 's' || e.key === 'S') && !pttActive && !e.repeat) {
     pttActive = true;
-    if (keyS) keyS.classList.add('active');
+    keyS?.classList.add('active');
     if (typeof socket !== 'undefined' && socket.connected) socket.emit('ptt_start');
   }
   if ((e.key === 'r' || e.key === 'R') && !e.repeat) {
@@ -705,7 +521,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keyup', e => {
   if ((e.key === 's' || e.key === 'S') && pttActive) {
     pttActive = false;
-    if (keyS) keyS.classList.remove('active');
+    keyS?.classList.remove('active');
     if (typeof socket !== 'undefined' && socket.connected) socket.emit('ptt_stop');
   }
 });
@@ -717,7 +533,7 @@ const warn = document.getElementById('connWarn');
 let socket;
 
 try {
-  socket = io('http://localhost:5001', { reconnectionDelay: 2000, timeout: 5000 });
+  socket = io('http://localhost:5001', { reconnectionDelay:2000, timeout:5000 });
 
   socket.on('connect',       () => warn.classList.remove('show'));
   socket.on('disconnect',    () => { warn.classList.add('show'); setUIState('idle'); });
@@ -725,10 +541,7 @@ try {
 
   socket.on('state', data => {
     if (data.mode) setUIState(data.mode);
-    if (data.text) {
-      document.getElementById('respTxt').textContent = data.text;
-      if (data.mode === 'speaking') scheduleSpeech(data.text);
-    }
+    if (data.text) document.getElementById('respTxt').textContent = data.text;
     setPiInfo(data);
   });
 
@@ -746,7 +559,7 @@ try {
     document.getElementById('respTxt').textContent  = '';
   });
 
-} catch (e) {
+} catch(e) {
   warn.classList.add('show');
   warn.textContent = '● socket.io yüklenemedi';
 }
