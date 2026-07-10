@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
-Spectraloop - Sesli Asistan (UI'siz, sade terminal modu)
-----------------------------------------------------------
-S = Push-to-talk  |  R = Geçmişi sıfırla  |  ESC = Çıkış
+Spectraloop - Sesli Asistan (Araç Komut Modu)
+----------------------------------------------
+S = Push-to-talk  |  ESC = Çıkış
+
+Sadece araç komutlarını (motor, fren, sensör, alarm, LED) anlar.
+Sohbet, LLM veya bilgi tabanı yoktur.
 """
 import subprocess
 import queue
@@ -13,38 +16,22 @@ import sounddevice as sd
 from pynput import keyboard
 from faster_whisper import WhisperModel
 
-from brain           import Brain
-from hardware        import send_vehicle_command
+from hardware         import send_vehicle_command
 from vehicle_commands import detect_vehicle_command
 
 # ── Ayarlar ──────────────────────────────────────────────────────────────────
 PTT_KEY       = "s"
-RESET_KEY     = "r"
 SAMPLE_RATE   = 16000
 WHISPER_MODEL = "small"
 TTS_VOICE     = "Yelda"
 TTS_RATE      = "190"
 
+UNKNOWN_RESPONSE = "Sadece araç komutlarını anlıyorum. Motor, fren veya sensör komutu verebilirsiniz."
 
 # ── TTS ──────────────────────────────────────────────────────────────────────
 _tts_q    = queue.Queue()
 _tts_proc = None
 _tts_lock = threading.Lock()
-
-
-_PRONOUNCE = [
-    ("Spectraloop", "Spektıraloop"),
-    ("SPECTRALOOP", "Spektıraloop"),
-    ("Spectra",     "Spektıra"),
-    ("SPECTRA",     "Spektıra"),
-    ("spectra",     "spektıra"),
-]
-
-def _pronounce(text: str) -> str:
-    """TTS için telaffuz düzeltmesi — ekrandaki metin değişmez."""
-    for src, dst in _PRONOUNCE:
-        text = text.replace(src, dst)
-    return text
 
 
 def _tts_worker():
@@ -56,13 +43,13 @@ def _tts_worker():
             break
         with _tts_lock:
             _tts_proc = subprocess.Popen(
-                ["say", "-v", TTS_VOICE, "-r", TTS_RATE, _pronounce(text)]
+                ["say", "-v", TTS_VOICE, "-r", TTS_RATE, text]
             )
         _tts_proc.wait()
         _tts_q.task_done()
 
 
-def speak(text):
+def speak(text: str):
     if not text:
         return
     print(f"Spectra: {text}")
@@ -114,16 +101,12 @@ def process_audio():
 
     print(f"Sen: {text}")
 
-    # Hızlı araç komut yolu
-    vehicle_cmd = detect_vehicle_command(text)
-    if vehicle_cmd:
-        result = send_vehicle_command(vehicle_cmd)
+    cmd = detect_vehicle_command(text)
+    if cmd:
+        result = send_vehicle_command(cmd)
         speak(result)
-        return
-
-    # Sohbet yolu — streaming
-    for sentence in brain.chat_stream(text):
-        speak(sentence)
+    else:
+        speak(UNKNOWN_RESPONSE)
 
 
 # ── Klavye ───────────────────────────────────────────────────────────────────
@@ -137,11 +120,6 @@ def on_press(key):
             while not audio_q.empty():
                 audio_q.get()
             print("\n[● Dinliyor...]")
-
-        elif ch == RESET_KEY:
-            brain.reset()
-            speak("Tamam, konuşmayı sıfırladım.")
-
     except AttributeError:
         pass
 
@@ -160,12 +138,10 @@ def on_release(key):
 
 # ── Başlatma ──────────────────────────────────────────────────────────────────
 def main():
-    global whisper, brain
+    global whisper
 
     print("Whisper yükleniyor...")
     whisper = WhisperModel(WHISPER_MODEL, device="cpu", compute_type="int8")
-
-    brain = Brain(hardware_fn=send_vehicle_command)
 
     threading.Thread(target=_tts_worker, daemon=True).start()
 
@@ -173,8 +149,8 @@ def main():
                             dtype="float32", callback=audio_callback)
     stream.start()
 
-    print(f"\nSpectra hazır.  [ S = konuş | R = sıfırla | ESC = çıkış ]\n")
-    speak("Merhaba! Ben Spectra, Samsun Üniversitesi Spectraloop takımının sesli asistanıyım. Motor, fren, sensör kontrolü ve daha fazlası için buradayım. Nasıl yardımcı olabilirim?")
+    print(f"\nSpectra hazır.  [ S = konuş | ESC = çıkış ]\n")
+    speak("Spectra hazır. Motor, fren veya sensör komutu verebilirsiniz.")
 
     with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
         listener.join()
