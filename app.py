@@ -28,30 +28,9 @@ WHISPER_MODEL = "small"
 PORT          = 5050
 
 # Komut → video dosyası eşlemesi
-# Yalnızca var olan videolar için eşleme yapın; diğerleri "unknown" oynar
+# Sadece mevcut videolar burada — eşleşme yoksa idle'a dönülür
 VIDEO_MAP = {
-    "MOTOR_ON":       "motor_on.mp4",
-    "MOTOR_OFF":      "motor_off.mp4",
-    "MOTOR_STATUS":   "motor_status.mp4",
-    "FRONT_ON":       "front_on.mp4",
-    "FRONT_OFF":      "front_off.mp4",
-    "REAR_ON":        "rear_on.mp4",
-    "REAR_OFF":       "rear_off.mp4",
-    "ALL":            "all_brakes.mp4",
-    "RELEASE":        "release.mp4",
-    "EMERGENCY_STOP": "emergency.mp4",
-    "GET_TEMP":       "sensor_temp.mp4",
-    "GET_VOLTAGE":    "sensor_voltage.mp4",
-    "GET_ALL":        "sensor_all.mp4",
-    "LED_ON":         "led_on.mp4",
-    "LED_OFF":        "led_off.mp4",
-    "BUZZER_ON":      "buzzer_on.mp4",
-    "BUZZER_OFF":     "buzzer_off.mp4",
-    "BUZZER_BEEP":    "buzzer_beep.mp4",
-    "FLASHER_ON":     "flasher_on.mp4",
-    "FLASHER_OFF":    "flasher_off.mp4",
-    "STOP_LIGHT_ON":  "stop_light_on.mp4",
-    "STOP_LIGHT_OFF": "stop_light_off.mp4",
+    "MOTOR_ON": "motor_on.mp4",
 }
 
 # ── Flask + SocketIO ───────────────────────────────────────────────────────────
@@ -108,13 +87,17 @@ def process_audio():
     cmd = detect_vehicle_command(text)
 
     if cmd:
-        video = VIDEO_MAP.get(cmd, "unknown.mp4")
-        print(f"[CMD] {cmd} → {video}")
         threading.Thread(target=send_vehicle_command, args=(cmd,), daemon=True).start()
-        socketio.emit("play", {"video": video, "command": cmd})
+        video = VIDEO_MAP.get(cmd)
+        if video:
+            print(f"[CMD] {cmd} → {video}")
+            socketio.emit("play", {"video": video, "command": cmd})
+        else:
+            print(f"[CMD] {cmd} → video yok, idle'a dön")
+            socketio.emit("state", {"state": "idle"})
     else:
         print("[CMD] Komut bulunamadı")
-        socketio.emit("play", {"video": "unknown.mp4", "command": None})
+        socketio.emit("state", {"state": "idle"})
 
 
 # ── Klavye (PTT) ──────────────────────────────────────────────────────────────
@@ -160,11 +143,11 @@ HTML = """<!DOCTYPE html>
       background: #000;
       width: 100vw; height: 100vh;
       overflow: hidden;
-      display: flex; align-items: center; justify-content: center;
     }
     #player {
       width: 100%; height: 100%;
       object-fit: cover;
+      display: block;
     }
     #status {
       position: fixed;
@@ -184,63 +167,90 @@ HTML = """<!DOCTYPE html>
       font-size: 11px;
       pointer-events: none;
     }
+    /* Ses kilit açma overlay — tarayıcı ses politikası için */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 99;
+    }
+    #overlay span {
+      color: rgba(255,255,255,0.8);
+      font-family: monospace;
+      font-size: 20px;
+      letter-spacing: 2px;
+    }
   </style>
 </head>
 <body>
-  <video id="player" autoplay muted playsinline></video>
+  <!-- Tarayıcı ses iznini açmak için bir kez tıklanır, sonra kaybolur -->
+  <div id="overlay"><span>BAŞLATMAK İÇİN TIKLA</span></div>
+
+  <video id="player" playsinline></video>
   <div id="ptt-hint">[ S = konuş | ESC = çıkış ]</div>
-  <div id="status">Başlıyor...</div>
+  <div id="status"></div>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
     const player  = document.getElementById('player');
+    const overlay = document.getElementById('overlay');
     const status  = document.getElementById('status');
 
-    const GIRIS   = '/videos/giris.mp4';
-    const IDLE    = '/videos/duragan_loop.mp4';
-    const LISTEN  = '/videos/konusan_loop.mp4';
+    const GIRIS = '/videos/giris.mp4';
+    const IDLE  = '/videos/duragan_loop.mp4';
 
-    let phase = 'intro'; // intro | idle | listening | playing
+    let phase = 'locked'; // locked | intro | idle | listening | playing
 
+    // ── Video oynat ──────────────────────────────────────────────────────────
     function playVideo(src, loop, muted) {
       player.loop  = loop;
       player.muted = muted;
-      player.src   = src;
+      player.volume = 1.0;
+      player.src = src;
       player.load();
-      player.play().catch(e => console.warn('play:', e));
+      player.play().catch(e => console.warn('play hatası:', e));
     }
 
     function goIdle() {
       phase = 'idle';
       playVideo(IDLE, true, true);
-      status.textContent = 'Hazır';
+      status.textContent = 'Hazır  [ S = konuş ]';
     }
 
-    // Başlangıç: giriş videosu bir kez oynar, bitince durağan döngüye geçer
+    // Video bitti → idle
     player.addEventListener('ended', () => {
-      if (phase === 'intro' || phase === 'playing') {
-        goIdle();
-      }
+      if (phase === 'intro' || phase === 'playing') goIdle();
     });
 
-    // Video hata → idle
+    // Video bulunamadı → idle
     player.addEventListener('error', () => {
-      console.warn('Video bulunamadı:', player.src);
       if (phase !== 'idle') goIdle();
-      status.textContent = 'Hazır';
     });
 
-    // Giriş videosu
-    playVideo(GIRIS, false, true);
-    status.textContent = 'Başlıyor...';
+    // ── Overlay tıklandı → ses kilidi açıldı ────────────────────────────────
+    overlay.addEventListener('click', () => {
+      overlay.style.display = 'none';
+      phase = 'intro';
+      status.textContent = '';
+      // Kısa sessiz oynatma → tarayıcıya ses izni ver, sonra giriş başlat
+      player.muted = false;
+      player.volume = 1.0;
+      playVideo(GIRIS, false, false);
+      status.textContent = '';
+    });
 
-    // SocketIO
+    // ── SocketIO ─────────────────────────────────────────────────────────────
     const socket = io();
 
     socket.on('state', data => {
+      if (phase === 'locked') return;
       if (data.state === 'listening') {
         phase = 'listening';
-        playVideo(LISTEN, true, true);
+        playVideo(IDLE, true, true);   // durağan devam eder
         status.textContent = '● Dinliyor...';
       } else if (data.state === 'idle') {
         goIdle();
@@ -248,10 +258,10 @@ HTML = """<!DOCTYPE html>
     });
 
     socket.on('play', data => {
+      if (phase === 'locked') return;
       phase = 'playing';
-      const src = '/videos/' + data.video;
-      playVideo(src, false, false); // komut videoları sesli
-      status.textContent = data.command || '?';
+      playVideo('/videos/' + data.video, false, false);  // sesli
+      status.textContent = data.command || '';
     });
   </script>
 </body>
