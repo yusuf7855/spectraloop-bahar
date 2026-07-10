@@ -133,20 +133,24 @@ _PHRASES = {
         "arka freni geri al","arka freni serbeste birak","orka freni kapat",
     ],
     "ALL": [
-        "fren yap","firen yap","frene bas","frenleri ac","tum frenleri ac",
+        "fren yap","firen yap","firan yap","tiren yap","tiran yap",
+        "kiran yap","vren yap",
+        "frene bas","frenleri ac","tum frenleri ac",
         "butun frenleri ac","frenle","frenleme yap","frenleri devreye al",
         "frenleri uygula","frenleri kilitle","frenleri sik","frenleri vur",
         "frenleri tut","frenleri tuttur","tam fren","tam frenleme","her iki frene bas",
         "her iki freni ac","iki freni de ac","komple fren","tum frenlere bas",
         "hem on hem arka fren","freni cek","frenleri aktif et",
+        "kirani devreye al","tireni devreye al","fireni devreye al",
     ],
     "RELEASE": [
         "freni birak","frenleri birak","serbest birak","freni kapat",
         "frenleri kapat","tum frenleri birak","hepsini birak","hepsini kapat",
         "freni serbest birak","frenleri serbest birak","freni gevset",
         "frenden cik","freni kaldir","frenleri kaldir","freni geri al",
-        "fireni birak","freni iptal","freni coz","frenleri bos birak",
-        "frene basma","frenleri devre disi birak","freni birakiyor",
+        "fireni birak","fireni kapat","firani birak","kirani birak",
+        "tirani birak","tireni birak","freni iptal","freni coz",
+        "frenleri bos birak","frene basma","frenleri devre disi birak",
     ],
     "EMERGENCY_STOP": [
         "acil durdur","acil dur","acil stop","acil fren","acil frenleme",
@@ -222,7 +226,7 @@ _NORM_PHRASES = {
     for cmd, phrases in _PHRASES.items()
 }
 
-DIFFLIB_THRESHOLD = 0.54
+DIFFLIB_THRESHOLD = 0.70   # altında → emin değil → None döner
 
 
 def _difflib_match(tn: str):
@@ -317,7 +321,12 @@ def detect_vehicle_command(text: str) -> Optional[str]:
                or has_w({"ac","on","bas","sik","uygula","tut","vur","yap"})
     has_brk  = has(["fren","freni","frene","frenleri","frenler","frenle",
                     "firen","fireni","firene","firenle",
-                    "firan","firani","filen","frem","brake"])
+                    "firan","firani","filen","frem",
+                    "kiran","kirani","kirane","kiranleri",   # Whisper: fren→kiran
+                    "tiren","tireni","tirene",               # Whisper: fren→tiren
+                    "tiran","tirani",                        # Whisper: fren→tiran
+                    "vren","vreni",                          # Whisper: fren→vren
+                    "brake"])
 
     if has_brk or is_rear or is_front:
         if is_off:
