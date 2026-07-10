@@ -17,6 +17,15 @@ COMMAND_LABELS = {
     "MOTOR_ON":       "Motor çalışıyor.",
     "MOTOR_OFF":      "Motor durduruldu.",
     "EMERGENCY_STOP": "Acil durdurma! Tüm frenler devreye alındı, motor durduruldu.",
+    "BUZZER_ON":      "Alarm çalıyor.",
+    "BUZZER_OFF":     "Alarm kapatıldı.",
+    "BUZZER_BEEP":    "Bip!",
+    "FLASHER_ON":     "Flaşör açıldı.",
+    "FLASHER_OFF":    "Flaşör kapatıldı.",
+    "STOP_LIGHT_ON":  "Stop lambası yandı.",
+    "STOP_LIGHT_OFF": "Stop lambası söndürüldü.",
+    "LED_ON":         "LED'ler açıldı.",
+    "LED_OFF":        "LED'ler kapatıldı.",
 }
 
 
