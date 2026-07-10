@@ -201,7 +201,7 @@ HTML = """<!DOCTYPE html>
     const status  = document.getElementById('status');
 
     const GIRIS = '/videos/giris.mp4';
-    const IDLE  = '/videos/duragan_loop.mp4';
+    const IDLE  = '/videos/duragan.mp4';
 
     let phase = 'locked'; // locked | intro | idle | listening | playing
 
