@@ -141,8 +141,10 @@ HTML = """<!DOCTYPE html>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #000; width: 100vw; height: 100vh; overflow: hidden; }
 
-    /* İki video üst üste — crossfade için */
     #wrap { position: relative; width: 100%; height: 100%; }
+
+    /* va: ALT KATMAN — duragan, her zaman çalışır */
+    /* vb: ÜST KATMAN — giriş + komut videoları */
     .vp {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
@@ -150,22 +152,23 @@ HTML = """<!DOCTYPE html>
       opacity: 0;
       transition: opacity 0.35s ease;
     }
-    .vp.visible { opacity: 1; }
+    #va { z-index: 1; }
+    #vb { z-index: 2; }
+    .vp.vis { opacity: 1; }
 
     #status {
-      position: fixed;
+      position: fixed; z-index: 10;
       bottom: 20px; left: 50%;
       transform: translateX(-50%);
       color: rgba(255,255,255,0.55);
       font-family: monospace; font-size: 13px;
       pointer-events: none;
     }
-
     #overlay {
-      position: fixed; inset: 0;
+      position: fixed; inset: 0; z-index: 99;
       background: rgba(0,0,0,0.85);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; z-index: 99;
+      cursor: pointer;
     }
     #overlay span {
       color: rgba(255,255,255,0.85);
@@ -177,7 +180,7 @@ HTML = """<!DOCTYPE html>
   <div id="overlay"><span>BAŞLATMAK İÇİN TIKLA</span></div>
 
   <div id="wrap">
-    <video id="va" class="vp" playsinline></video>
+    <video id="va" class="vp" playsinline loop muted></video>
     <video id="vb" class="vp" playsinline></video>
   </div>
   <div id="status"></div>
@@ -186,60 +189,46 @@ HTML = """<!DOCTYPE html>
   <script>
     const overlay = document.getElementById('overlay');
     const status  = document.getElementById('status');
-    const va = document.getElementById('va');
-    const vb = document.getElementById('vb');
+    const va = document.getElementById('va');   // duragan — hiç durmuyor
+    const vb = document.getElementById('vb');   // giriş / komut
 
     const GIRIS = '/videos/giris.mp4';
     const IDLE  = '/videos/duragan.mp4';
 
-    let cur     = va;      // şu an görünür olan element
-    let phase   = 'locked';
-    let curSrc  = '';      // şu an oynayan videonun src'si
+    let phase = 'locked';
 
-    // ── Crossfade geçiş ─────────────────────────────────────────────────────
-    function switchTo(src, loop, muted, onEnded) {
-      curSrc = src;
-      const next = (cur === va) ? vb : va;
-      next.loop    = loop;
-      next.muted   = muted;
-      next.volume  = 1.0;
-      next.onended = onEnded || null;
-      next.src     = src;
-      next.load();
+    // ── va: duragan her zaman arka planda hazır ──────────────────────────────
+    va.src = IDLE;
+    va.load();
 
-      // Yeni video gerçekten oynamaya başlayınca görünür yap (siyahlık önlenir)
-      next.addEventListener('playing', () => {
-        next.classList.add('visible');
-        const prev = cur;
-        cur = next;
-        setTimeout(() => {
-          prev.classList.remove('visible');
-          prev.pause();
-          prev.removeAttribute('src');
-          prev.load();
-        }, 380);
-      }, { once: true });
-
-      next.play().catch(e => console.warn('play:', e));
-    }
-
-    function goIdle() {
-      phase = 'idle';
-      status.textContent = 'Hazır  [ S = konuş ]';
-      // Zaten duragan oynuyorsa yeniden başlatma — loop kesmeden devam eder
-      if (curSrc === IDLE) return;
-      switchTo(IDLE, true, true, null);
-    }
-
-    // ── Overlay tıkla → ses kilidi aç → giriş videosu ───────────────────────
+    // ── Overlay tıkla → ses kilidi aç ───────────────────────────────────────
     overlay.addEventListener('click', () => {
       overlay.style.display = 'none';
       phase = 'intro';
-      status.textContent = '';
-      switchTo(GIRIS, false, false, () => {
-        // giris.mp4 bitti → durağana geç
-        goIdle();
-      });
+
+      // Arka planda duragan başlat (sessize)
+      va.play().catch(() => {});
+      va.classList.add('vis');   // duragan görünür (giris üstüne çıkana kadar)
+
+      // Giriş videosunu üstte sesli oynat
+      vb.muted  = false;
+      vb.volume = 1.0;
+      vb.loop   = false;
+      vb.src    = GIRIS;
+      vb.load();
+
+      vb.addEventListener('canplay', () => {
+        vb.classList.add('vis');   // giris üste çıkar
+      }, { once: true });
+
+      vb.addEventListener('ended', () => {
+        // Giriş bitti → vb solar, duragan (va) görünür kalır
+        vb.classList.remove('vis');
+        phase = 'idle';
+        status.textContent = 'Hazır  [ S = konuş ]';
+      }, { once: true });
+
+      vb.play().catch(e => console.warn('giris:', e));
     });
 
     // ── SocketIO ─────────────────────────────────────────────────────────────
@@ -248,11 +237,13 @@ HTML = """<!DOCTYPE html>
     socket.on('state', data => {
       if (phase === 'locked') return;
       if (data.state === 'listening') {
-        // Loop kesilmez — sadece yazı değişir
         phase = 'listening';
         status.textContent = '● Dinliyor...';
+        // va (duragan) kesmeden çalmaya devam eder
       } else if (data.state === 'idle') {
-        if (phase !== 'idle') goIdle();
+        phase = 'idle';
+        status.textContent = 'Hazır  [ S = konuş ]';
+        // va zaten çalışıyor — hiçbir şey yapmaya gerek yok
       }
     });
 
@@ -260,10 +251,25 @@ HTML = """<!DOCTYPE html>
       if (phase === 'locked') return;
       phase = 'playing';
       status.textContent = data.command || '';
-      switchTo('/videos/' + data.video, false, false, () => {
-        // Komut videosu bitti → durağana dön
-        goIdle();
-      });
+
+      // Komut videosunu üstte sesli oynat; duragan (va) altta çalmaya devam eder
+      vb.muted  = false;
+      vb.volume = 1.0;
+      vb.loop   = false;
+      vb.src    = '/videos/' + data.video;
+      vb.load();
+
+      vb.addEventListener('canplay', () => {
+        vb.classList.add('vis');
+      }, { once: true });
+
+      vb.addEventListener('ended', () => {
+        vb.classList.remove('vis');
+        phase = 'idle';
+        status.textContent = 'Hazır  [ S = konuş ]';
+      }, { once: true });
+
+      vb.play().catch(e => console.warn('cmd:', e));
     });
   </script>
 </body>
