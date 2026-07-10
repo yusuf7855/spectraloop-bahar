@@ -254,8 +254,14 @@ def detect_vehicle_command(text: str) -> Optional[str]:
     # ── 1. ACİL DURDURMA — her şeyden önce ──────────────────────────────────
     if has(["estop","e stop","e-stop","emergency"]):
         return "EMERGENCY_STOP"
-    if "acil" in tn:
-        return "EMERGENCY_STOP"
+    # "acil" veya ses benzerleri (asil/acal/hacil) + eylem kelimesi
+    _EMRG_TRIGGERS = {"acil","asil","acal","hacil","acill","asill"}
+    _EMRG_ACTIONS  = {"durdur","dur","stop","kes","fren","frene","bas",
+                      "durttur","durduru","durtur"}
+    if tws & _EMRG_TRIGGERS:
+        # Tek başına "acil" bile yeterli (demos ortamında her acil = emergency)
+        if "acil" in tn or (tws & _EMRG_TRIGGERS and tws & _EMRG_ACTIONS):
+            return "EMERGENCY_STOP"
 
     # ── 2. ALARM / BUZZER ────────────────────────────────────────────────────
     if has(["alarm","buzzer","zil","siren"]):
@@ -282,20 +288,23 @@ def detect_vehicle_command(text: str) -> Optional[str]:
         return "LED_OFF" if is_off else "LED_ON"
 
     # ── 5. MOTOR ─────────────────────────────────────────────────────────────
-    if has(["motor","motoru","motori","motore","motur","moter"]):
+    _MOTOR_WORDS = ["motor","motoru","motori","motore","motorun","motorlari",
+                    "motur","moturu","moter","motora","motoyu","matoru"]
+    if has(_MOTOR_WORDS):
         # Durum sorgusu
         if has(["durum","nasil","calisiyor mu","kontrol","acik mi","kapali mi",
-                "ne yapiyor","var mi","izle","bakiyor"]):
+                "ne yapiyor","var mi","izle","bakiyor","calisip"]):
             return "MOTOR_STATUS"
-        # ON: anahtar kelime veya kök eşleşmesi
-        if has(["calistir","baslat","devreye","aktif","yak","devret","guc ver",
-                "start","calismaya","hazirla","acabilir","acabilirim","acalim"]) \
-           or has_w({"ac","on","baslat","calistir","calis","ver","koy"}):
+        # ON
+        if has(["calistir","calısır","baslat","devreye","aktif","yak","devret",
+                "guc ver","start","calismaya","hazirla","acabilir","acabilirim",
+                "acalim","calissin","calıssin"]) \
+           or has_w({"ac","on","baslat","calistir","calis","ver","koy","yak"}):
             return "MOTOR_ON"
-        # OFF: anahtar kelime veya kök eşleşmesi
-        if has(["durdur","kapat","bitir","pasif","devre disi","sondur","sustur",
-                "sonlandir","kes","off","stop"]) \
-           or has_w({"dur","durdur","kapat","kes","sondur","bitir"}):
+        # OFF
+        if has(["durdur","durttur","durtur","kapat","bitir","pasif","devre disi",
+                "sondur","sustur","sonlandir","kes","off","stop","kapatabilir"]) \
+           or has_w({"dur","durdur","kapat","kes","sondur","bitir","sustur"}):
             return "MOTOR_OFF"
         return "MOTOR_STATUS"
 
@@ -311,7 +320,7 @@ def detect_vehicle_command(text: str) -> Optional[str]:
 
     # ── 7. FREN — anahtar kelime + kök eşleşmesi ─────────────────────────────
     is_rear  = has(["arka","orka","geri","rear"])
-    is_front = has(["on fren","ileri","ondeki","onde","front"]) or \
+    is_front = has(["on fren","onfren","onfrene","onfreni","ileri","ondeki","onde","front"]) or \
                " on " in tn or tn.startswith("on ") or tn.endswith(" on")
     is_off   = has(["kapat","birak","birakin","serbest","gevset","kaldir",
                     "geri al","coz","iptal","birakiyor","bos birak"]) \
