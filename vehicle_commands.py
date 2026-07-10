@@ -288,6 +288,12 @@ def detect_vehicle_command(text: str) -> Optional[str]:
     def has(kws):    return any(k in tn for k in kws)
     def has_w(kws):  return bool(kws & tws)  # kök dahil eşleşme
 
+    # ── 0. OLUMSUZLAMA — "istemiyorum/yapma/hayır" varsa komut yok ───────────
+    _NEGATIONS = ["istemiyorum","istemem","yapmayin","yapmayalim",
+                  "yapmak istemiyorum","yapmak istemem"]
+    if any(neg in tn for neg in _NEGATIONS):
+        return None
+
     # ── 1. ACİL DURDURMA — her şeyden önce ──────────────────────────────────
     if has(["estop","e stop","e-stop","emergency"]):
         return "EMERGENCY_STOP"
@@ -307,7 +313,9 @@ def detect_vehicle_command(text: str) -> Optional[str]:
             return "BUZZER_OFF"
         if has(["bip","klakson","kisa","tek","beep"]):
             return "BUZZER_BEEP"
-        return "BUZZER_ON"
+        if has(["ac","calistir","devreye","ver","baslat","cal","on","aktif","ver","calis"]):
+            return "BUZZER_ON"
+        # alarm detected but no explicit action → fall through
     if has(["bip","beep"]):
         return "BUZZER_BEEP"
 
@@ -330,7 +338,12 @@ def detect_vehicle_command(text: str) -> Optional[str]:
         is_off = has(["kapat","sondur","birak","kes","off","karart","karanlik",
                       "sondurabilir","kapatabilir"]) and \
                  not has(["ac","yak","ver","devreye","aktif"])
-        return "LED_OFF" if is_off else "LED_ON"
+        is_on  = has(["ac","yak","ver","devreye","aktif","on","parlat","aydinlat"])
+        if is_off:
+            return "LED_OFF"
+        if is_on:
+            return "LED_ON"
+        # LED kelimesi var ama açık/kapalı belli değil → geç
 
     # ── 5. MOTOR ─────────────────────────────────────────────────────────────
     _MOTOR_WORDS = ["motor","motoru","motori","motore","motorun","motorlari",
@@ -344,7 +357,7 @@ def detect_vehicle_command(text: str) -> Optional[str]:
         if has(["calistir","calısır","baslat","devreye","aktif","yak","devret",
                 "guc ver","start","calismaya","hazirla","acabilir","acabilirim",
                 "acalim","calissin","calıssin"]) \
-           or has_w({"ac","on","baslat","calistir","calis","ver","koy","yak"}):
+           or has_w({"ac","on","baslat","calistir","calis","koy","yak"}):
             return "MOTOR_ON"
         # OFF
         if has(["durdur","durttur","durtur","kapat","bitir","pasif","devre disi",
@@ -367,7 +380,7 @@ def detect_vehicle_command(text: str) -> Optional[str]:
             "aku","akü","akusu","aküsü",
             "gerilim","sarj","sarji","pil","pili",
             "kac volt","elektrik","guc seviyesi","sarj seviyesi",
-            "batarya dolu","batarya bitti","sarj var","guc var"]):
+            "batarya dolu","batarya bitti"]):
         return "GET_VOLTAGE"
 
     # GET_ALL — daha fazla doğal söylem
@@ -383,8 +396,7 @@ def detect_vehicle_command(text: str) -> Optional[str]:
 
     # ── 7. FREN — anahtar kelime + kök eşleşmesi ─────────────────────────────
     is_rear  = has(["arka","orka","geri","rear"])
-    is_front = has(["on fren","onfren","onfrene","onfreni","ileri","ondeki","onde","front"]) or \
-               " on " in tn or tn.startswith("on ") or tn.endswith(" on")
+    is_front = has(["on fren","onfren","onfrene","onfreni","ileri","ondeki","onde","front"])
     is_off   = has(["kapat","birak","birakin","serbest","gevset","kaldir",
                     "geri al","coz","iptal","birakiyor","bos birak"]) \
                or has_w({"kapat","birak","gevset","kaldir","iptal","coz"})
@@ -411,8 +423,26 @@ def detect_vehicle_command(text: str) -> Optional[str]:
             return "ALL"
 
     # ── 8. DIFFLIB FALLBACK ───────────────────────────────────────────────────
+    _MOTOR_SET   = {"motor","motoru","motur","motori","motore","motorun"}
+    _VOLTAGE_SET = {"voltaj","volt","batarya","aku","sarj","gerilim","pil"}
+    _BRAKE_SET   = {"fren","freni","frene","firan","firen","kiran","tiren","tiran","vren","brake"}
+    _LED_SET     = {"led","ledi","ledleri","lamba","lambayi","isik","isigi","isiklari","let","yet","aydinlat"}
+    _ALARM_SET   = {"alarm","alarmi","buzzer","bazar","buzer","buser","zil","siren","ikaz","uyari"}
+
     best_cmd, best_score = _difflib_match(tn)
     if best_score >= DIFFLIB_THRESHOLD:
+        # Bağlam doğrulaması: ilgili kök kelime yoksa reddet
+        if best_cmd in ("MOTOR_ON","MOTOR_OFF","MOTOR_STATUS") and not (tws & _MOTOR_SET):
+            return None
+        if best_cmd == "GET_VOLTAGE" and not (tws & _VOLTAGE_SET):
+            return None
+        if best_cmd in ("FRONT_ON","FRONT_OFF","REAR_ON","REAR_OFF","ALL","RELEASE") \
+                and not (tws & _BRAKE_SET) and not is_rear and not is_front:
+            return None
+        if best_cmd in ("LED_ON","LED_OFF") and not (tws & _LED_SET):
+            return None
+        if best_cmd in ("BUZZER_ON","BUZZER_OFF","BUZZER_BEEP") and not (tws & _ALARM_SET):
+            return None
         print(f"[CMD] difflib: {best_cmd} ({best_score:.2f}) ← \"{text}\"")
         return best_cmd
 

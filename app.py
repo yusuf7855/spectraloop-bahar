@@ -9,12 +9,13 @@ Arayüz:    http://localhost:5050  (tam ekran aç)
 """
 import threading
 import queue
+import os
 
 import numpy as np
 import sounddevice as sd
 from faster_whisper import WhisperModel
 from pynput import keyboard
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, send_from_directory
 from flask_socketio import SocketIO
 
 from vehicle_commands import detect_vehicle_command
@@ -27,6 +28,7 @@ WHISPER_MODEL = "small"
 PORT          = 5050
 
 # Komut → video dosyası eşlemesi
+# Yalnızca var olan videolar için eşleme yapın; diğerleri "unknown" oynar
 VIDEO_MAP = {
     "MOTOR_ON":       "motor_on.mp4",
     "MOTOR_OFF":      "motor_off.mp4",
@@ -48,6 +50,8 @@ VIDEO_MAP = {
     "BUZZER_BEEP":    "buzzer_beep.mp4",
     "FLASHER_ON":     "flasher_on.mp4",
     "FLASHER_OFF":    "flasher_off.mp4",
+    "STOP_LIGHT_ON":  "stop_light_on.mp4",
+    "STOP_LIGHT_OFF": "stop_light_off.mp4",
 }
 
 # ── Flask + SocketIO ───────────────────────────────────────────────────────────
@@ -82,6 +86,7 @@ def process_audio():
     while not audio_q.empty():
         chunks.append(audio_q.get())
     if not chunks:
+        socketio.emit("state", {"state": "idle"})
         return
 
     audio = np.concatenate(chunks, axis=0).flatten()
@@ -105,9 +110,7 @@ def process_audio():
     if cmd:
         video = VIDEO_MAP.get(cmd, "unknown.mp4")
         print(f"[CMD] {cmd} → {video}")
-        # Donanıma gönder (Pi)
         threading.Thread(target=send_vehicle_command, args=(cmd,), daemon=True).start()
-        # UI'a video oynat
         socketio.emit("play", {"video": video, "command": cmd})
     else:
         print("[CMD] Komut bulunamadı")
@@ -165,84 +168,90 @@ HTML = """<!DOCTYPE html>
     }
     #status {
       position: fixed;
-      bottom: 24px; left: 50%;
+      bottom: 20px; left: 50%;
       transform: translateX(-50%);
-      color: rgba(255,255,255,0.6);
+      color: rgba(255,255,255,0.55);
       font-family: monospace;
-      font-size: 14px;
+      font-size: 13px;
       pointer-events: none;
     }
     #ptt-hint {
       position: fixed;
-      bottom: 48px; left: 50%;
+      bottom: 44px; left: 50%;
       transform: translateX(-50%);
-      color: rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.25);
       font-family: monospace;
-      font-size: 12px;
+      font-size: 11px;
       pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <video id="player" autoplay loop muted playsinline>
-    <source src="/videos/idle.mp4" type="video/mp4">
-  </video>
+  <video id="player" autoplay muted playsinline></video>
   <div id="ptt-hint">[ S = konuş | ESC = çıkış ]</div>
-  <div id="status">Hazır</div>
+  <div id="status">Başlıyor...</div>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
     const player  = document.getElementById('player');
     const status  = document.getElementById('status');
-    const IDLE    = '/videos/idle.mp4';
-    const LISTEN  = '/videos/listening.mp4';
-    let   isIdle  = true;
 
-    function playVideo(src, loop) {
-      player.loop = loop;
-      player.muted = loop;   // idle/listening = muted; komut videoları sesli
-      const source = player.querySelector('source');
-      source.src = src;
+    const GIRIS   = '/videos/giris.mp4';
+    const IDLE    = '/videos/duragan_loop.mp4';
+    const LISTEN  = '/videos/konusan_loop.mp4';
+
+    let phase = 'intro'; // intro | idle | listening | playing
+
+    function playVideo(src, loop, muted) {
+      player.loop  = loop;
+      player.muted = muted;
+      player.src   = src;
       player.load();
       player.play().catch(e => console.warn('play:', e));
     }
 
     function goIdle() {
-      isIdle = true;
-      playVideo(IDLE, true);
+      phase = 'idle';
+      playVideo(IDLE, true, true);
+      status.textContent = 'Hazır';
     }
 
-    // Video bitti → idle'a dön
+    // Başlangıç: giriş videosu bir kez oynar, bitince durağan döngüye geçer
     player.addEventListener('ended', () => {
-      if (!isIdle) goIdle();
+      if (phase === 'intro' || phase === 'playing') {
+        goIdle();
+      }
     });
+
+    // Video hata → idle
+    player.addEventListener('error', () => {
+      console.warn('Video bulunamadı:', player.src);
+      if (phase !== 'idle') goIdle();
+      status.textContent = 'Hazır';
+    });
+
+    // Giriş videosu
+    playVideo(GIRIS, false, true);
+    status.textContent = 'Başlıyor...';
 
     // SocketIO
     const socket = io();
 
     socket.on('state', data => {
       if (data.state === 'listening') {
-        isIdle = false;
-        playVideo(LISTEN, true);
+        phase = 'listening';
+        playVideo(LISTEN, true, true);
         status.textContent = '● Dinliyor...';
       } else if (data.state === 'idle') {
         goIdle();
-        status.textContent = 'Hazır';
       }
     });
 
     socket.on('play', data => {
-      isIdle = false;
+      phase = 'playing';
       const src = '/videos/' + data.video;
-      playVideo(src, false);
+      playVideo(src, false, false); // komut videoları sesli
       status.textContent = data.command || '?';
-    });
-
-    // Eksik video → idle'a dön
-    player.addEventListener('error', () => {
-      console.warn('Video yok:', player.querySelector('source').src);
-      goIdle();
-      status.textContent = 'Video bulunamadı';
     });
   </script>
 </body>
@@ -250,9 +259,6 @@ HTML = """<!DOCTYPE html>
 
 
 # ── Video dosyalarını sun ──────────────────────────────────────────────────────
-import os
-from flask import send_from_directory
-
 @app.route("/videos/<path:filename>")
 def serve_video(filename):
     video_dir = os.path.join(os.path.dirname(__file__), "videos")
