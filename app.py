@@ -139,108 +139,104 @@ HTML = """<!DOCTYPE html>
   <title>Spectraloop</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #000;
-      width: 100vw; height: 100vh;
-      overflow: hidden;
-    }
-    #player {
+    body { background: #000; width: 100vw; height: 100vh; overflow: hidden; }
+
+    /* İki video üst üste — crossfade için */
+    #wrap { position: relative; width: 100%; height: 100%; }
+    .vp {
+      position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      display: block;
+      opacity: 0;
+      transition: opacity 0.35s ease;
     }
+    .vp.visible { opacity: 1; }
+
     #status {
       position: fixed;
       bottom: 20px; left: 50%;
       transform: translateX(-50%);
       color: rgba(255,255,255,0.55);
-      font-family: monospace;
-      font-size: 13px;
+      font-family: monospace; font-size: 13px;
       pointer-events: none;
     }
-    #ptt-hint {
-      position: fixed;
-      bottom: 44px; left: 50%;
-      transform: translateX(-50%);
-      color: rgba(255,255,255,0.25);
-      font-family: monospace;
-      font-size: 11px;
-      pointer-events: none;
-    }
-    /* Ses kilit açma overlay — tarayıcı ses politikası için */
+
     #overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.82);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 99;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 99;
     }
     #overlay span {
-      color: rgba(255,255,255,0.8);
-      font-family: monospace;
-      font-size: 20px;
-      letter-spacing: 2px;
+      color: rgba(255,255,255,0.85);
+      font-family: monospace; font-size: 20px; letter-spacing: 3px;
     }
   </style>
 </head>
 <body>
-  <!-- Tarayıcı ses iznini açmak için bir kez tıklanır, sonra kaybolur -->
   <div id="overlay"><span>BAŞLATMAK İÇİN TIKLA</span></div>
 
-  <video id="player" playsinline></video>
-  <div id="ptt-hint">[ S = konuş | ESC = çıkış ]</div>
+  <div id="wrap">
+    <video id="va" class="vp" playsinline></video>
+    <video id="vb" class="vp" playsinline></video>
+  </div>
   <div id="status"></div>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
-    const player  = document.getElementById('player');
     const overlay = document.getElementById('overlay');
     const status  = document.getElementById('status');
+    const va = document.getElementById('va');
+    const vb = document.getElementById('vb');
 
     const GIRIS = '/videos/giris.mp4';
     const IDLE  = '/videos/duragan.mp4';
 
-    let phase = 'locked'; // locked | intro | idle | listening | playing
+    let cur   = va;   // şu an görünür olan element
+    let phase = 'locked';
 
-    // ── Video oynat ──────────────────────────────────────────────────────────
-    function playVideo(src, loop, muted) {
-      player.loop  = loop;
-      player.muted = muted;
-      player.volume = 1.0;
-      player.src = src;
-      player.load();
-      player.play().catch(e => console.warn('play hatası:', e));
+    // ── Crossfade geçiş ─────────────────────────────────────────────────────
+    function switchTo(src, loop, muted, onEnded) {
+      const next = (cur === va) ? vb : va;
+      next.loop   = loop;
+      next.muted  = muted;
+      next.volume = 1.0;
+      next.onended = onEnded || null;
+      next.src    = src;
+      next.load();
+
+      // Yeni video gerçekten oynamaya başlayınca görünür yap (siyahlık önlenir)
+      next.addEventListener('playing', () => {
+        next.classList.add('visible');
+        const prev = cur;
+        cur = next;
+        // Geçiş tamamlanınca eski videoyu durdur
+        setTimeout(() => {
+          prev.classList.remove('visible');
+          prev.pause();
+          prev.removeAttribute('src');
+          prev.load();
+        }, 380);
+      }, { once: true });
+
+      next.play().catch(e => console.warn('play:', e));
     }
 
     function goIdle() {
       phase = 'idle';
-      playVideo(IDLE, true, true);
+      switchTo(IDLE, true, true, null);
       status.textContent = 'Hazır  [ S = konuş ]';
     }
 
-    // Video bitti → idle
-    player.addEventListener('ended', () => {
-      if (phase === 'intro' || phase === 'playing') goIdle();
-    });
-
-    // Video bulunamadı → idle
-    player.addEventListener('error', () => {
-      if (phase !== 'idle') goIdle();
-    });
-
-    // ── Overlay tıklandı → ses kilidi açıldı ────────────────────────────────
+    // ── Overlay tıkla → ses kilidi aç → giriş videosu ───────────────────────
     overlay.addEventListener('click', () => {
       overlay.style.display = 'none';
       phase = 'intro';
       status.textContent = '';
-      // Kısa sessiz oynatma → tarayıcıya ses izni ver, sonra giriş başlat
-      player.muted = false;
-      player.volume = 1.0;
-      playVideo(GIRIS, false, false);
-      status.textContent = '';
+      switchTo(GIRIS, false, false, () => {
+        // giris.mp4 bitti → durağana geç
+        goIdle();
+      });
     });
 
     // ── SocketIO ─────────────────────────────────────────────────────────────
@@ -249,19 +245,22 @@ HTML = """<!DOCTYPE html>
     socket.on('state', data => {
       if (phase === 'locked') return;
       if (data.state === 'listening') {
+        // Loop kesilmez — sadece yazı değişir
         phase = 'listening';
-        playVideo(IDLE, true, true);   // durağan devam eder
         status.textContent = '● Dinliyor...';
       } else if (data.state === 'idle') {
-        goIdle();
+        if (phase !== 'idle') goIdle();
       }
     });
 
     socket.on('play', data => {
       if (phase === 'locked') return;
       phase = 'playing';
-      playVideo('/videos/' + data.video, false, false);  // sesli
       status.textContent = data.command || '';
+      switchTo('/videos/' + data.video, false, false, () => {
+        // Komut videosu bitti → durağana dön
+        goIdle();
+      });
     });
   </script>
 </body>
