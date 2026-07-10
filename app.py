@@ -30,8 +30,9 @@ PORT          = 5050
 # Komut → video dosyası eşlemesi
 # Sadece mevcut videolar burada — eşleşme yoksa idle'a dönülür
 VIDEO_MAP = {
-    "MOTOR_ON": "motor_on.mp4",
-    "ALL":      "fren_yapiliyor.mp4",
+    "MOTOR_ON":  "motor_on.mp4",
+    "MOTOR_OFF": "motor_off.mp4",
+    "ALL":       "fren_yapiliyor.mp4",
 }
 
 # ── Flask + SocketIO ───────────────────────────────────────────────────────────
