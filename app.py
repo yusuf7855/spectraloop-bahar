@@ -192,17 +192,19 @@ HTML = """<!DOCTYPE html>
     const GIRIS = '/videos/giris.mp4';
     const IDLE  = '/videos/duragan.mp4';
 
-    let cur   = va;   // şu an görünür olan element
-    let phase = 'locked';
+    let cur     = va;      // şu an görünür olan element
+    let phase   = 'locked';
+    let curSrc  = '';      // şu an oynayan videonun src'si
 
     // ── Crossfade geçiş ─────────────────────────────────────────────────────
     function switchTo(src, loop, muted, onEnded) {
+      curSrc = src;
       const next = (cur === va) ? vb : va;
-      next.loop   = loop;
-      next.muted  = muted;
-      next.volume = 1.0;
+      next.loop    = loop;
+      next.muted   = muted;
+      next.volume  = 1.0;
       next.onended = onEnded || null;
-      next.src    = src;
+      next.src     = src;
       next.load();
 
       // Yeni video gerçekten oynamaya başlayınca görünür yap (siyahlık önlenir)
@@ -210,7 +212,6 @@ HTML = """<!DOCTYPE html>
         next.classList.add('visible');
         const prev = cur;
         cur = next;
-        // Geçiş tamamlanınca eski videoyu durdur
         setTimeout(() => {
           prev.classList.remove('visible');
           prev.pause();
@@ -224,8 +225,10 @@ HTML = """<!DOCTYPE html>
 
     function goIdle() {
       phase = 'idle';
-      switchTo(IDLE, true, true, null);
       status.textContent = 'Hazır  [ S = konuş ]';
+      // Zaten duragan oynuyorsa yeniden başlatma — loop kesmeden devam eder
+      if (curSrc === IDLE) return;
+      switchTo(IDLE, true, true, null);
     }
 
     // ── Overlay tıkla → ses kilidi aç → giriş videosu ───────────────────────
