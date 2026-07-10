@@ -159,64 +159,101 @@ _PHRASES = {
         "tehlike durdur","aninda durdur","aninda dur","tam dur","tam durdur",
     ],
     "GET_TEMP": [
-        "sicaklik","sicaklik nedir","kac derece","ne kadar sicak",
-        "aracin sicakligi","sistem sicakligi","isi olcumu","sicaklik raporu",
-        "termal durum","sicak mi","kac derecede","derece nedir",
+        "sicaklik","sicaklik nedir","kac derece","kac dereceyiz","ne kadar sicak",
+        "aracin sicakligi","sistem sicakligi","sicakliği soyle","sicakliği ver",
+        "isi olcumu","sicaklik raporu","termal durum","sicak mi",
+        "kac derecede","derece nedir","kac isi","termometre",
+        "isiklik","isinma durumu","ne kadar isi","sicaklik bilgisi",
+        # Whisper varyantları
+        "sıcaklık","sicak lik","sıcak lık",
     ],
     "GET_VOLTAGE": [
         "voltaj","voltaj nedir","kac volt","batarya durumu","batarya nedir",
-        "sarj durumu","sarj nedir","pil durumu","gerilim nedir",
-        "batarya dolu mu","batarya bitti mi","sarj var mi","guc var mi",
-        "batarya raporu","voltaj raporu","elektrik durumu",
+        "bataryanin durumu","bataryayi soyle","batarya seviyesi",
+        "bataria durumu","batariya durumu",             # Whisper varyantları
+        "aku durumu","aku seviyesi","akusu nedir",      # akü varyantları
+        "sarj durumu","sarj nedir","sarj seviyesi","sarj var mi",
+        "pil durumu","pil seviyesi","gerilim nedir","guc var mi",
+        "batarya dolu mu","batarya bitti mi","elektrik durumu",
+        "voltaj raporu","batarya raporu",
     ],
     "GET_ALL": [
-        "sistem durumu","genel durum","durum raporu","tam rapor",
-        "tum sensorler","hepsini soyle","hepsini oku","ne durumda",
-        "nasil gidiyor","durum ver","rapor ver","bilgi ver",
-        "son durum","aracin durumu","her seyi soyle","ne var ne yok",
+        "sistem durumu","sistemin durumu","sistem raporu",
+        "genel durum","genel rapor","genel bilgi",
+        "durum raporu","tam rapor","tam bilgi ver","tam durum",
+        "tum sensorler","tum bilgiler","hepsini soyle","hepsini oku","hepsini goster",
+        "ne durumda","nasil gidiyor","nasil bir durum",
+        "durum ver","rapor ver","bilgi ver",
+        "her seyi soyle","ne var ne yok","arac durumu","aracin durumu",
+        "son durum","durum nedir","guncel durum","sistem bilgisi",
     ],
     "LED_ON": [
         "led ac","ledi ac","ledleri ac","led yak","ledleri yak",
         "isik ac","isigi ac","isiklari ac","isik ver","isiklari yak",
         "lamba ac","lambayi ac","lambalari ac","lambayi yak",
         "aydinlat","parlat","isiklandir","led devreye al","ledleri aktif et",
-        "led on","isik on","lamba on","let ac","yet ac",
+        "led on","isik on","lamba on",
+        "let ac","yet ac","led ack",                   # Whisper: LED→let/yet
+        "isiklari ac","isiklari devreye al","aydinlatmayi ac",
+        "ışıkları aç","lambalari yak","ışıkları devreye al",
     ],
     "LED_OFF": [
         "led kapat","ledi kapat","ledleri kapat","led sondur","ledleri sondur",
         "isik kapat","isigi kapat","isiklari kapat","isiklari sondur",
         "lamba kapat","lambayi kapat","lambalari kapat","lambayi sondur",
-        "isigi sondur","karart","karanlik yap","led devre disi",
-        "isik yok","lamba yok","isigi kes","led off","isik off","lamba off",
-        "let kapat","yet kapat",
+        "isigi sondur","isiklari sondur","karart","karanlik yap",
+        "led devre disi","isik yok","lamba yok","isigi kes",
+        "led off","isik off","lamba off",
+        "let kapat","yet kapat",                        # Whisper: LED→let/yet
+        "aydinlatmayi kapat","isiklari birak","ledleri birak",
+        "ışıkları kapat","lambalari kapat","ışıkları söndür",
     ],
     "BUZZER_ON": [
-        "alarm ac","alarm calistir","alarm devreye","zil cal","siren ac",
-        "buzzer ac","alarm ver","alarm baslat","alarmi cal",
+        "alarm ac","alarmi ac","alarm calistir","alarm devreye al",
+        "zil cal","zili cal","siren ac","sireni ac",
+        "buzzer ac","bazar ac","buzer ac","buser ac",    # Whisper: buzzer→bazar/buzer
+        "alarm ver","alarm baslat","alarmi devreye al",
+        "ikaz ver","uyari ver","uyari ac","ikaz ac",
+        "alarmı aç","alarmı çalıştır","zili çal",
     ],
     "BUZZER_OFF": [
-        "alarm kapat","alarm durdur","alarm sus","alarm sustur","zil kapat",
-        "siren kapat","buzzer kapat","alarmi kapat","alarmi durdur",
+        "alarm kapat","alarmi kapat","alarm durdur","alarm sus","alarm sustur",
+        "zil kapat","zili kapat","siren kapat","sireni kapat",
+        "buzzer kapat","bazar kapat","buzer kapat","buser kapat",  # Whisper varyantları
+        "alarmi durdur","alarmı kapat","alarmı sustur",
+        "ikaz kapat","uyari kapat","ikaz durdur",
     ],
     "BUZZER_BEEP": [
-        "bip","bip yap","bip ses","kisa alarm","tek bip","klakson",
-        "bip ver","bip cal","kisa ses","bir bip",
+        "bip","bip yap","bip ses","bip ver","bip cal","bir bip","tek bip",
+        "kisa alarm","kisa ses","kisa bip","klakson","klaksonu cal",
+        "beep","beep yap","bir bip sesi","bip sesi ver",
     ],
     "FLASHER_ON": [
-        "flasor ac","flash ac","strob ac","yanip sonsun","flasor devreye",
-        "flasher ac","flasor baslat","yanip sonme",
+        "flasor ac","flaser ac","flesur ac","flashor ac",  # Whisper varyantları
+        "flash ac","strob ac","flasher ac",
+        "yanip sonsun","yanip sonme","yanip sonmeyi baslat",
+        "flasor devreye","flasor baslat","flasor aktif",
+        "flaşer aç","flaşör aç","flaşör devreye","flaşörü aç",
+        "yanıp sönsün","yanıp sönme aç",
     ],
     "FLASHER_OFF": [
-        "flasor kapat","flash kapat","strob kapat","flasor durdur",
-        "flasher kapat","flasor sondur","yanip sonmeyi durdur",
+        "flasor kapat","flaser kapat","flasor sondur","flasor durdur",
+        "flash kapat","strob kapat","flasher kapat",
+        "flaşer kapat","flaşörü kapat","flaşör kapat",    # Whisper varyantları
+        "yanip sonmeyi durdur","yanip sonmeyi kapat","yanip sonmeyi kes",
+        "yanıp sönmeyi durdur","yanıp sönmeyi kapat",
+        "flasor devre disi","flasor birak",
     ],
     "STOP_LIGHT_ON": [
-        "stop lambasi ac","stop isigi ac","fren lambasi ac","brake isigi ac",
-        "stop lamba yak","fren isigi yak",
+        "stop lambasi ac","stop lambasi yak","stop isigi ac","stop isigi yak",
+        "fren lambasi ac","fren lambasi yak","fren isigi ac","fren isigi yak",
+        "brake isigi ac","brake lambasi ac",
+        "stop lamba yak","stop lamba ac","stop ısığı aç",
     ],
     "STOP_LIGHT_OFF": [
-        "stop lambasi kapat","stop isigi kapat","fren lambasi kapat",
-        "stop lamba sondur","fren isigi sondur",
+        "stop lambasi kapat","stop lambasi sondur","stop isigi kapat","stop isigi sondur",
+        "fren lambasi kapat","fren lambasi sondur","fren isigi kapat","fren isigi sondur",
+        "brake isigi kapat","stop lamba sondur","stop lamba kapat",
     ],
 }
 
@@ -264,27 +301,35 @@ def detect_vehicle_command(text: str) -> Optional[str]:
             return "EMERGENCY_STOP"
 
     # ── 2. ALARM / BUZZER ────────────────────────────────────────────────────
-    if has(["alarm","buzzer","zil","siren"]):
-        if has(["kapat","durdur","sus","sustur","kes","off","birak"]):
+    # "bazar/buzer/buser" → Whisper'ın "buzzer" için ürettiği varyantlar
+    if has(["alarm","alarmi","alarmi","buzzer","bazar","buzer","buser","zil","siren","sireni","ikaz","uyari"]):
+        if has(["kapat","durdur","sus","sustur","kes","off","birak","iptal"]):
             return "BUZZER_OFF"
-        if has(["bip","klakson","kisa","tek"]):
+        if has(["bip","klakson","kisa","tek","beep"]):
             return "BUZZER_BEEP"
         return "BUZZER_ON"
-    if "bip" in tn:
+    if has(["bip","beep"]):
         return "BUZZER_BEEP"
 
     # ── 3. FLAŞÖR ────────────────────────────────────────────────────────────
-    if has(["flasor","flash","strob","yanip sonsun","yanip sonme"]):
-        if has(["kapat","durdur","sondur","off","dur"]):
+    # "flaser/flesur/flashor/flasor" → Whisper varyantları
+    if has(["flasor","flaser","flesur","flashor","flash","strob",
+            "yanip sonsun","yanip sonme","yanip"]):
+        if has(["kapat","durdur","sondur","off","dur","birak","iptal"]):
             return "FLASHER_OFF"
         return "FLASHER_ON"
 
     # ── 4. STOP LAMBASI / LED ────────────────────────────────────────────────
-    if has(["lamba","isik","isig","led","aydinlat","parlat"]):
-        if has(["stop","brake"]) or (has(["fren"]) and has(["lamba","isik","isig","led"])):
+    # "let/yet" → Whisper'ın "LED" için ürettiği varyantlar
+    if has(["lamba","lambayi","lambalari","isik","isigi","isiklari","isig",
+            "led","ledi","ledleri","let","yet","aydinlat","parlat","karanlik"]):
+        # Stop lambası
+        if has(["stop","brake"]) or (has(["fren"]) and has(["lamba","isik","led"])):
             return "STOP_LIGHT_OFF" if has(["kapat","sondur","off","birak"]) else "STOP_LIGHT_ON"
-        is_off = has_w({"kapat","sondur","birak","kes","off","karart"}) and \
-                 not has_w({"ac","yak","ver","on"})
+        # Genel LED
+        is_off = has(["kapat","sondur","birak","kes","off","karart","karanlik",
+                      "sondurabilir","kapatabilir"]) and \
+                 not has(["ac","yak","ver","devreye","aktif"])
         return "LED_OFF" if is_off else "LED_ON"
 
     # ── 5. MOTOR ─────────────────────────────────────────────────────────────
@@ -309,13 +354,31 @@ def detect_vehicle_command(text: str) -> Optional[str]:
         return "MOTOR_STATUS"
 
     # ── 6. SENSÖRLER ─────────────────────────────────────────────────────────
-    if has(["sicaklik","derece","kac derece","ne kadar sicak","termal","isinma"]):
+    # GET_TEMP — "ısıklık" gibi Whisper hataları + termometre + kaç ısı
+    if has(["sicaklik","sicakligi","sicakliği","sicakligini","sicaklikta",
+            "derece","kac derece","kac dereceyiz","ne kadar sicak",
+            "termal","isinma","termometre","kac isi","isi olcumu",
+            "isinma durumu","sicak mi","ne kadar isi"]):
         return "GET_TEMP"
-    if has(["voltaj","volt","batarya","gerilim","sarj","pil","kac volt","elektrik"]):
+
+    # GET_VOLTAGE — "bataria/batariya/aku/paterya" Whisper varyantları
+    if has(["voltaj","volt","batarya","bataryanin","bataryayi","bataryasi",
+            "bataria","batariya","paterya",
+            "aku","akü","akusu","aküsü",
+            "gerilim","sarj","sarji","pil","pili",
+            "kac volt","elektrik","guc seviyesi","sarj seviyesi",
+            "batarya dolu","batarya bitti","sarj var","guc var"]):
         return "GET_VOLTAGE"
-    if has(["sistem durumu","genel durum","durum raporu","tum sensor","ne durumda",
-            "rapor ver","durum ver","tam rapor","hepsini oku","nasil gidiyor",
-            "her seyi soyle","ne var ne yok","arac durumu"]):
+
+    # GET_ALL — daha fazla doğal söylem
+    if has(["sistem durumu","sistemin durumu","sistem raporu",
+            "genel durum","genel rapor","genel bilgi",
+            "durum raporu","tam rapor","tam bilgi",
+            "tum sensor","tum sensorler",
+            "ne durumda","nasil gidiyor",
+            "rapor ver","durum ver","bilgi ver","hepsini goster","hepsini oku",
+            "her seyi soyle","ne var ne yok","arac durumu","aracin durumu",
+            "durum nedir","durum soyle","son durum"]):
         return "GET_ALL"
 
     # ── 7. FREN — anahtar kelime + kök eşleşmesi ─────────────────────────────
