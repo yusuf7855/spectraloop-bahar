@@ -161,26 +161,21 @@ HTML = """<!DOCTYPE html>
   <title>Spectraloop</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { background: #000; width: 100vw; height: 100vh; overflow: hidden; }
-
-    #player {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      background: #000;
+    html, body {
+      background: #000; width: 100vw; height: 100vh; overflow: hidden;
+      display: flex; flex-direction: row;
     }
 
     /* ── Sol Sidebar ───────────────────────────────────────────────────── */
     #sidebar {
-      position: fixed; left: 0; top: 0;
-      width: 200px; height: 100%;
-      z-index: 50;
-      background: rgba(8, 4, 28, 0.82);
+      flex: 0 0 200px;
+      height: 100%;
+      background: rgba(8, 4, 28, 0.95);
       border-right: 1px solid rgba(124, 58, 237, 0.35);
-      backdrop-filter: blur(6px);
       overflow-y: auto;
       padding: 14px 10px 20px;
       display: flex; flex-direction: column; gap: 6px;
+      z-index: 10;
     }
     #sidebar::-webkit-scrollbar { width: 4px; }
     #sidebar::-webkit-scrollbar-track { background: transparent; }
@@ -222,9 +217,24 @@ HTML = """<!DOCTYPE html>
       box-shadow: 0 2px 8px rgba(79,70,229,0.25);
     }
 
+    /* ── Video alanı ───────────────────────────────────────────────────── */
+    #video-area {
+      flex: 1;
+      position: relative;
+      height: 100%;
+      background: #000;
+    }
+
+    #player {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+
     /* ── Durum / overlay ───────────────────────────────────────────────── */
     #status {
-      position: fixed; z-index: 60;
+      position: absolute; z-index: 10;
       bottom: 20px; left: 50%;
       transform: translateX(-50%);
       color: rgba(255,255,255,0.55);
@@ -232,7 +242,7 @@ HTML = """<!DOCTYPE html>
       pointer-events: none;
     }
     #overlay {
-      position: fixed; inset: 0; z-index: 99;
+      position: absolute; inset: 0; z-index: 99;
       background: rgba(0,0,0,0.88);
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
@@ -244,9 +254,6 @@ HTML = """<!DOCTYPE html>
   </style>
 </head>
 <body>
-  <div id="overlay"><span>BAŞLATMAK İÇİN TIKLA</span></div>
-  <video id="player" playsinline></video>
-
   <!-- ── Sol Sidebar ──────────────────────────────────────────────────── -->
   <div id="sidebar">
 
@@ -269,7 +276,12 @@ HTML = """<!DOCTYPE html>
 
   </div>
 
-  <div id="status"></div>
+  <!-- ── Video alanı ──────────────────────────────────────────────────── -->
+  <div id="video-area">
+    <div id="overlay"><span>BAŞLATMAK İÇİN TIKLA</span></div>
+    <video id="player" playsinline></video>
+    <div id="status"></div>
+  </div>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
