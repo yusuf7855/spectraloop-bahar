@@ -30,9 +30,15 @@ PORT          = 5050
 # Komut → video dosyası eşlemesi
 # Sadece mevcut videolar burada — eşleşme yoksa idle'a dönülür
 VIDEO_MAP = {
-    "MOTOR_ON":  "motor_on.mp4",
-    "MOTOR_OFF": "motor_off.mp4",
-    "ALL":       "fren_yapiliyor.mp4",
+    "MOTOR_ON":   "motor_on.mp4",
+    "MOTOR_OFF":  "motor_off.mp4",
+    "ALL":        "fren_yapiliyor.mp4",
+    "RELEASE":    "release.mp4",
+    "FLASHER_ON":     "flasher_on.mp4",
+    "FLASHER_OFF":    "flasher_off.mp4",
+    "STOP_LIGHT_OFF": "stop_light_off.mp4",
+    "STOP_LIGHT_ON":   "stop_light_on.mp4",
+    "EMERGENCY_STOP":  "emergency_stop.mp4",
 }
 
 # ── Flask + SocketIO ───────────────────────────────────────────────────────────
@@ -49,6 +55,20 @@ def index():
 @socketio.on("connect")
 def on_connect():
     print("[UI] Tarayıcı bağlandı.")
+
+
+@socketio.on("button_cmd")
+def on_button_cmd(data):
+    cmd = data.get("command", "")
+    if not cmd:
+        return
+    print(f"[BTN] {cmd}")
+    threading.Thread(target=send_vehicle_command, args=(cmd,), daemon=True).start()
+    video = VIDEO_MAP.get(cmd)
+    if video:
+        socketio.emit("play", {"video": video, "command": cmd})
+    else:
+        socketio.emit("state", {"state": "idle"})
 
 
 # ── Ses & Whisper ─────────────────────────────────────────────────────────────
@@ -142,14 +162,69 @@ HTML = """<!DOCTYPE html>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { background: #000; width: 100vw; height: 100vh; overflow: hidden; }
+
     #player {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
       background: #000;
     }
+
+    /* ── Sol Sidebar ───────────────────────────────────────────────────── */
+    #sidebar {
+      position: fixed; left: 0; top: 0;
+      width: 200px; height: 100%;
+      z-index: 50;
+      background: rgba(8, 4, 28, 0.82);
+      border-right: 1px solid rgba(124, 58, 237, 0.35);
+      backdrop-filter: blur(6px);
+      overflow-y: auto;
+      padding: 14px 10px 20px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-track { background: transparent; }
+    #sidebar::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.5); border-radius: 2px; }
+
+    .sb-group-label {
+      color: rgba(167,139,250,0.7);
+      font-family: monospace; font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase;
+      margin: 10px 4px 4px;
+    }
+    .sb-group-label:first-child { margin-top: 2px; }
+
+    .sb-btn {
+      width: 100%;
+      padding: 9px 12px;
+      border: none; border-radius: 8px;
+      cursor: pointer;
+      font-family: monospace; font-size: 12px;
+      color: #fff;
+      text-align: left;
+      background: linear-gradient(135deg, #3b2fa0 0%, #7c3aed 100%);
+      box-shadow: 0 2px 8px rgba(124,58,237,0.25);
+      transition: filter .15s, transform .1s;
+      line-height: 1.3;
+    }
+    .sb-btn:hover  { filter: brightness(1.25); }
+    .sb-btn:active { transform: scale(0.97); filter: brightness(0.9); }
+    .sb-btn.danger {
+      background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%);
+      box-shadow: 0 2px 8px rgba(220,38,38,0.35);
+    }
+    .sb-btn.sensor {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+      box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+    }
+    .sb-btn.light {
+      background: linear-gradient(135deg, #1a2744 0%, #4f46e5 100%);
+      box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+    }
+
+    /* ── Durum / overlay ───────────────────────────────────────────────── */
     #status {
-      position: fixed; z-index: 10;
+      position: fixed; z-index: 60;
       bottom: 20px; left: 50%;
       transform: translateX(-50%);
       color: rgba(255,255,255,0.55);
@@ -171,6 +246,29 @@ HTML = """<!DOCTYPE html>
 <body>
   <div id="overlay"><span>BAŞLATMAK İÇİN TIKLA</span></div>
   <video id="player" playsinline></video>
+
+  <!-- ── Sol Sidebar ──────────────────────────────────────────────────── -->
+  <div id="sidebar">
+
+    <div class="sb-group-label">Motor</div>
+    <button class="sb-btn" onclick="sendCmd('MOTOR_ON')">▶ Motoru Çalıştır</button>
+    <button class="sb-btn" onclick="sendCmd('MOTOR_OFF')">■ Motoru Durdur</button>
+
+    <div class="sb-group-label">Frenler</div>
+    <button class="sb-btn" onclick="sendCmd('ALL')">Tüm Frenler Devreye</button>
+    <button class="sb-btn" onclick="sendCmd('RELEASE')">Tüm Frenler Serbest</button>
+
+    <div class="sb-group-label">Işık &amp; Ses</div>
+    <button class="sb-btn light" onclick="sendCmd('FLASHER_ON')">Flaşör Aç</button>
+    <button class="sb-btn light" onclick="sendCmd('FLASHER_OFF')">Flaşör Kapat</button>
+    <button class="sb-btn light" onclick="sendCmd('STOP_LIGHT_ON')">Stop Lambası Aç</button>
+    <button class="sb-btn light" onclick="sendCmd('STOP_LIGHT_OFF')">Stop Lambası Kapat</button>
+
+    <div class="sb-group-label">Acil</div>
+    <button class="sb-btn danger" onclick="sendCmd('EMERGENCY_STOP')">⚠ ACİL DURDURMA</button>
+
+  </div>
+
   <div id="status"></div>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -179,9 +277,8 @@ HTML = """<!DOCTYPE html>
     const status  = document.getElementById('status');
     const player  = document.getElementById('player');
 
-    const PI    = 'http://10.239.168.177:8001';
-    const GIRIS = PI + '/giris.mp4';
-    const IDLE  = PI + '/duragan.mp4';
+    const GIRIS = '/videos/giris.mp4';
+    const IDLE  = '/videos/duragan.mp4';
 
     let phase = 'locked';
 
@@ -201,7 +298,6 @@ HTML = """<!DOCTYPE html>
       overlay.style.display = 'none';
       phase = 'intro';
 
-      // Duragan'ı arka planda ön belleğe al
       const preload = document.createElement('video');
       preload.src = IDLE;
       preload.load();
@@ -216,9 +312,16 @@ HTML = """<!DOCTYPE html>
       player.addEventListener('ended', () => goIdle(), { once: true });
     });
 
-    // ── SocketIO ─────────────────────────────────────────────────────────────
+    // ── Buton komutu gönder ──────────────────────────────────────────────────
     const socket = io();
 
+    function sendCmd(cmd) {
+      if (phase === 'locked') return;
+      socket.emit('button_cmd', { command: cmd });
+      status.textContent = cmd.replace(/_/g, ' ');
+    }
+
+    // ── SocketIO ─────────────────────────────────────────────────────────────
     socket.on('state', data => {
       if (phase === 'locked') return;
       if (data.state === 'listening') {
@@ -237,7 +340,7 @@ HTML = """<!DOCTYPE html>
       player.loop   = false;
       player.muted  = false;
       player.volume = 1.0;
-      player.src    = PI + '/' + data.video;
+      player.src    = '/videos/' + data.video;
       player.load();
       player.play().catch(e => console.warn('cmd:', e));
 
